@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ItemController;
+use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ShopController;
 
 /*
@@ -32,4 +34,11 @@ Route::middleware('auth:sanctum')->group( function () {
 
 Route::middleware('auth:sanctum')->group( function () {
     Route::post('/shop/logout', [ShopController::class, 'logoutShop']);
+    Route::post('/shop/publish', [ShopController::class, 'publishItem']);
 });
+
+Route::get('/shop&i={id}', [ItemController::class, 'showShop']);
+Route::get('/item&i={id}', [ItemController::class, 'showItem']);
+
+Route::get('/search/', [SearchController::class, 'search']);
+

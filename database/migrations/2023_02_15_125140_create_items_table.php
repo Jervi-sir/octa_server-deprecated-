@@ -27,6 +27,7 @@ return new class extends Migration
             $table->mediumText('size');
             $table->integer('stock');
             $table->string('price');
+            $table->string('type');
 
             $table->timestamps();
         });
