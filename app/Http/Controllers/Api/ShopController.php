@@ -87,6 +87,15 @@ class ShopController extends Controller
     }
 
     public function publishItem(Request $request) {
+        $imagesPath = [];
+        for($i = 1; $i <= 7; $i++) {
+            if($request->hasFile('image'.$i)) {
+                $path = $request->file('image'.$i)->store('image', 'public');
+                array_push($imagesPath, $path);
+            }
+        }
+       
+        return [$imagesPath];
         try {
             $validateUser = Validator::make($request->all(), [
                 'shop_name' => 'required',

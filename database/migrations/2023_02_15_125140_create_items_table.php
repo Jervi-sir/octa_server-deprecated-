@@ -19,7 +19,7 @@ return new class extends Migration
             $table->longText('shop_image');
 
             $table->mediumText('details');
-            $table->longText('contacts');
+            $table->string('contacts');
             $table->mediumText('map_location');
             
             $table->string('name');

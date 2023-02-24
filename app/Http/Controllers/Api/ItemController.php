@@ -13,10 +13,11 @@ class ItemController extends Controller
         try {
             $shop = Shop::find($id);
 
-            return $shop->items()->paginate(1);
+            //return $shop->items()->paginate(1);
             return response()->json([
                 'status' => true,
-                'message' => 'User Logged In Successfully',
+                'shop' => $shop,
+                'items' => $shop->items,
             ], 200);
 
         } catch (\Throwable $th) {

@@ -34,11 +34,14 @@ Route::middleware('auth:sanctum')->group( function () {
 
 Route::middleware('auth:sanctum')->group( function () {
     Route::post('/shop/logout', [ShopController::class, 'logoutShop']);
-    Route::post('/shop/publish', [ShopController::class, 'publishItem']);
 });
 
 Route::get('/shop&i={id}', [ItemController::class, 'showShop']);
 Route::get('/item&i={id}', [ItemController::class, 'showItem']);
 
-Route::get('/search/', [SearchController::class, 'search']);
+Route::get('/search', [SearchController::class, 'search']);
+
+Route::get('/suggest', [SearchController::class, 'suggest']);
+
+Route::post('/shop/publish', [ShopController::class, 'publishItem']);
 
