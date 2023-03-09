@@ -4,7 +4,11 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\ItemSeeder;
 use Database\Seeders\RoleSeeder;
+use Database\Seeders\ShopSeeder;
+use Database\Seeders\ImageSeeder;
+use Database\Seeders\WilayaSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -22,24 +26,18 @@ class DatabaseSeeder extends Seeder
         //$roles = new RoleSeeder();
         //$roles->run();
 
-        $item = new ItemSeeder();
-        $item->run();
-        $item->run();
-        $item->run();
-        $item->run();
-        $item->run();
-        $item->run();
-        $item->run();
-        $item->run();
-        $item->run();
-        $item->run();
-        $item->run();
-        $item->run();
-        $item->run();
-        $item->run();
-        $item->run();
-        $item->run();
-        $item->run();
+        $roles = new RoleSeeder();
+        $wilaya = new WilayaSeeder();
+        $shops = new ShopSeeder();
+        $items = new ItemSeeder();
+        $images = new ImageSeeder();
+
+        $roles->run();
+        $wilaya->run();
+        $shops->run();
+        $items->run();
+        $images->run();
+
 
     }
 }

@@ -26,7 +26,7 @@ return new class extends Migration
             $table->integer('nb_likes')->default(0);
             
             $table->mediumText('threeD_model')->nullable();
-            $table->smallInteger('wilaya')->nullable();
+            $table->string('wilaya_name')->nullable();
 
             $table->unsignedSmallInteger('wilaya_id')->nullable();
             $table->foreign('wilaya_id')->references('id')->on('wilayas');
