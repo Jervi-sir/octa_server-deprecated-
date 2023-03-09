@@ -13,21 +13,18 @@ return new class extends Migration
     {
         Schema::create('items', function (Blueprint $table) {
             $table->id();
-
             $table->foreignId('shop_id')->constrained();
-            $table->string('shop_name');
-            $table->longText('shop_image');
 
-            $table->mediumText('details');
-            $table->string('contacts');
-            $table->mediumText('map_location');
-            
+            $table->mediumText('details')->nullable();
+
             $table->string('name');
-            $table->longText('item_images');
-            $table->mediumText('size');
-            $table->integer('stock');
-            $table->string('price');
-            $table->string('type');
+            $table->mediumText('sizes')->nullable();
+            $table->integer('stock')->default(1);
+            $table->string('price')->nullable();
+            $table->integer('item_type_id');
+            $table->integer('gender_id'); //_male, _female, _male/_female
+
+            $table->longText('search')->nullable();
 
             $table->timestamps();
         });

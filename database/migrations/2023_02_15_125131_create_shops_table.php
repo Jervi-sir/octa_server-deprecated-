@@ -13,18 +13,21 @@ return new class extends Migration
     {
         Schema::create('shops', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->mediumText('bio')->nullable();
-
+            
+            $table->string('shop_name');
             $table->mediumText('details')->nullable();
             $table->longText('contacts')->nullable();
+            $table->mediumText('location')->nullable();
             $table->mediumText('map_location')->nullable();
-            $table->string('followers')->nullable();
-            $table->longText('shop_image')->nullable();
+            $table->integer('nb_followers')->default(0);
+            $table->integer('nb_likes')->default(0);
             
+            $table->mediumText('threeD_model')->nullable();
+            $table->smallInteger('wilaya')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
         });

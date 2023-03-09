@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
-            $table->tinyInteger('id')->primary();
-            $table->string('role_name');
+        Schema::create('item_images', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('item_id')->constrained();
+            $table->string('url');
+            $table->string('meta')->nullable();
             $table->timestamps();
         });
     }
@@ -23,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('item_images');
     }
 };

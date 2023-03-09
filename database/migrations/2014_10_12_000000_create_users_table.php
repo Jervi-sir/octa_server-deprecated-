@@ -19,13 +19,15 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
 
-            $table->string('name');
-            $table->string('username');
-            $table->mediumText('bio');
+            $table->string('name')->nullable();
+            $table->string('username')->nullable();
+            $table->mediumText('bio')->default('Octa User');
 
-            $table->longText('profile_images');
-            $table->longText('contacts');
-            $table->string('nb_likes');
+            $table->longText('profile_images')->nullable();
+            $table->longText('contacts')->nullable();
+            $table->integer('nb_likes')->default(0);
+            $table->integer('nb_followers')->default(0);
+            $table->boolean('isPremium')->default(0);
 
             $table->rememberToken();
             $table->timestamps();

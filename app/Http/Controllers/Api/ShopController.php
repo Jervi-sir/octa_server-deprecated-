@@ -16,6 +16,7 @@ class ShopController extends Controller
     public function createShop(Request $request) {
         try {
             $validateUser = Validator::make($request->all(), [
+                'name' => 'required',
                 'email' => 'required|email',
                 'password' => 'required'
             ]);
