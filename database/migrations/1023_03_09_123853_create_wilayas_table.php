@@ -12,9 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('wilayas', function (Blueprint $table) {
-            $table->smallInteger('id')->primary();
+            $table->smallInteger('id')->unsigned()->primary();
             $table->string('name');
             $table->smallInteger('code');
+
             $table->timestamps();
         });
     }

@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            
-            $table->foreignId('role_id')->constrained();
+            $table->unsignedTinyInteger('role_id');
+
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
@@ -29,6 +29,8 @@ return new class extends Migration
             $table->integer('nb_followers')->default(0);
             $table->boolean('isPremium')->default(0);
 
+
+            $table->foreign('role_id')->references('id')->on('roles');
             $table->rememberToken();
             $table->timestamps();
         });

@@ -28,6 +28,9 @@ return new class extends Migration
             $table->mediumText('threeD_model')->nullable();
             $table->smallInteger('wilaya')->nullable();
 
+            $table->unsignedSmallInteger('wilaya_id')->nullable();
+            $table->foreign('wilaya_id')->references('id')->on('wilayas');
+
             $table->rememberToken();
             $table->timestamps();
         });
