@@ -4,6 +4,7 @@ function getItem($item) {
   $result = [
     'id' => $item->id,
     'shop_id' => $item->shop_id,
+    'shop_image' => imageUrl('shops', $item->shop->shop_image),
     'name' => $item->name,
     'details' => $item->details,
     'sizes' => $item->sizes,
@@ -18,6 +19,22 @@ function getItem($item) {
   return $result;
 }
 
+function getShop($shop) {
+  $result = [
+    'shop_name' => $shop->shop_name,
+    'shop_image' => imageUrl('shops', $shop->shop_image),
+    'details' => $shop->details,
+    'contacts' => $shop->contacts,
+    'location' => $shop->location,
+    'map_location' => $shop->map_location,
+    'nb_followers' => $shop->nb_followers,
+    'nb_likes' => $shop->nb_likes,
+    'wilaya_name' => $shop->wilaya_name,
+  ];
+
+  return $result;
+}
+
 function imageToArray($images) {
   if(count($images) == 0) {
       return [[
@@ -25,7 +42,11 @@ function imageToArray($images) {
       ]];
   }
   foreach ($images as &$item) {
-      $item = ["image" => "http://192.168.1.106:8000/items/" . $item];
+      $item = ["image" => imageUrl('items', $item)];
   }
   return $images;
+}
+
+function imageUrl($source, $image) {
+  return "http://192.168.1.106:8000/" . $source . '/' . $image;
 }

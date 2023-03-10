@@ -16,21 +16,25 @@ use App\Http\Controllers\Api\ShopController;
 
 Route::get('/showShop/{shopId}', [ProfileController::class, 'showShop']);
 Route::get('/showUser/{userId}', [ProfileController::class, 'showUser']);
+
 Route::post('/auth/register', [AuthController::class, 'createUser']);
 Route::post('/auth/login', [AuthController::class, 'loginUser']);
-Route::get('/suggest', [SearchController::class, 'suggest']);
+
+Route::get('/suggestItems', [SearchController::class, 'suggest']);
+Route::get('/suggestShops', [SearchController::class, 'suggestShop']);
 
 Route::get('/search/{keywords}', [SearchController::class, 'search']);
+
+Route::middleware('auth:sanctum')->group( function () {
+    Route::get('/showMyProfile', [ProfileController::class, 'showMyProfile']);
+    Route::post('/auth/logout', [AuthController::class, 'logoutUser']);
+});
 
 
 
 /*-- not done --*/
 Route::post('/shop/register', [ShopController::class, 'createShop']);
 Route::post('/shop/login', [ShopController::class, 'loginShop']);
-
-Route::middleware('auth:sanctum')->group( function () {
-    Route::post('/auth/logout', [AuthController::class, 'logoutUser']);
-});
 
 Route::middleware('auth:sanctum')->group( function () {
     Route::post('/shop/logout', [ShopController::class, 'logoutShop']);

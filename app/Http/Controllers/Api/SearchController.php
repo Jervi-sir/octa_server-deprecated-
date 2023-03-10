@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Item;
+use App\Models\Shop;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
@@ -17,6 +18,21 @@ class SearchController extends Controller
         return response()->json([
             'data' => $data['items'],
             'next' => $items->nextPageUrl(),
+        ]);
+    }
+
+    public function suggestShop() {
+        $shops = Shop::inRandomOrder()->paginate(10);
+        foreach($shops as $index => $shop) {
+            $data['shops'][$index] = [
+                'id' => $shop->id,
+                'shop_name' => $shop->shop_name,
+                'shop_image' => imageUrl('shops', $shop->shop_image),
+                'map_location' => $shop->map_location,
+            ];
+        }
+        return response()->json([
+            'shops' => $data['shops'],
         ]);
     }
 

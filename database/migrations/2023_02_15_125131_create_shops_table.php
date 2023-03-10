@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('password');
             
             $table->string('shop_name');
+            $table->string('shop_image')->nullable();
             $table->mediumText('details')->nullable();
             $table->longText('contacts')->nullable();
             $table->mediumText('location')->nullable();

@@ -6,22 +6,14 @@ use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
     public function showShop($shopId)
     {
         $shop = Shop::find($shopId);
-        $data['shop'] =[
-            'shop_name' => $shop->shop_name,
-            'details' => $shop->details,
-            'contacts' => $shop->contacts,
-            'location' => $shop->location,
-            'map_location' => $shop->map_location,
-            'nb_followers' => $shop->nb_followers,
-            'nb_likes' => $shop->nb_likes,
-            'wilaya_name' => $shop->wilaya_name,
-        ];
+        $data['shop'] = getShop($shop);
 
         $items = $shop->items;
         foreach($items as $index => $item) {
@@ -47,6 +39,23 @@ class ProfileController extends Controller
             'isPremium' => $user->isPremium,
         ];
         return response()->json($data['user'], 200);
+    }
+
+    public function showMyProfile(Request $request) 
+    {
+        $user = Auth::user();
+        $data['user'] = [
+            'username' => $user->username,
+            'name' => $user->name,
+            'isPremium' => $user->isPremium,
+            'bio' => $user->bio,
+            'contacts' => $user->contacts,
+            'nb_followers' => $user->nb_followers,
+            'nb_likes' => $user->nb_likes,
+            'profile_images' => imageUrl('users', $user->profile_images),
+        ];
+
+        return response()->json($data['user']);
     }
 
 }
