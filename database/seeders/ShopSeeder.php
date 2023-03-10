@@ -27,6 +27,7 @@ class ShopSeeder extends Seeder
                 'contacts' => 'contacts',
                 'location' => 'location',
                 'map_location' => 'map_location',
+                'shop_image' => 'shop(' . ($i + 1) . ').png',
                 'wilaya_id' => $wilaya_number[$randomNumber],
                 'wilaya_name' => $wilaya[$randomNumber],
             ]);

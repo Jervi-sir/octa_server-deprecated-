@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ActionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -20,17 +21,17 @@ Route::get('/showUser/{userId}', [ProfileController::class, 'showUser']);
 Route::post('/auth/register', [AuthController::class, 'createUser']);
 Route::post('/auth/login', [AuthController::class, 'loginUser']);
 
-Route::get('/suggestItems', [SearchController::class, 'suggest']);
 Route::get('/suggestShops', [SearchController::class, 'suggestShop']);
 
 Route::get('/search/{keywords}', [SearchController::class, 'search']);
 
 Route::middleware('auth:sanctum')->group( function () {
     Route::get('/showMyProfile', [ProfileController::class, 'showMyProfile']);
+    Route::get('/suggestItems', [SearchController::class, 'suggest']);
     Route::post('/auth/logout', [AuthController::class, 'logoutUser']);
+    Route::post('/action/saveItem/{itemId}', [ActionController::class, 'saveItem']);
+    Route::post('/action/unSaveItem/{itemId}', [ActionController::class, 'unSaveItem']);
 });
-
-
 
 /*-- not done --*/
 Route::post('/shop/register', [ShopController::class, 'createShop']);

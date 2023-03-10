@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
+
 function getItem($item) {
   $result = [
     'id' => $item->id,
@@ -14,8 +16,8 @@ function getItem($item) {
     'gender_id' => $item->gender_id,
     'search' => $item->search,
     'images' => imageToArray($item->images->pluck('url')->toArray()),
+    'isSaved' => $item->savedByUsers->contains(Auth::user()->id),  
   ];
-
   return $result;
 }
 
