@@ -3,12 +3,15 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\Item;
+use App\Models\Role;
+use App\Models\Shop;
+use App\Models\User;
+use App\Models\Wilaya;
+use App\Models\UserMap;
+use App\Models\UserSave;
 use Illuminate\Database\Seeder;
-use Database\Seeders\ItemSeeder;
-use Database\Seeders\RoleSeeder;
-use Database\Seeders\ShopSeeder;
-use Database\Seeders\ImageSeeder;
-use Database\Seeders\WilayaSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -17,27 +20,27 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        // Seed roles
+        Role::factory()->create(['role_name' => 'admin']);
+        Role::factory()->create(['role_name' => 'user']);
+        Role::factory()->create(['role_name' => 'assistant']);
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-        //$roles = new RoleSeeder();
-        //$roles->run();
+        // Seed wilayas
+        for ($i = 1; $i < 48; $i++) {
+            Wilaya::factory()->create(['id' => $i, 'code' => $i]);
+        }
 
-        $roles = new RoleSeeder();
-        $wilaya = new WilayaSeeder();
-        $shops = new ShopSeeder();
-        $items = new ItemSeeder();
-        $images = new ImageSeeder();
+        // Seed users
+        $users = User::factory(150)->create();
 
-        $roles->run();
-        $wilaya->run();
-        $shops->run();
-        $items->run();
-        $images->run();
+        // Seed shops
+        $shops = Shop::factory(600)->create();
 
+        // Seed user maps
+        UserMap::factory(150)->create();
 
+        // Seed user saves
+        $item = Item::factory(2000)->create();
+        UserSave::factory(1000)->create();
     }
 }

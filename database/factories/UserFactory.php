@@ -2,8 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use Faker\Generator as Faker;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -17,12 +19,22 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $faker = new Faker();
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'role_id' => Role::inRandomOrder()->first()->id, //assuming you have 3 roles in your roles table
+            'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-            'remember_token' => Str::random(10),
+            'password' => bcrypt('password'),
+            'name' => $this->faker->name(),
+            'username' => $this->faker->userName(),
+            'bio' => $this->faker->sentence(10),
+            'profile_images' => $this->faker->imageUrl(480, 480),
+            'contacts' => json_encode(['phone' => $this->faker->phoneNumber(), 'address' => $this->faker->address()]),
+            'nb_likes' => $this->faker->numberBetween(0, 1000),
+            'nb_followers' => $this->faker->numberBetween(0, 10000),
+            'isPremium' => $this->faker->boolean(),
+            'created_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
+            'updated_at' => $this->faker->dateTimeBetween('-1 year', 'now')
         ];
     }
 

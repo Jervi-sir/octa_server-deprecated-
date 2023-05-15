@@ -24,7 +24,7 @@ return new class extends Migration
             $table->integer('item_type_id');
             $table->integer('gender_id'); //_male, _female, _male/_female
 
-            $table->longText('search')->nullable();
+            $table->longText('images')->nullable();
 
             $table->timestamps();
         });
