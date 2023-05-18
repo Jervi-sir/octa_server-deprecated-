@@ -16,15 +16,15 @@ class ActionController extends Controller
         if ($user->savedItems()->where('item_id', $itemId)->exists()) {
             return response()->json(['message' => 'Item already saved'], 422);
         }
-        
+
         $user->savedItems()->attach($itemId);
-        return response()->json('saved item');
+        return response()->json('saved item', 200);
     }
 
     public function unSaveItem($itemId)
     {
         $user = Auth::user();
         $user->savedItems()->detach($itemId);
-        return response()->json('unSaved item');
+        return response()->json('unSaved item', 200);
     }
 }

@@ -19,12 +19,15 @@ class UserSaveFactory extends Factory
      */
     public function definition(): array
     {
-        $faker = new Faker();
-        return [
-            'user_id' => User::inRandomOrder()->first()->id,
-            'item_id' => Item::inRandomOrder()->first()->id,
-            'created_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
-            'updated_at' => $this->faker->dateTimeBetween('-1 year', 'now')
-        ];
+        try {
+            return [
+                'user_id' => User::inRandomOrder()->first()->id,
+                'item_id' => Item::inRandomOrder()->first()->id,
+                'created_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
+                'updated_at' => $this->faker->dateTimeBetween('-1 year', 'now')
+            ];
+        } catch (\Throwable $th) {
+            return null;
+        }
     }
 }

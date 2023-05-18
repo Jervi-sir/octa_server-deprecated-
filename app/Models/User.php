@@ -45,7 +45,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function savedItems() :BelongsToMany
+    public function savedItems(): BelongsToMany
     {
         return $this->belongsToMany(Item::class, 'user_saves', 'user_id', 'item_id');
     }

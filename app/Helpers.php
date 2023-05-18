@@ -7,7 +7,8 @@ function getItem($item)
   $result = [
     'id' => $item->id,
     'shop_id' => $item->shop_id,
-    'shop_image' => imageUrl('shops', $item->shop->shop_image),
+    'shop_image' => $item->shop->shop_image,
+    //'shop_image' => imageUrl('shops', $item->shop->shop_image),
     'name' => $item->name,
     'details' => $item->details,
     'sizes' => $item->sizes,

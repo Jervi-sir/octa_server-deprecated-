@@ -10,38 +10,8 @@ use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
-    public function showShop($shopId)
-    {
-        $shop = Shop::find($shopId);
-        $data['shop'] = getShop($shop);
 
-        $items = $shop->items;
-        foreach($items as $index => $item) {
-            $data['items'][$index] = getItem($item);
-        }
-        return response()->json([
-            'shop' => $data['shop'],
-            'items' => $data['items'],
-        ], 200);
-    }
-
-    public function showUser($userId)
-    {
-        $user = User::find($userId);
-        $data['user'] =[
-            'name' => $user->name,
-            'username' => $user->username,
-            'bio' => $user->bio,
-            'profile_images' => $user->profile_images,
-            'contacts' => $user->contacts,
-            'nb_likes' => $user->nb_likes,
-            'nb_followers' => $user->nb_followers,
-            'isPremium' => $user->isPremium,
-        ];
-        return response()->json($data['user'], 200);
-    }
-
-    public function showMyProfile(Request $request) 
+    public function showMyProfile(Request $request)
     {
         $user = Auth::user();
         $data['user'] = [
@@ -52,10 +22,29 @@ class ProfileController extends Controller
             'contacts' => $user->contacts,
             'nb_followers' => $user->nb_followers,
             'nb_likes' => $user->nb_likes,
-            'profile_images' => imageUrl('users', $user->profile_images),
+            'profile_images' => $user->profile_images,
+            //'profile_images' => imageUrl('users', $user->profile_images),
         ];
 
-        return response()->json($data['user']);
+        return response()->json([
+            'user_status' => Auth::user() ? 'You are authenticated' : 'You are NOT authenticated',
+            'user' => $data['user'],
+        ], 200);
     }
 
+
+    public function getSavedItems()
+    {
+        $user = Auth::user();
+        $items = $user->savedItems;
+        $data['items'] = [];
+        foreach ($items as $index => $item) {
+            $data['items'][$index] = getItem($item);
+        }
+
+        return response()->json([
+            'user_status' => Auth::user() ? 'You are authenticated' : 'You are NOT authenticated',
+            'items' => $data['items'],
+        ], 200);
+    }
 }

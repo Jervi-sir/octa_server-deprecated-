@@ -26,6 +26,8 @@ return new class extends Migration
 
             $table->longText('images')->nullable();
 
+            $table->longText('keywords')->nullable();
+
             $table->timestamps();
         });
     }
