@@ -2,7 +2,8 @@
 
 use Illuminate\Support\Facades\Auth;
 
-function getItem($item) {
+function getItem($item)
+{
   $result = [
     'id' => $item->id,
     'shop_id' => $item->shop_id,
@@ -15,13 +16,15 @@ function getItem($item) {
     'item_type_id' => $item->item_type_id,
     'gender_id' => $item->gender_id,
     'search' => $item->search,
-    'images' => imageToArray($item->images->pluck('url')->toArray()),
-    'isSaved' => $item->savedByUsers->contains(Auth::user()->id),  
+    'images' => json_decode($item->images),
+    //'images' => imageToArray($item->images->pluck('url')->toArray()),
+    'isSaved' => Auth::user() ? $item->savedByUsers->contains(Auth::user()->id) : null,
   ];
   return $result;
 }
 
-function getShop($shop) {
+function getShop($shop)
+{
   $result = [
     'shop_name' => $shop->shop_name,
     'shop_image' => imageUrl('shops', $shop->shop_image),
@@ -37,18 +40,20 @@ function getShop($shop) {
   return $result;
 }
 
-function imageToArray($images) {
-  if(count($images) == 0) {
-      return [[
-          "image" => "https://images.unsplash.com/photo-1455620611406-966ca6889d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1130&q=80"
-      ]];
+function imageToArray($images)
+{
+  if (count($images) == 0) {
+    return [[
+      "image" => "https://images.unsplash.com/photo-1455620611406-966ca6889d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1130&q=80"
+    ]];
   }
   foreach ($images as &$item) {
-      $item = ["image" => imageUrl('items', $item)];
+    $item = ["image" => imageUrl('items', $item)];
   }
   return $images;
 }
 
-function imageUrl($source, $image) {
+function imageUrl($source, $image)
+{
   return "http://192.168.1.106:8000/" . $source . '/' . $image;
 }

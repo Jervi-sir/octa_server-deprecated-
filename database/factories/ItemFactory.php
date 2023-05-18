@@ -23,7 +23,7 @@ class ItemFactory extends Factory
             'shop_id' => Shop::inRandomOrder()->first()->id,
             'details' => $this->faker->paragraph,
             'name' => $this->faker->words(3, true),
-            'sizes' => $this->faker->randomElements(['Small', 'Medium', 'Large']),
+            'sizes' => array_rand(['Small', 'Medium', 'Large']),
             'stock' => $this->faker->numberBetween(1, 100),
             'price' => $this->faker->randomFloat(2, 5, 100),
             'item_type_id' => $this->faker->numberBetween(1, 5),
