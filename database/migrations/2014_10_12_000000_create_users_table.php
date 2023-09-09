@@ -15,9 +15,11 @@ return new class extends Migration
             $table->id();
             $table->unsignedTinyInteger('role_id');
 
+            $table->string('phone_number')->unique();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('password_plainText');
 
             $table->string('name')->nullable();
             $table->string('username')->nullable();
@@ -28,7 +30,6 @@ return new class extends Migration
             $table->integer('nb_likes')->default(0);
             $table->integer('nb_followers')->default(0);
             $table->boolean('isPremium')->default(0);
-
 
             $table->foreign('role_id')->references('id')->on('roles');
             $table->rememberToken();

@@ -11,7 +11,9 @@ use App\Models\User;
 use App\Models\Wilaya;
 use App\Models\UserMap;
 use App\Models\UserSave;
+use App\Models\PaymentHistory;
 use Illuminate\Database\Seeder;
+use Database\Seeders\WilayaSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,27 +22,35 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+
+        //PaymentHistory::factory(600)->create();
+        
+
+
+        /*
         // Seed roles
         Role::factory()->create(['role_name' => 'admin']);
         Role::factory()->create(['role_name' => 'user']);
         Role::factory()->create(['role_name' => 'assistant']);
 
         // Seed wilayas
-        for ($i = 1; $i < 48; $i++) {
-            Wilaya::factory()->create(['id' => $i, 'code' => $i]);
-        }
-
+        //Wilaya::factory()->create();
+        $wilaya = new WilayaSeeder();
+        $wilaya->run();
+        
         // Seed users
-        $users = User::factory(150)->create();
+        $users = User::factory(50)->create();
 
         // Seed shops
-        $shops = Shop::factory(600)->create();
+        $shops = Shop::factory(50)->create();
 
         // Seed user maps
         UserMap::factory(150)->create();
 
         // Seed user saves
-        $item = Item::factory(2000)->create();
-        UserSave::factory(1000)->create();
+        
+        */
+        $item = Item::factory(200)->create();
+        UserSave::factory(200)->create();
     }
 }

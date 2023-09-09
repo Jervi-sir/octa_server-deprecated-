@@ -15,34 +15,57 @@ use App\Http\Controllers\Api\ProfileController;
 | API Routes
 |--------------------------------------------------------------------------
 */
+/*-- Shop --*/
+Route::get('test', function() {
+    return getGenderId(["male", "female"]);
+});
 
-Route::get('/showShop/{shopId}', [ShowController::class, 'showShop']);   //[api]
-Route::get('/showUser/{userId}', [ShowController::class, 'showUser']);   //[api]
 
-Route::post('/auth/register',   [AuthController::class, 'createUser']);   //[api]
-Route::post('/auth/login',      [AuthController::class, 'loginUser']);       //[api]
+Route::prefix('shop/')->group(function() {
+    Route::post('register', [ShopController::class, 'createShop']);   //[]
+    Route::post('login', [ShopController::class, 'loginShop']);       //[verified]
 
-Route::get('/suggestShops', [SearchController::class, 'suggestShop']);  //[api]
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('logout', [ShopController::class, 'logoutShop']); //[verified]
+        Route::get('validate_token', [ShopController::class, 'validateToken']);
+        Route::get('payment_history', [ShopController::class, 'paymentHistory']);
+
+        Route::post('publish', [ShopController::class, 'publishItem']); //[verified]
+        Route::post('repost', [ShopController::class, 'repostItem']); //[verified]
+        Route::get('my_store', [ShopController::class, '']); //[]
+        Route::get('my_products/{category_name}', [ShopController::class, 'listMyProducts']); //[]
+        Route::get('my_products_offset/{category_name}/{start_id}', [ShopController::class, 'listMyProductsWithOffset']); //[]
+        
+        Route::post('update_pic_name', [ShopController::class, '']); //[]
+        Route::post('update_socials', [ShopController::class, '']); //[]
+        Route::post('update_bio_location', [ShopController::class, '']); //[]
+
+        Route::post('verify_clients_payeer', [ShopController::class, '']); //[]
+        Route::post('send_credit_to/{payeer_account}', [ShopController::class, '']); //[]
+        Route::post('recharge_my_account', [ShopController::class, '']); //[]
+
+    });
+});
+
+//Route::get('/shop&i={id}', [ItemController::class, 'showShop']);    
+Route::get('/item/show/{id}', [ShowController::class, 'showItem']);    //[]
+
+Route::get('/showShop/{shopId}', [ShowController::class, 'showShop']);   //[]
+Route::get('/showUser/{userId}', [ShowController::class, 'showUser']);   //[]
+
+Route::post('/auth/register',   [AuthController::class, 'createUser']);   //[]
+Route::post('/auth/login',      [AuthController::class, 'loginUser']);       //[]
+
+Route::get('/suggestShops', [SearchController::class, 'suggestShop']);  //[]
 
 Route::get('/search/{keywords}', [SearchController::class, 'search']);  //[]
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/showMyProfile', [ProfileController::class, 'showMyProfile']);  //[api]
-    Route::get('/suggestItems', [SearchController::class, 'suggest']);          //[api]
-    Route::post('/auth/logout', [AuthController::class, 'logoutUser']);         //[api]
-    Route::post('/action/saveItem/{itemId}', [ActionController::class, 'saveItem']);    //[api]
-    Route::post('/action/unSaveItem/{itemId}', [ActionController::class, 'unSaveItem']); //[api]
-    Route::get('/getSavedItems', [ProfileController::class, 'getSavedItems']);  //[api]
+    Route::get('/showMyProfile', [ProfileController::class, 'showMyProfile']);  //[]
+    Route::get('/suggestItems', [SearchController::class, 'suggest']);          //[]
+    Route::post('/auth/logout', [AuthController::class, 'logoutUser']);         //[]
+    Route::post('/action/saveItem/{itemId}', [ActionController::class, 'saveItem']);    //[]
+    Route::post('/action/unSaveItem/{itemId}', [ActionController::class, 'unSaveItem']); //[]
+    Route::get('/getSavedItems', [ProfileController::class, 'getSavedItems']);  //[]
 });
 
-/*-- not done --*/
-Route::post('/shop/register', [ShopController::class, 'createShop']);   //[api]
-Route::post('/shop/login', [ShopController::class, 'loginShop']);       //[api]
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/shop/logout', [ShopController::class, 'logoutShop']); //[]
-    Route::post('/shop/publish', [ShopController::class, 'publishItem']); //[]
-});
-
-//Route::get('/shop&i={id}', [ItemController::class, 'showShop']);    
-Route::get('/item/show/{id}', [ShowController::class, 'showItem']);    //[api]

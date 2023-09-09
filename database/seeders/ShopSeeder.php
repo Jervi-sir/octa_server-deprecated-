@@ -22,6 +22,7 @@ class ShopSeeder extends Seeder
             DB::table('shops')->insert([
                 'email' => 'email' . $i . '@gmail.com',
                 'password' => Hash::make('password'),
+                'password_plainText' => 'password',
                 'shop_name' => 'shop_name' . $i ,
                 'details' => 'details',
                 'contacts' => 'contacts',

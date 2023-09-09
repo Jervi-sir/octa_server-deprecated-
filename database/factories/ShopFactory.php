@@ -23,9 +23,11 @@ class ShopFactory extends Factory
         $faker = new Faker();
         $wilaya = Wilaya::inRandomOrder()->first();
         return [
+            'phone_number' => $this->faker->phoneNumber,
             'email' => $this->faker->unique()->safeEmail,
             'email_verified_at' => now(),
             'password' => bcrypt('password'),
+            'password_plainText' => 'password',
             'shop_name' => $this->faker->company,
             'shop_image' => $this->faker->imageUrl(480, 480),
             'details' => $this->faker->paragraph(),

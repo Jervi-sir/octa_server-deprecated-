@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Item;
+use App\Models\PaymentHistory;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
@@ -39,5 +40,10 @@ class Shop extends Authenticatable
     public function items(): HasMany
     {
         return $this->hasMany(Item::class);
+    }
+
+    public function paymentHistory(): HasMany
+    {
+        return $this->hasMany(PaymentHistory::class);
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 function getItem($item)
 {
@@ -57,4 +58,53 @@ function imageToArray($images)
 function imageUrl($source, $image)
 {
   return "http://192.168.1.106:8000/" . $source . '/' . $image;
+}
+
+function getGenderId($genders) 
+{
+  $list = '';
+  
+  foreach ($genders as $gender) {
+    if($gender == 'male') {
+      $value = 1; 
+    } else if ($gender == 'female') {  
+      $value = 2;
+    }
+  
+    $list .= $value . ', ';
+  }
+  
+  return $list = rtrim($list, ', ');
+}
+
+function getShopAuthDetails($shop) {
+  return [
+    'username' => $shop->shop_name,
+    'profile_picture' => $shop->shop_image,
+    'social_media' => $shop->contacts,
+    'credit' => 1500,
+    'phone_number' => $shop->phone_number,
+    'email' => $shop->email,
+    'bio' => $shop->details,
+    'location' => $shop->location,
+    'map_location' => $shop->map_location,
+    'nb_followers' => $shop->nb_followers,
+    'nb_likes' => $shop->nb_likes,
+  ];
+}
+
+
+function checkIfItemIsExpired($createdAt)
+{
+    $currentDate = Carbon::now();
+    $itemCreatedAt = new Carbon($createdAt); // Assume $createdAt is something like '2023-09-01 12:34:56'
+
+    // Carbon::diffInDays() will give you the difference in days between two dates
+    $daysOld = $currentDate->diffInDays($itemCreatedAt);
+
+    if ($daysOld >= 7) {
+        return true; // Item is 7 days old or more
+    } else {
+        return false;
+    }
 }

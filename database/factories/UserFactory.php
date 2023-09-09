@@ -22,9 +22,11 @@ class UserFactory extends Factory
         $faker = new Faker();
         return [
             'role_id' => Role::inRandomOrder()->first()->id, //assuming you have 3 roles in your roles table
+            'phone_number' => json_encode(['phone' => $this->faker->phoneNumber(), 'address' => $this->faker->address()]),
             'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => bcrypt('password'),
+            'password_plainText' => 'password',
             'name' => $this->faker->name(),
             'username' => $this->faker->userName(),
             'bio' => $this->faker->sentence(10),

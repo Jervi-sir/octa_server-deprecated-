@@ -21,13 +21,16 @@ return new class extends Migration
             $table->mediumText('sizes')->nullable();
             $table->integer('stock')->default(1);
             $table->string('price')->nullable();
-            $table->integer('item_type_id');
-            $table->integer('gender_id'); //_male, _female, _male/_female
+            $table->foreignId('product_type_id')->constrained();
+            $table->string('genders')->nullable(); //_male, _female, _male/_female
 
             $table->longText('images')->nullable();
 
             $table->longText('keywords')->nullable();
+            
+            $table->integer('isActive')->default(1);
 
+            $table->dateTime('last_reposted')->nullable();
             $table->timestamps();
         });
     }
