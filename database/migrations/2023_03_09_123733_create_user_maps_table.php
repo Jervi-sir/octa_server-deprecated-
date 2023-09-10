@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('user_maps', function (Blueprint $table) {
             $table->id();
             $table->string('positions');
-            $table->foreignId('user_id')->constrained();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

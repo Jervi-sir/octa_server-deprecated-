@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('payment_histories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('shop_id')->constrained();
-            $table->foreignId('user_id')->constrained();
+            $table->foreignId('user_id')->constrained()->nullable();
 
             $table->string('amount');
             $table->smallInteger('sold_bought'); //1: means they sold. 2: means they bought

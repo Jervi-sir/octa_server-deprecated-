@@ -9,6 +9,11 @@ use App\Http\Controllers\Api\ShowController;
 use App\Http\Controllers\Api\ActionController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\Shop\ShopAuthController;
+use App\Http\Controllers\Api\Shop\ShopItemController;
+use App\Http\Controllers\Api\Shop\ShopPaymentController;
+use App\Http\Controllers\Api\Shop\ShopProfileController;
+use App\Http\Controllers\Api\Shop\ShopListItemsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,28 +27,32 @@ Route::get('test', function() {
 
 
 Route::prefix('shop/')->group(function() {
-    Route::post('register', [ShopController::class, 'createShop']);   //[]
-    Route::post('login', [ShopController::class, 'loginShop']);       //[verified]
+    Route::post('register', [ShopAuthController::class, 'createShop']);   //[]
+    Route::post('login', [ShopAuthController::class, 'loginShop']);       //[verified]
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('logout', [ShopController::class, 'logoutShop']); //[verified]
-        Route::get('validate_token', [ShopController::class, 'validateToken']);
-        Route::get('payment_history', [ShopController::class, 'paymentHistory']);
+        Route::post('logout', [ShopAuthController::class, 'logoutShop']); //[verified]
+        Route::get('validate_token', [ShopAuthController::class, 'validateToken']);
+        Route::get('payment_history', [ShopProfileController::class, 'paymentHistory']);
 
-        Route::post('publish', [ShopController::class, 'publishItem']); //[verified]
-        Route::post('repost', [ShopController::class, 'repostItem']); //[verified]
-        Route::get('my_store', [ShopController::class, '']); //[]
-        Route::get('my_products/{category_name}', [ShopController::class, 'listMyProducts']); //[]
-        Route::get('my_products_offset/{category_name}/{start_id}', [ShopController::class, 'listMyProductsWithOffset']); //[]
+        Route::post('publish', [ShopItemController::class, 'publishItem']); //[verified]
+        Route::get('edit_item/{item_id}', [ShopItemController::class, 'editItem']); //[verified]
+        Route::post('update_item/{item_id}', [ShopItemController::class, 'updateItem']); //[verified]
+        Route::post('delete_item/{item_id}', [ShopItemController::class, 'deleteItem']); //[verified]
         
-        Route::post('update_pic_name', [ShopController::class, '']); //[]
-        Route::post('update_socials', [ShopController::class, '']); //[]
-        Route::post('update_bio_location', [ShopController::class, '']); //[]
-
-        Route::post('verify_clients_payeer', [ShopController::class, '']); //[]
-        Route::post('send_credit_to/{payeer_account}', [ShopController::class, '']); //[]
-        Route::post('recharge_my_account', [ShopController::class, '']); //[]
-
+        Route::post('repost', [ShopItemController::class, 'repostItem']); //[verified]
+        Route::get('my_store', [ShopController::class, '']); //[]
+        Route::get('my_products/{category_name}', [ShopListItemsController::class, 'listMyProducts']); //[verified]
+        Route::get('my_products_offset/{category_name}/{start_id}', [ShopListItemsController::class, 'listMyProductsWithOffset']); //[verified]
+        
+        Route::post('update_pic_name', [ShopProfileController::class, 'updatePic_Name']); //[verified]
+        Route::post('update_socials', [ShopProfileController::class, 'updateSocialList']); //[]
+        Route::post('update_description', [ShopProfileController::class, 'updateBio']); //[verified]
+        Route::post('update_location', [ShopProfileController::class, 'updateLocation']); //[verified]
+        
+        Route::post('verify_clients_payeer', [ShopPaymentController::class, '']); //[]
+        Route::post('send_credit_to/{payeer_account}', [ShopPaymentController::class, '']); //[]
+        Route::post('recharge_my_account', [ShopPaymentController::class, '']); //[]
     });
 });
 

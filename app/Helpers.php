@@ -31,7 +31,7 @@ function getShop($shop)
     'shop_name' => $shop->shop_name,
     'shop_image' => imageUrl('shops', $shop->shop_image),
     'details' => $shop->details,
-    'contacts' => $shop->contacts,
+    'contacts' => json_decode($shop->contacts),
     'location' => $shop->location,
     'map_location' => $shop->map_location,
     'nb_followers' => $shop->nb_followers,
@@ -62,21 +62,30 @@ function imageUrl($source, $image)
 
 function getGenderId($genders) 
 {
-  $list = '';
+  $list = [];
   
   foreach ($genders as $gender) {
     if($gender == 'male') {
       $value = 1; 
-    } else if ($gender == 'female') {  
+    } else if ($gender == 'female') {
       $value = 2;
     }
-  
-    $list .= $value . ', ';
+    $list[] = $value;
   }
   
-  return $list = rtrim($list, ', ');
+  sort($list); // Sorts the array of gender IDs
+  
+  return implode(', ', $list);  // Converts the sorted array back to a string
 }
 
+function getGenderNames($data) {
+  $text = str_replace("1", "male", $data);
+  $text = str_replace("2", "female", $text);
+  return $text;
+}
+
+
+// Define mapping 
 function getShopAuthDetails($shop) {
   return [
     'username' => $shop->shop_name,
@@ -107,4 +116,25 @@ function checkIfItemIsExpired($createdAt)
     } else {
         return false;
     }
+}
+
+function removeNullsFromStart($array) {
+  $newArray = [];
+  $foundNonNull = false;
+
+  foreach ($array as $item) {
+      if (!$foundNonNull && is_null($item)) {
+          continue;
+      }
+      
+      $foundNonNull = true;
+      $newArray[] = $item;
+  }
+
+  // Fill the rest of the array with null values to preserve length
+  while (count($newArray) < count($array)) {
+      $newArray[] = null;
+  }
+
+  return $newArray;
 }

@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('user_saves', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained();
-            $table->foreignId('item_id')->constrained();
+            $table->foreignId('item_id')->constrained()->onDelete('cascade');
             
             $table->unique(['user_id', 'item_id']); // add unique constraint
             $table->timestamps();
+
         });
     }
 
