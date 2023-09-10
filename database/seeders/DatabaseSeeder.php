@@ -12,6 +12,7 @@ use App\Models\Wilaya;
 use App\Models\UserMap;
 use App\Models\UserSave;
 use App\Models\PaymentHistory;
+use App\Models\ProductType;
 use Illuminate\Database\Seeder;
 use Database\Seeders\WilayaSeeder;
 
@@ -22,12 +23,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-
-        //PaymentHistory::factory(600)->create();
-        
-
-
-        /*
         // Seed roles
         Role::factory()->create(['role_name' => 'admin']);
         Role::factory()->create(['role_name' => 'user']);
@@ -38,19 +33,21 @@ class DatabaseSeeder extends Seeder
         $wilaya = new WilayaSeeder();
         $wilaya->run();
         
+        $product_type = new ProductTypeSeeder();
+        $product_type->run();
+
         // Seed users
-        $users = User::factory(50)->create();
+        User::factory(50)->create();
 
         // Seed shops
-        $shops = Shop::factory(50)->create();
+        Shop::factory(50)->create();
 
         // Seed user maps
         UserMap::factory(150)->create();
 
-        // Seed user saves
-        
-        */
-        $item = Item::factory(200)->create();
+        Item::factory(200)->create();
         UserSave::factory(200)->create();
+        PaymentHistory::factory(600)->create();
+
     }
 }

@@ -31,7 +31,7 @@ class ShopFactory extends Factory
             'shop_name' => $this->faker->company,
             'shop_image' => $this->faker->imageUrl(480, 480),
             'details' => $this->faker->paragraph(),
-            'contacts' => $this->faker->phoneNumber,
+            //'contacts' => $this->faker->phoneNumber,
             'location' => $this->faker->state,
             'map_location' => $this->faker->latitude() . ',' . $this->faker->longitude(),
             'nb_followers' => $this->faker->numberBetween(0, 1000),

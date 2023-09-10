@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class ProductTypeSeeder extends Seeder
 {
@@ -32,7 +33,7 @@ class ProductTypeSeeder extends Seeder
         ];
 
         foreach ($algerianWilayas  as $key => $value) {
-            DB::table('product_types')->create([
+            DB::table('product_types')->insert([
                 'id' => $value['id'],
                 'name' => $value['name'],
             ]);

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('shop_name');
             $table->string('shop_image')->nullable();
             $table->mediumText('details')->nullable();
-            $table->longText('contacts')->default([]);
+            $table->text('contacts')->default('[]');
             $table->mediumText('location')->nullable();
             $table->mediumText('map_location')->nullable();
             $table->integer('nb_followers')->default(0);
