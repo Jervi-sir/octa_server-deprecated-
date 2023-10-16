@@ -17,7 +17,7 @@ class ShopAuthController extends Controller
         $shop = auth()->user();
 
         return response()->json([
-            'status' => 'success', 
+            'status' => 'success',
             'message' => 'Token is valid',
             'shop_auth_info' => getShopAuthDetails($shop)
         ]);
@@ -59,7 +59,7 @@ class ShopAuthController extends Controller
     }
 
     public function loginShop(Request $request) {
-       
+
         try {
             $validateUser = Validator::make($request->all(), [
                 'phone_number' => 'required',
@@ -92,7 +92,8 @@ class ShopAuthController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'User Logged In Successfully',
-                'access_token' => $shop->createToken($request->header('User-Agent'), ['role:shop'])->plainTextToken
+                'access_token' => $shop->createToken($request->header('User-Agent'), ['role:shop'])->plainTextToken,
+                'shop_auth_info' => getShopAuthDetails($shop)
             ], 200);
 
         } catch (\Throwable $th) {
