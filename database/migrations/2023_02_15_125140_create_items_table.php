@@ -13,15 +13,18 @@ return new class extends Migration
     {
         Schema::create('items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('shop_id')->constrained()->onDelete('cascade');
+            $table->foreignId('shop_id')->constrained();
+            $table->foreignId('user_id')->nullable()->constrained();
+            $table->foreignId('wilaya_id')->nullable()->constrained();
+            $table->foreignId('product_type_id')->nullable()->constrained();
 
             $table->mediumText('details')->nullable();
-
             $table->string('name');
             $table->mediumText('sizes')->nullable();
             $table->integer('stock')->default(1);
             $table->string('price')->nullable();
-            $table->foreignId('product_type_id')->constrained()->nullable();
+            $table->string('product_type')->nullable();
+
             $table->string('genders')->nullable(); //_male, _female, _male/_female
 
             $table->longText('images')->nullable();

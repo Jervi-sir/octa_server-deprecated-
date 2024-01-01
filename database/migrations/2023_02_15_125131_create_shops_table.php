@@ -31,8 +31,8 @@ return new class extends Migration
             $table->mediumText('threeD_model')->nullable();
             $table->string('wilaya_name')->nullable();
 
-            $table->unsignedSmallInteger('wilaya_id')->nullable();
-            $table->foreign('wilaya_id')->references('id')->on('wilayas');
+            $table->foreignId('wilaya_id')->constrained();
+            $table->foreignId('user_id')->constrained();
 
             $table->rememberToken();
             $table->timestamps();

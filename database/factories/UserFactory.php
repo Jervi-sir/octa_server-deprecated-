@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Role;
+use App\Models\Wilaya;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 use Faker\Generator as Faker;
@@ -22,6 +23,8 @@ class UserFactory extends Factory
         $faker = new Faker();
         return [
             'role_id' => Role::inRandomOrder()->first()->id, //assuming you have 3 roles in your roles table
+            'wilaya_id' => Wilaya::inRandomOrder()->first()->id, //assuming you have 3 roles in your roles table
+            
             'phone_number' => json_encode(['phone' => $this->faker->phoneNumber(), 'address' => $this->faker->address()]),
             'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
@@ -30,11 +33,17 @@ class UserFactory extends Factory
             'name' => $this->faker->name(),
             'username' => $this->faker->userName(),
             'bio' => $this->faker->sentence(10),
-            'profile_images' => $this->faker->imageUrl(480, 480),
+            'location' => $this->faker->sentence(10),
+            
+            'profile_images' => [$this->faker->imageUrl(480, 480)],
             'contacts' => json_encode(['phone' => $this->faker->phoneNumber(), 'address' => $this->faker->address()]),
             'nb_likes' => $this->faker->numberBetween(0, 1000),
             'nb_followers' => $this->faker->numberBetween(0, 10000),
             'isPremium' => $this->faker->boolean(),
+
+            'credit' => $this->faker->numberBetween(0, 100),
+            'game_map' => $this->faker->sentence(10),
+
             'created_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
             'updated_at' => $this->faker->dateTimeBetween('-1 year', 'now')
         ];

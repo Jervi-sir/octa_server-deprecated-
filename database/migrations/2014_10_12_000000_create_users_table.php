@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->unsignedTinyInteger('role_id');
+            $table->foreignId('role_id')->constrained();
+            $table->foreignId('wilaya_id')->nullable()->constrained();
 
             $table->string('phone_number')->unique();
             $table->string('email')->unique();
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->string('username')->nullable();
             $table->mediumText('bio')->default('Octa User');
+            $table->mediumText('location')->nullable();
 
             $table->longText('profile_images')->nullable();
             $table->longText('contacts')->nullable();
@@ -31,7 +33,10 @@ return new class extends Migration
             $table->integer('nb_followers')->default(0);
             $table->boolean('isPremium')->default(0);
 
-            $table->foreign('role_id')->references('id')->on('roles');
+            $table->integer('credit')->default(0);
+
+            $table->longText('game_map')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
         });

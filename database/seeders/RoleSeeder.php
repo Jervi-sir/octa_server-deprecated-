@@ -20,6 +20,10 @@ class RoleSeeder extends Seeder
         ]);
         DB::table('roles')->insert([
             'id' => 2,
+            'role_name' => 'shop'
+        ]);
+        DB::table('roles')->insert([
+            'id' => 3,
             'role_name' => 'user'
         ]);
 

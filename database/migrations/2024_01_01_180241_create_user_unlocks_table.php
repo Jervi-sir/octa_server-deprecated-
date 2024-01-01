@@ -11,14 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payment_histories', function (Blueprint $table) {
+        Schema::create('user_unlocks', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained();
             $table->foreignId('shop_id')->constrained();
-            $table->foreignId('user_id')->constrained()->nullable();
-
-            $table->string('amount');
-            $table->smallInteger('sold_bought'); //1: means they sold. 2: means they bought
-
             $table->timestamps();
         });
     }
@@ -28,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payment_histories');
+        Schema::dropIfExists('user_unlocks');
     }
 };

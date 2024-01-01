@@ -23,8 +23,6 @@ class UserSaveFactory extends Factory
             return [
                 'user_id' => User::inRandomOrder()->first()->id,
                 'item_id' => Item::inRandomOrder()->first()->id,
-                'created_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
-                'updated_at' => $this->faker->dateTimeBetween('-1 year', 'now')
             ];
         } catch (\Throwable $th) {
             return null;
