@@ -11,11 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('credits', function (Blueprint $table) {
+        Schema::create('payment_transactions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained();
             $table->foreignId('shop_id')->constrained();
-            $table->foreignId('user_id')->constrained()->nullable();
             $table->double('amount');
+            
+            $table->string('type')->nullable(); //purchase, refund
+            $table->string('proof_image')->nullable(); //sold, bought
+
+            $table->string('status')->nullable(); //pending, completed
 
             $table->timestamps();
         });
@@ -26,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('credits');
+        Schema::dropIfExists('payment_transactions');
     }
 };

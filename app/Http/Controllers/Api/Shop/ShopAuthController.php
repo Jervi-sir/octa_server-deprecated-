@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Shop;
 use App\Models\Shop;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -80,9 +81,9 @@ class ShopAuthController extends Controller
             //    ], 401);
             //}
 
-            $shop = Shop::where('phone_number', $request->phone_number)->first();
+            $user = User::where('phone_number', $request->phone_number)->first();
 
-            if (!$shop || !Hash::check($request->password, $shop->password)) {
+            if (!$user || !Hash::check($request->password, $user->password)) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Auth Error',
@@ -92,8 +93,8 @@ class ShopAuthController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'User Logged In Successfully',
-                'access_token' => $shop->createToken($request->header('User-Agent'), ['role:shop'])->plainTextToken,
-                'shop_auth_info' => getShopAuthDetails($shop)
+                'access_token' => $user->createToken($request->header('User-Agent'), ['role:shop'])->plainTextToken,
+                'shop_auth_info' => getShopAuthDetails($user->shop)
             ], 200);
 
         } catch (\Throwable $th) {

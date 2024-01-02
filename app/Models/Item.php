@@ -16,14 +16,9 @@ class Item extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'shop_name',
-        'details',
-        'name',
-        'size',
-        'stock',
-        'type',
-        'price',
+    protected $fillable = ['*'];
+    protected $hidden = [
+        'user_id'
     ];
 
     public function shop(): BelongsTo

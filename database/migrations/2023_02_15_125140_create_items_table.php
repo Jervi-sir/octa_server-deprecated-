@@ -26,13 +26,9 @@ return new class extends Migration
             $table->string('product_type')->nullable();
 
             $table->string('genders')->nullable(); //_male, _female, _male/_female
-
             $table->longText('images')->nullable();
-
             $table->longText('keywords')->nullable();
-            
             $table->integer('isActive')->default(1);
-
             $table->dateTime('last_reposted')->nullable();
             $table->timestamps();
         });

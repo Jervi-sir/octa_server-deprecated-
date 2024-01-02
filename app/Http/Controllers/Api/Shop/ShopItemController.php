@@ -11,20 +11,42 @@ use Illuminate\Support\Facades\Storage;
 
 class ShopItemController extends Controller
 {
-    public function publishItem(Request $request) {
+    public function publishItem(Request $request) 
+    {
+        $request->validate([
+            'product_type_id'   => 'required|numeric',
+            'wilaya_number'     => 'nullable|string',
+            'details'   => 'nullable|string',
+            'name'      => 'nullable|string',
+            'sizes'     => 'nullable|string',
+            'stock'     => 'nullable|numeric',
+            'price'     => 'nullable|numeric',
+            'genders'   => 'nullable|string',
+            'images'    => 'required|string',
+        ]);
 
         $data = $request->all();
+        $user = auth()->user();
+        $shop = $user->shop;
+
         $item = new Item;
-        $item->shop_id = auth()->id();
-        $item->details = $data['productDescription']; // Or you can set this as needed
-        $item->name = $data['productName'];
+        $item->shop_id  = $shop->id;
+        $item->user_id  = $user->id;
+        $item->details  = $data['details']  ?? null; // Or you can set this as needed
+        $item->name     = $data['name']     ?? 'Untitled';
+        $item->sizes    = $data['sizes']    ?? null; // default
+        $item->stock    = $data['stock']    ?? 1; // default
+        $item->price    = $data['price']    ?? null;
+        $item->genders  = $data['genders']  ?? null;
+        $item->images   = $data['images'];
+        $item->product_type_id =  $data['product_type_id']; // You'll need to map this to an actual ID
+        $item->save();
+
+        //$item->price = str_replace(' ', '', $data['productPrice']);
+        //$item->genders  =   $data['selectedGenders'];//getGenderId($data['selectedGenders']);
         //$item->sizes = json_encode($data['selectedSizes']);
-        $item->stock = 1; // default
-        $item->price = str_replace(' ', '', $data['productPrice']);
-        $item->product_type_id = ProductType::where('name', 'like', $data['productType'])->first()->id; // You'll need to map this to an actual ID
-        $item->genders = getGenderId($data['selectedGenders']);
-        
         // Save base64 images as files and store their paths
+        /*
         $imagePaths = [];
         foreach ($data['base64Images'] as $base64Image) {
             if ($base64Image !== null) {
@@ -36,20 +58,21 @@ class ShopItemController extends Controller
         }
 
         $item->images = json_encode($imagePaths);
-
-        $item->save();
+        */
 
         return response()->json([
             'success' => true,
-            'item' => '200',
+            'item' => $item,
         ]);
         
     }
 
     public function repostItem(Request $request) {
+        $request->validate([
+            'item_id'   => 'required|numeric',
+        ]);
         
         $item = Item::find($request->item_id);
-        
         $item->last_reposted = Carbon::now();
         $item->isActive = 1;
         $item->save();
@@ -61,13 +84,17 @@ class ShopItemController extends Controller
         ]);
     }
 
-    public function editItem(Request $request, $item_id) {
-        
-        $shop = auth()->user();
-        $item =  $shop->items->find($item_id);
+    public function editItem(Request $request, $item_id) 
+    {
+        $user = auth()->user();
+        $shop = $user->shop;
+        $item = $shop->items->find($item_id);
         
         $data['item'] = [
             'id' => $item->id,
+            'product_type_id' => $item->product_type_id,
+            'wilaya_id' => $item->wilaya_id,
+
             'name' => $item->name,
             'details' => $item->details,
             'sizes' => $item->sizes,
@@ -90,52 +117,47 @@ class ShopItemController extends Controller
 
     public function updateItem(Request $request, $item_id) {
 
+        $request->validate([
+            'product_type_id'   => 'required|numeric',
+            'wilaya_number'     => 'nullable|string',
+            'details'   => 'nullable|string',
+            'name'      => 'nullable|string',
+            'sizes'     => 'nullable|string',
+            'stock'     => 'nullable|numeric',
+            'price'     => 'nullable|numeric',
+            'genders'   => 'nullable|string',
+            'images'    => 'required|string',
+        ]);
+
         $data = $request->all();
-        
-        $shop = auth()->user();
-        $item =  $shop->items->find($item_id);
 
-        $item->shop_id = $shop->id;
-        $item->details = $data['productDescription']; // Or you can set this as needed
-        $item->name = $data['productName'];
-        //$item->sizes = json_encode($data['selectedSizes']);
-        $item->stock = 1; // default
-        $item->price = str_replace(' ', '', $data['productPrice']);
-        $item->product_type_id = ProductType::where('name', 'like', $data['productType'])->first()->id; // You'll need to map this to an actual ID
-        $item->genders = getGenderId($data['selectedGenders']);
-       
+        $user = auth()->user();
+        $shop = $user->shop;
+        $item = $shop->items->find($item_id);
 
-        // Save base64 images as files and store their paths
-        $imagePaths = [];
-        foreach ($data['base64Images'] as $index => $image) {
-            // Check if it's a URL or null, if so leave it as is
-            if ($image === null || filter_var($image, FILTER_VALIDATE_URL)) {
-                $imagePaths[$index] = $image;
-            } 
-            // Assume remaining as base64 encoded images
-            else {
-                $imageName = uniqid() . '.png';
-                $imagePath = 'public/images/' . $imageName;
-                //Storage::put($imagePath, base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $image)));
-                Storage::put($imagePath, base64_decode($image));
-                $imagePaths[$index] = env('API_URL') . '/storage/images/' . $imageName;
-            }
-        }
-        $item->images = json_encode(removeNullsFromStart($imagePaths));
-       
+        $item->shop_id  = $shop->id;
+        $item->user_id  = $user->id;
+        $item->details  = $data['details']  ?? null; // Or you can set this as needed
+        $item->name     = $data['name']     ?? 'Untitled';
+        $item->sizes    = $data['sizes']    ?? null; // default
+        $item->stock    = $data['stock']    ?? 1; // default
+        $item->price    = $data['price']    ?? null;
+        $item->genders  = $data['genders']  ?? null;
+        $item->images   = $data['images'];
+        $item->product_type_id =  $data['product_type_id']; // You'll need to map this to an actual ID
         $item->save();
 
         return response()->json([
-            'success' => true,
-            'item' => $item,
+            'success'   => true,
+            'item'      => $item,
         ]);
-        
     }
 
     public function deleteItem(Request $request, $item_id) {
         $data = $request->all();
-        
-        $shop = auth()->user();
+
+        $user = auth()->user();
+        $shop = $user->shop;
         $item =  $shop->items->find($item_id);
         $item->delete();
 
@@ -143,6 +165,5 @@ class ShopItemController extends Controller
             'success' => true,
             'item' => 200,
         ], 200);
-        
     }
 }

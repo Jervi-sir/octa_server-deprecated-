@@ -11,6 +11,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Shop extends Authenticatable
@@ -48,8 +49,19 @@ class Shop extends Authenticatable
         return $this->hasMany(Item::class);
     }
 
-    public function paymentHistory(): HasMany
+    public function paymentTransactions(): HasMany
     {
-        return $this->hasMany(PaymentHistory::class);
+        return $this->hasMany(PaymentTransaction::class);
     }
+    
+    public function creditTransactions(): HasMany
+    {
+        return $this->hasMany(CreditTransaction::class);
+    }
+
+    public function userfollowers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_shop_followings');
+    }
+
 }

@@ -9,13 +9,13 @@ use App\Models\Role;
 use App\Models\Sale;
 use App\Models\Shop;
 use App\Models\User;
-use App\Models\Credit;
+use App\Models\CreditTransaction;
 use App\Models\Wilaya;
 use App\Models\UserMap;
 use App\Models\UserSave;
 use App\Models\UserUnlock;
 use App\Models\ProductType;
-use App\Models\Transaction;
+use App\Models\PaymentTransaction;
 use App\Models\UserFollowing;
 use App\Models\PaymentHistory;
 use Illuminate\Database\Seeder;
@@ -33,8 +33,8 @@ class DatabaseSeeder extends Seeder
         //Role::factory()->create(['role_name' => 'admin']);
 
         // Seed wilayas
-        /*
-        */ 
+        /**/
+         
         $role = new RoleSeeder();
         $role->run();
         $wilaya = new WilayaSeeder();
@@ -45,8 +45,7 @@ class DatabaseSeeder extends Seeder
         Shop::factory(20)->create();
         Item::factory(500)->create();
 
-        Credit::factory(50)->create();
-        Transaction::factory(350)->create();
+
         
         UserUnlock::factory(200)->create();
         Sale::factory(100)->create();
@@ -55,6 +54,8 @@ class DatabaseSeeder extends Seeder
         UserFollowing::factory(200)->create();
         
         UserShopFollowing::factory(200)->create();
-
+        
+        CreditTransaction::factory(50)->create();
+        PaymentTransaction::factory(350)->create();
     }
 }

@@ -7,8 +7,11 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -47,4 +50,15 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Item::class, 'user_saves', 'user_id', 'item_id');
     }
+
+    public function shop(): HasOne
+    {
+        return $this->hasOne(Shop::class);
+    }
+
+    public function shopsfollowing(): BelongsToMany
+    {
+        return $this->belongsToMany(Shop::class, 'user_shop_followings');
+    }
+
 }

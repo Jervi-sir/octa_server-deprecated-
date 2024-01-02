@@ -38,15 +38,18 @@ class ShopProfileController extends Controller
 
 
     public function updatePic_Name(Request $request) {
-
-        $shop_id = auth()->id();
+        $request->validate([
+            'shop_name'   => 'required',
+            'base64_image' => 'required',
+        ]);
+        
         $data = $request->all();
 
-        $shop = Shop::find($shop_id);
-        $shop->shop_name = $data['shopName'];
-        if ($data['base64Image'] !== null) {
+        $shop= auth()->user()->shop;
+        $shop->shop_name = $data['shop_name'];
+        if ($data['base64_image'] !== null) {
             $imagePath = 'public/images/' . uniqid() . '.png';
-            Storage::put($imagePath, base64_decode($data['base64Image']));
+            Storage::put($imagePath, base64_decode($data['base64_image']));
             $shop->shop_image = env('API_URL') . Storage::url($imagePath);
         }
         $shop->save();
@@ -60,12 +63,14 @@ class ShopProfileController extends Controller
 
     public function updateBio(Request $request) {
 
-        $shop_id = auth()->id();
+        $request->validate([
+            'description'   => 'required',
+        ]);
+
         $data = $request->all();
 
-        $shop = Shop::find($shop_id);
+        $shop = auth()->user()->shop;
         $shop->details = $data['description'];
-        
         $shop->save();
 
         return response()->json([
@@ -76,12 +81,14 @@ class ShopProfileController extends Controller
     }
 
     public function updateSocialList(Request $request) {
+        $request->validate([
+            'social_media_list'   => 'required',
+        ]);
 
-        $shop_id = auth()->id();
         $data = $request->all();
 
-        $shop_edit = Shop::find($shop_id);
-        $shop_edit->contacts = $data['socialMediaList'];
+        $shop_edit = auth()->user()->shop;
+        $shop_edit->contacts = $data['social_media_list'];
         
         $shop_edit->save();
 
@@ -95,10 +102,14 @@ class ShopProfileController extends Controller
 
     public function updateLocation(Request $request) {
 
-        $shop_id = auth()->id();
+        $request->validate([
+            'location'   => 'required',
+        ]);
+
+
         $data = $request->all();
 
-        $shop = Shop::find($shop_id);
+        $shop = auth()->user()->shop;
         $shop->location = $data['location'];
         
         $shop->save();
@@ -109,5 +120,7 @@ class ShopProfileController extends Controller
         ]);
 
     }
+
+    
     
 }

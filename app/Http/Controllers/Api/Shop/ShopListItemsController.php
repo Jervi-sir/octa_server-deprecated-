@@ -10,22 +10,27 @@ use Illuminate\Support\Facades\Storage;
 
 class ShopListItemsController extends Controller
 {
-    public function listMyProducts($category_name) {
-        $shop = auth()->user();
+    public function listMyProducts(Request $request, $category_name) {
+        $request->validate([
+            'page' => 'nullable|numeric',
+        ]);
+
+        $user = auth()->user();
+        $shop = $user->shop;
         $category_id = ProductType::where('name', 'like', $category_name)->first()->id; // You'll need to map this to an actual ID
         $products = $shop->items()->where('product_type_id', $category_id)->orderBy('id', 'desc')->paginate(7);
         //$products = Item::where('product_type_id', $category_id)->orderBy('id', 'desc')->paginate(7);
         
         $data['products'] = [];
-
+        
         foreach ($products as $index => $product) {
-            $selected_image = json_decode($product->images)[0];
+            //$selected_image = json_decode($product->images)[0];
            // $image = strpos($selected_image, "https") !== false ? $selected_image : 'http://192.168.1.105:8000' . Storage::url($selected_image);
             
             $data['products'][$index] = [
                 'id' => $product->id,
                 'name' => $product->name,
-                'thumbnail' => json_decode($product->images),
+                'thumbnail' => $product->images,
                 'price' => $product->price,
                 'product_type_id' => $product->product_type_id,
                 'is_expired' => checkIfItemIsExpired($product->last_reposted),
@@ -33,8 +38,8 @@ class ShopListItemsController extends Controller
                 'created_at' => $product->created_at
             ];
         }
+
         return response()->json([
-            'products' => $data['products'],
             'pagination' => [
                 'total' => $products->total(),
                 'per_page' => $products->perPage(),
@@ -42,7 +47,9 @@ class ShopListItemsController extends Controller
                 'last_page' => $products->lastPage(),
                 'from' => $products->firstItem(),
                 'to' => $products->lastItem(),
-            ]
+            ],
+            'products' => $data['products'],
+            
         ]);
     }
 
@@ -85,4 +92,5 @@ class ShopListItemsController extends Controller
             ]
         ]);
     }
+
 }
