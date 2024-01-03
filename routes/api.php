@@ -1,9 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\ShowController;
 use App\Http\Controllers\Api\ActionController;
@@ -21,10 +19,6 @@ use App\Http\Controllers\Api\Shop\ShopListItemsController;
 |--------------------------------------------------------------------------
 */
 /*-- Shop --*/
-Route::get('test', function() {
-    return getGenderId(["male", "female"]);
-});
-
 Route::prefix('shop/')->group(function() {
     Route::post('register', [ShopAuthController::class, 'createShop']);                                     //[]
     Route::post('login',    [ShopAuthController::class, 'loginShop']);                                      //[V]
@@ -57,30 +51,51 @@ Route::prefix('shop/')->group(function() {
         //Route::get('validate_token', [ShopAuthController::class, 'validateToken']); //[x]
         //Route::get('payment_history', [ShopProfileController::class, 'paymentHistory']);
         //Route::get('my_products_offset/{category_name}/{start_id}', [ShopListItemsController::class, 'listMyProductsWithOffset']); //[X]
-
-    
     });
 }); 
 
-//Route::get('/shop&i={id}', [ItemController::class, 'showShop']);    
-Route::get  ('/item/show/{id}',     [ShowController::class,  'showItem']);      //[]
+Route::prefix('auth/')->group(function() {
+    Route::post ('register',    [AuthController::class,  'createUser']);    //[V]
+    Route::post ('login',       [AuthController::class,  'loginUser']);     //[V]
 
-Route::get  ('/showShop/{shopId}',  [ShowController::class,  'showShop']);      //[]
-Route::get  ('/showUser/{userId}',  [ShowController::class,  'showUser']);      //[]
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post ('logout',  [AuthController::class, 'logoutUser']);         //[V]
 
-Route::post ('/auth/register',      [AuthController::class,  'createUser']);    //[]
-Route::post ('/auth/login',         [AuthController::class,  'loginUser']);     //[]
+        Route::get  ('show_my_profile',     [ProfileController::class, 'showMyProfile']);   //[V]
+        Route::get  ('edit_my_profile',     [ProfileController::class, 'showMyProfile']);   //[V]
+        Route::post ('update_my_profile',   [ProfileController::class, 'updateMyProfile']);   //[]
+        Route::get  ('show_my_map',         [ProfileController::class, 'showMyMap']);       //[V]
+        Route::get  ('edit_my_map',         [ProfileController::class, 'showMyProfile']);   //[X]
+        Route::post ('update_my_map',       [ProfileController::class, 'showMyProfile']);   //[X]
 
-Route::get  ('/suggestShops',       [SearchController::class,'suggestShop']);   //[]
+        Route::post ('follow_user',          [ActionController::class, 'followUser']);      //[V]
+        Route::post ('un_follow_user',       [ActionController::class, 'unfollowUser']);    //[V]
+        Route::get  ('get_followings',  [ActionController::class, 'getMyFollowings']);      //[V]
+        Route::get  ('get_followers',   [ActionController::class, 'getMyFollowers']);       //[V]
 
-Route::get  ('/search/{keywords}',  [SearchController::class,'search']);        //[]
+        Route::get  ('get_saved_items', [ActionController::class,  'getSavedItems']); //[V]          //[]
+        Route::post ('save_item',       [ActionController::class,  'saveItem']);     //[V]
+        Route::post ('un_save_item',    [ActionController::class,  'unSaveItem']);   //[V]
+    });
+}); 
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/auth/logout',     [AuthController::class, 'logoutUser']);         //[]
-    Route::get('/showMyProfile',    [ProfileController::class, 'showMyProfile']);   //[]
-    Route::get('/suggestItems',     [SearchController::class, 'suggest']);          //[]
-    Route::post('/action/saveItem/{itemId}',    [ActionController::class, 'saveItem']);     //[]
-    Route::post('/action/unSaveItem/{itemId}',  [ActionController::class, 'unSaveItem']);   //[]
-    Route::get('/getSavedItems',    [ProfileController::class, 'getSavedItems']);           //[]
-});
 
+Route::prefix('shop/')->group(function() {
+    Route::get('show/{shopId}',                 [ShowController::class,  'showShop']);      //[V]
+    Route::get('show/{shopId}/{category_name}',   [ShowController::class,  'showShop']);    //[V]
+    Route::get('suggest',                       [SearchController::class,'suggestShop']);   //[]
+}); 
+
+Route::prefix('user/')->group(function() {
+    Route::get('show/{userId}',     [ShowController::class,  'showUser']);      //[V]
+    Route::get('show/{userId}/map', function($userId) {
+        return app(ShowController::class)->showUser(request(), $userId, true);  //[V]
+    });
+}); 
+
+Route::prefix('item/')->group(function() {
+    Route::get('search',            [SearchController::class,   'search']);         //[V]
+    Route::get('show/{item_id}',    [ShowController::class,     'showItem']);       //[V]
+    Route::get('suggest',           [SearchController::class,   'suggest']);        //[V]
+    Route::get('category/{category_name}', [SearchController::class,   'byCategory']);        //[V]
+}); 

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 class AuthController extends Controller
 {
     public function createUser(Request $request) {
+        
         try {
             //Validated
             $validateUser = Validator::make($request->all(), 
@@ -30,13 +31,15 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            $user = User::create([
-                'name' => $request->name,
-                'phone_number' => $request->phone_number,
-                'password' => Hash::make($request->password),
-                'role_id' => Role::where('role_name', 'user')->first()->id
-            ]);
+            $user = new User();
+            $user->role_id = Role::where('role_name', 'user')->first()->id;
+            $user->name = $request->name;
+            $user->phone_number = $request->phone_number;
+            $user->password = Hash::make($request->password);
+            $user->password_plainText = ($request->password);
 
+            $user->save();
+            
             return response()->json([
                 'status' => true,
                 'message' => 'User Created Successfully',
@@ -52,14 +55,15 @@ class AuthController extends Controller
     }
 
 
-    public function loginUser(Request $request) {
+    public function loginUser(Request $request) 
+    {
+        
         try {
             $validateUser = Validator::make($request->all(), 
             [
-                'phone_number' => 'required|unique:users,phone_number',
+                'phone_number' => 'required:users,phone_number',
                 'password' => 'required'
             ]);
-
             if($validateUser->fails()){
                 return response()->json([
                     'status' => false,
@@ -68,19 +72,19 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            if(!Auth::attempt($request->only(['phone_number', 'password']))){
+            $user = User::where('phone_number', $request->phone_number)->first();
+
+            if (!$user || !Hash::check($request->password, $user->password)) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'phone_number & Password does not match with our record.',
-                ], 401);
+                    'message' => 'Auth Error',
+                ], 500);
             }
-
-            $user = User::where('phone_number', $request->email)->first();
-
+            
             return response()->json([
                 'status' => true,
                 'message' => 'User Logged In Successfully',
-                'token' => $user->createToken($request->header('User-Agent'))->plainTextToken
+                'access_token' => $user->createToken($request->header('User-Agent'))->plainTextToken,
             ], 200);
 
         } catch (\Throwable $th) {
@@ -92,6 +96,7 @@ class AuthController extends Controller
     }
 
     public function logoutUser(Request $request) {
+        
         //$request->user()->tokens()->delete();
         auth()->user()->currentAccessToken()->delete();
 

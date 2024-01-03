@@ -1,10 +1,12 @@
 <?php
 
+use App\Models\ProductType;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 function getItem($item)
 {
+  $auth = auth()->user();
   $result = [
     'id' => $item->id,
     'shop_id' => $item->shop_id,
@@ -15,12 +17,13 @@ function getItem($item)
     'sizes' => $item->sizes,
     'stock' => $item->stock,
     'price' => $item->price,
-    'item_type_id' => $item->item_type_id,
-    'gender_id' => $item->gender_id,
-    'search' => $item->search,
+    'category' => ProductType::find($item->product_type_id)->name,
+    'category_id' => $item->product_type_id,
+    'genders' => $item->genders,
+    'search' => $item->keywords,
     'images' => json_decode($item->images),
     //'images' => imageToArray($item->images->pluck('url')->toArray()),
-    'isSaved' => Auth::user() ? $item->savedByUsers->contains(Auth::user()->id) : null,
+    'isSaved' => $auth ? $item->savedByUsers->contains($auth->id) : null,
   ];
   return $result;
 }

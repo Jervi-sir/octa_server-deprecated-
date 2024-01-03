@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('wilaya_id')->nullable()->constrained();
 
             $table->string('phone_number')->unique();
-            $table->string('email')->unique();
+            $table->string('email')->nullable()->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('password_plainText');

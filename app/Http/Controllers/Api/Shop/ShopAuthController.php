@@ -74,13 +74,6 @@ class ShopAuthController extends Controller
                 ], 401);
             }
 
-            //if(!Auth::attempt($request->only(['phone_number', 'password']))){
-            //    return response()->json([
-            //        'status' => false,
-            //        'message' => 'Phone Number & Password does not match with our record.',
-            //    ], 401);
-            //}
-
             $user = User::where('phone_number', $request->phone_number)->first();
 
             if (!$user || !Hash::check($request->password, $user->password)) {
