@@ -19,11 +19,13 @@ use App\Http\Controllers\Api\Shop\ShopListItemsController;
 |--------------------------------------------------------------------------
 */
 /*-- Shop --*/
+Route::get('test', fn() => response()->json('absc'));    
 Route::prefix('shop/')->group(function() {
     Route::post('register', [ShopAuthController::class, 'createShop']);                                     //[]
     Route::post('login',    [ShopAuthController::class, 'loginShop']);                                      //[V]
-
+    
     Route::middleware('auth:sanctum')->group(function () {
+        //Route::get('validate_token', [ShopAuthController::class, 'validateToken']); //[x]
         Route::post ('logout', [ShopAuthController::class, 'logoutShop']);                                  //[V]
 
         Route::post ('publish_item',            [ShopItemController::class, 'publishItem']);                //[V]
@@ -42,13 +44,13 @@ Route::prefix('shop/')->group(function() {
         Route::post('update_description',   [ShopProfileController::class, 'updateBio']);                   //[V]
         Route::post('update_location',      [ShopProfileController::class, 'updateLocation']);              //[V]
         
-        Route::post ('send_credit_to/{user_id}',    [ShopPaymentController::class, 'sendCredit']);          //[V]
-        Route::post ('recharge_my_account',         [ShopPaymentController::class, 'rechargeMyAccount']);   //[V]
-        Route::get  ('recharging_history',          [ShopPaymentController::class, 'rechargingHistory']);   //[V]
-        Route::get  ('credit_history',              [ShopPaymentController::class, 'creditHistory']);       //[V]
+        Route::post('send_credit_to',       [ShopPaymentController::class, 'sendCredit']);          //[V]
+        Route::post('recharge_my_account',  [ShopPaymentController::class, 'rechargeMyAccount']);   //[V]
+        Route::get ('recharging_history',   [ShopPaymentController::class, 'rechargingHistory']);   //[V]
+        Route::get ('credit_history',       [ShopPaymentController::class, 'creditHistory']);       //[V]
+        Route::post('verify_account',       [ShopPaymentController::class, 'verifyUser']);       //[V]
         
         //Route::post('verify_clients_payeer', [ShopPaymentController::class, '']); //[X]
-        //Route::get('validate_token', [ShopAuthController::class, 'validateToken']); //[x]
         //Route::get('payment_history', [ShopProfileController::class, 'paymentHistory']);
         //Route::get('my_products_offset/{category_name}/{start_id}', [ShopListItemsController::class, 'listMyProductsWithOffset']); //[X]
     });

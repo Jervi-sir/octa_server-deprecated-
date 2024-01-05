@@ -3,6 +3,7 @@
 use App\Models\ProductType;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 function getItem($item)
 {
@@ -141,3 +142,13 @@ function removeNullsFromStart($array) {
 
   return $newArray;
 }
+
+
+function saveSingleImage($base64Image) {
+  $imageName = uniqid() . '.png';
+  $imagePath = 'public/images/' . $imageName;
+  Storage::put($imagePath, base64_decode($base64Image));
+  $imagePath = env('API_URL') . '/storage/images/' . $imageName;
+  return $imagePath;
+}
+

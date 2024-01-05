@@ -11,16 +11,28 @@ use App\Models\PaymentTransaction;
 
 class ShopPaymentController extends Controller
 {
-    public function sendCredit(Request $request, $user_id)
+    public function sendCredit(Request $request)
     {
         $request->validate([
+            'phone_number' => 'required',
             'amount'   => 'required|numeric',
+            'username'   => 'required',
         ]);
         
         $data = $request->all();
         $user = auth()->user();
+
+        if($user->credit <= $data['amount']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You do not have enought Credit',
+            ], 404);
+        }
+        
+        $username = str_replace("@", "", $data['username']);
+
         $shop = $user->shop;
-        $taget_user = User::find($user_id);
+        $taget_user = User::where('username',$username)->first();
         $amount = floatval($data['amount']);
         
         $shop_credit = $user->credit;
@@ -54,17 +66,20 @@ class ShopPaymentController extends Controller
     {
         $request->validate([
             'proof_image'   => 'required',
-            'amount'        => 'nullable'
+            'shop_account_number'        => 'nullable'
         ]);
 
         $user = auth()->user();
         $shop = $user->shop;
-
+        $data = $request->all();
         $payment_transactions = new PaymentTransaction();
         $payment_transactions->shop_id = $shop->id;
-        $payment_transactions->amount = $data['amount'] ?? 0;
+
+        $image = base64_decode($data['shop_account_number']);
+
+        $payment_transactions->shop_account_number = $data['shop_account_number'] ?? 0;
         $payment_transactions->type = 'with proof image';
-        $payment_transactions->proof_image = $data['proof_image'] ?? null;
+        $payment_transactions->proof_image = saveSingleImage($data['proof_image']) ?? null;
         
         $payment_transactions->status = 'pending';
         $payment_transactions->save();
@@ -75,7 +90,6 @@ class ShopPaymentController extends Controller
         ]);
     }
     
-
     public function rechargingHistory(Request $request) 
     {
         $request->validate([
@@ -98,12 +112,18 @@ class ShopPaymentController extends Controller
                 'created_at' => $transaction->created_at,
             ];
         }
+        // Getting the next page number
+        $nextPage = null;
+        if ($payment_transactions->nextPageUrl()) {
+            $nextPage = $payment_transactions->currentPage() + 1;
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Transaction in process, please wait...',
             'pagination' => [
                 'total' => $payment_transactions->total(),
+                'next_page' => $nextPage,
                 'per_page' => $payment_transactions->perPage(),
                 'current_page' => $payment_transactions->currentPage(),
                 'last_page' => $payment_transactions->lastPage(),
@@ -144,11 +164,17 @@ class ShopPaymentController extends Controller
             ];
         }
 
+         // Getting the next page number
+        $nextPage = null;
+        if ($credit_transactions->nextPageUrl()) {
+            $nextPage = $credit_transactions->currentPage() + 1;
+        }
         return response()->json([
             'success' => true,
             'message' => 'Transaction in process, please wait...',
             'pagination' => [
                 'total' => $credit_transactions->total(),
+                'next_page' => $nextPage,
                 'per_page' => $credit_transactions->perPage(),
                 'current_page' => $credit_transactions->currentPage(),
                 'last_page' => $credit_transactions->lastPage(),
@@ -157,5 +183,27 @@ class ShopPaymentController extends Controller
             ],
             'transactions' => $data['credits']
         ]);
+    }
+
+    public function verifyUser(Request $request) 
+    {
+        $request->validate([
+            'phone_number'   => 'required',
+        ]);
+        try {
+            $phone_number = str_replace("@", "", $request->phone_number);
+            $user = User::where('phone_number', $phone_number)->firstOrFail();
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'User is Found',
+                'username' => $user->username 
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User is not Found',
+            ], 404);
+        }
     }
 }

@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained();
             $table->foreignId('shop_id')->constrained();
-            $table->double('amount');
+            $table->double('amount')->nullable();
+            $table->double('shop_account_number')->nullable();
             
             $table->string('type')->nullable(); //purchase, refund
             $table->string('proof_image')->nullable(); //sold, bought
