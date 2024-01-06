@@ -101,7 +101,7 @@ class ShopItemController extends Controller
             'stock' => $item->stock,
             'price' => $item->price,
             'product_type' => ProductType::find($item->product_type_id)->name,
-            'genders' => getGenderNames($item->genders),
+            'genders' => $item->genders,
             'images' => json_decode($item->images),
             'keywords' => $item->keywords,
             'isActive' => $item->isActive,
@@ -118,15 +118,12 @@ class ShopItemController extends Controller
     public function updateItem(Request $request, $item_id) {
 
         $request->validate([
-            'product_type_id'   => 'required|numeric',
-            'wilaya_number'     => 'nullable|string',
+            'product_type'   => 'required',
             'details'   => 'nullable|string',
             'name'      => 'nullable|string',
-            'sizes'     => 'nullable|string',
-            'stock'     => 'nullable|numeric',
             'price'     => 'nullable|numeric',
             'genders'   => 'nullable|string',
-            'images'    => 'required|string',
+            'base64Images'    => 'required',
         ]);
 
         $data = $request->all();
@@ -139,12 +136,30 @@ class ShopItemController extends Controller
         $item->user_id  = $user->id;
         $item->details  = $data['details']  ?? null; // Or you can set this as needed
         $item->name     = $data['name']     ?? 'Untitled';
-        $item->sizes    = $data['sizes']    ?? null; // default
-        $item->stock    = $data['stock']    ?? 1; // default
         $item->price    = $data['price']    ?? null;
         $item->genders  = $data['genders']  ?? null;
-        $item->images   = $data['images'];
-        $item->product_type_id =  $data['product_type_id']; // You'll need to map this to an actual ID
+        $item->images   = $data['base64Images'];
+        $item->product_type_id =  ProductType::where('name', 'like', $data['product_type'])->first()->id; // You'll need to map this to an actual ID
+        $item->product_type =  $data['product_type']; // You'll need to map this to an actual ID
+        
+        $imagePaths = [];
+        foreach ($data['base64Images'] as $base64Image) {
+            if ($base64Image !== null) {
+                // Check if the string is a URL
+                if (filter_var($base64Image, FILTER_VALIDATE_URL)) {
+                    $imagePaths[] = $base64Image;
+                } else {
+                    // Handle the base64 encoded image
+                    $imageName = uniqid() . '.png';
+                    $imagePath = 'public/images/' . $imageName;
+                    Storage::put($imagePath, base64_decode($base64Image));
+                    $imagePaths[] = env('API_URL') . '/storage/images/' . $imageName;
+                }
+            }
+        }
+        
+        $item->images = json_encode($imagePaths);
+
         $item->save();
 
         return response()->json([

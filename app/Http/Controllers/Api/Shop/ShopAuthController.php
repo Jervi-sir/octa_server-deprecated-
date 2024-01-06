@@ -87,7 +87,7 @@ class ShopAuthController extends Controller
                 'status' => true,
                 'message' => 'User Logged In Successfully',
                 'access_token' => $user->createToken($request->header('User-Agent'), ['role:shop'])->plainTextToken,
-                'shop_auth_info' => getShopAuthDetails($user->shop)
+                'shop_auth_info' => getShopAuthDetails($user)
             ], 200);
 
         } catch (\Throwable $th) {

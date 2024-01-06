@@ -90,19 +90,24 @@ function getGenderNames($data) {
 
 
 // Define mapping 
-function getShopAuthDetails($shop) {
+function getShopAuthDetails($user) {
+  $shop = $user->shop;
   return [
-    'username' => $shop->shop_name,
-    'profile_picture' => $shop->shop_image,
-    'social_media' => $shop->contacts,
-    'credit' => 1500,
     'phone_number' => $shop->phone_number,
     'email' => $shop->email,
-    'bio' => $shop->details,
+    'credit' => $user->credit,
+    'shop_name' => $shop->shop_name,
+    'shop_image' => $shop->shop_image,
+    'details' => $shop->details,
+    'contacts' => $user->contacts,
     'location' => $shop->location,
     'map_location' => $shop->map_location,
     'nb_followers' => $shop->nb_followers,
-    'nb_likes' => $shop->nb_likes,
+    'threeD_model' => $shop->threeD_model,
+    'wilaya_name' => $shop->wilaya_name,
+    'wilaya_id' => $shop->wilaya_id,
+    'user_id' => $shop->user_id,
+    'created_at' => $shop->created_at,
   ];
 }
 

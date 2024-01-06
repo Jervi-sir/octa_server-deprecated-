@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Shop;
 use App\Models\Shop;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Models\Wilaya;
 use Illuminate\Support\Facades\Storage;
 
 class ShopProfileController extends Controller
@@ -45,7 +47,8 @@ class ShopProfileController extends Controller
         
         $data = $request->all();
 
-        $shop= auth()->user()->shop;
+        $user= auth()->user();
+        $shop= $user->shop;
         $shop->shop_name = $data['shop_name'];
         if ($data['base64_image'] !== null) {
             $imagePath = 'public/images/' . uniqid() . '.png';
@@ -54,9 +57,11 @@ class ShopProfileController extends Controller
         }
         $shop->save();
 
+        $newest_user = User::find($user->id);
+
         return response()->json([
             'success' => true,
-            'shop_auth_info' => getShopAuthDetails($shop)
+            'shop_auth_info' => getShopAuthDetails($newest_user)
         ]);
 
     }
@@ -64,18 +69,21 @@ class ShopProfileController extends Controller
     public function updateBio(Request $request) {
 
         $request->validate([
-            'description'   => 'required',
+            'details'   => 'required',
         ]);
 
         $data = $request->all();
 
-        $shop = auth()->user()->shop;
-        $shop->details = $data['description'];
+        $user = auth()->user();
+        $shop = $user->shop;
+        $shop->details = $data['details'];
         $shop->save();
+
+        $newest_user = User::find($user->id);
 
         return response()->json([
             'success' => true,
-            'shop_auth_info' => getShopAuthDetails($shop)
+            'shop_auth_info' => getShopAuthDetails($newest_user)
         ]);
 
     }
@@ -87,16 +95,14 @@ class ShopProfileController extends Controller
 
         $data = $request->all();
 
-        $shop_edit = auth()->user()->shop;
-        $shop_edit->contacts = $data['social_media_list'];
-        
-        $shop_edit->save();
-
+        $user = auth()->user();
+        $user->contacts = json_encode($data['social_media_list']);
+        $user->save();
 
         return response()->json([
             'status' => 'success', 
             'message' => 'Token is valid',
-            'shop_auth_info' => $data['socialMediaList']
+            'shop_auth_info' => getShopAuthDetails($user)
         ]);
     }
 
@@ -104,19 +110,24 @@ class ShopProfileController extends Controller
 
         $request->validate([
             'location'   => 'required',
+            'wilaya_id'   => 'required',
         ]);
-
 
         $data = $request->all();
 
-        $shop = auth()->user()->shop;
+        $user = auth()->user();
+        $shop = $user->shop;
         $shop->location = $data['location'];
+        $shop->wilaya_id = $data['wilaya_id'];
+        $shop->wilaya_name = Wilaya::where('code', $data['wilaya_id'])->first()->name;
         
         $shop->save();
 
+        $newest_user = User::find($user->id);
+
         return response()->json([
             'success' => true,
-            'shop_auth_info' => getShopAuthDetails($shop)
+            'shop_auth_info' => getShopAuthDetails($newest_user)
         ]);
 
     }

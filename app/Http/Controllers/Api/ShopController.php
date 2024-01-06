@@ -29,7 +29,7 @@ class ShopController extends Controller
         'shop_name' => $shop->shop_name,
         'shop_image' => $shop->shop_image,
         'details' => $shop->details,
-        'contacts' => $shop->contacts,
+        'contacts' => $user->contacts,
         'location' => $shop->location,
         'map_location' => $shop->map_location,
         'nb_followers' => $shop->nb_followers,

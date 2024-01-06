@@ -30,7 +30,7 @@ class ShopListItemsController extends Controller
             $data['products'][$index] = [
                 'id' => $product->id,
                 'name' => $product->name,
-                'thumbnail' => $product->images,
+                'thumbnail' => !empty($product->images) ? json_decode($product->images)[0] : null, // or provide a default image URL
                 'price' => $product->price,
                 'product_type_id' => $product->product_type_id,
                 'is_expired' => checkIfItemIsExpired($product->last_reposted),
@@ -39,9 +39,15 @@ class ShopListItemsController extends Controller
             ];
         }
 
+        // Getting the next page number
+        $nextPage = null;
+        if ($products->nextPageUrl()) {
+            $nextPage = $products->currentPage() + 1;
+        }
         return response()->json([
             'pagination' => [
                 'total' => $products->total(),
+                'next_page' => $nextPage,
                 'per_page' => $products->perPage(),
                 'current_page' => $products->currentPage(),
                 'last_page' => $products->lastPage(),
@@ -54,7 +60,7 @@ class ShopListItemsController extends Controller
     }
 
     public function listMyProductsWithOffset($category_name, $start_id = null) {
-        $shop = auth()->user();
+        $shop = auth()->user()->shop;
         $category_id = ProductType::where('name', 'like', $category_name)->first()->id;
         
         $products = $shop->items()->where('product_type_id', $category_id)->where('id', '<=', $start_id)->orderBy('id', 'desc')->paginate(7);
@@ -70,7 +76,7 @@ class ShopListItemsController extends Controller
             $data['products'][$index] = [
                 'id' => $product->id,
                 'name' => $product->name,
-                'thumbnail' => json_decode($product->images),
+                'thumbnail' => $selected_image,
                 'price' => $product->price,
                 'product_type_id' => $product->product_type_id,
                 'current_page' => $currentPage,  // Include the current page for each product
@@ -80,10 +86,16 @@ class ShopListItemsController extends Controller
             ];
         }
     
+        // Getting the next page number
+        $nextPage = null;
+        if ($products->nextPageUrl()) {
+            $nextPage = $products->currentPage() + 1;
+        }
         return response()->json([
             'products' => $data['products'],
             'pagination' => [
                 'total' => $products->total(),
+                'next_page' => $nextPage,
                 'per_page' => $products->perPage(),
                 'current_page' => $products->currentPage(),
                 'last_page' => $products->lastPage(),

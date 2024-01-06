@@ -21,8 +21,8 @@ use App\Http\Controllers\Api\Shop\ShopListItemsController;
 /*-- Shop --*/
 Route::get('test', fn() => response()->json('absc'));    
 Route::prefix('shop/')->group(function() {
-    Route::post('register', [ShopAuthController::class, 'createShop']);                                     //[]
-    Route::post('login',    [ShopAuthController::class, 'loginShop']);                                      //[V]
+    Route::post ('register', [ShopAuthController::class, 'createShop']);                                     //[]
+    Route::post ('login',    [ShopAuthController::class, 'loginShop']);                                      //[V]
     
     Route::middleware('auth:sanctum')->group(function () {
         //Route::get('validate_token', [ShopAuthController::class, 'validateToken']); //[x]
@@ -31,24 +31,25 @@ Route::prefix('shop/')->group(function() {
         Route::post ('publish_item',            [ShopItemController::class, 'publishItem']);                //[V]
         Route::get  ('edit_item/{item_id}',     [ShopItemController::class, 'editItem']);                   //[V]
         Route::post ('update_item/{item_id}',   [ShopItemController::class, 'updateItem']);                 //[V]
-        Route::delete('delete_item/{item_id}',  [ShopItemController::class, 'deleteItem']);                 //[V]
+        Route::post ('delete_item/{item_id}',   [ShopItemController::class, 'deleteItem']);                 //[V]
         
         Route::get  ('my_store',                    [ShopController::class,         'myStoreInfo']);        //[V]
         Route::get  ('show_my_followers',           [ShopController::class,         'showMyFollowers']);    //[V]
         Route::get  ('my_products/{category_name}', [ShopListItemsController::class,'listMyProducts']);     //[V]
+        Route::get  ('my_products_offset/{category_name}/{start_id}', [ShopListItemsController::class, 'listMyProductsWithOffset']); //[X]
         Route::get  ('show_product/{product_id}',   [ShopListItemsController::class,'']);                   //[ ]
         Route::post ('repost',                      [ShopItemController::class,     'repostItem']);         //[V]
         
-        Route::post('update_pic_name',      [ShopProfileController::class, 'updatePic_Name']);              //[V]
-        Route::post('update_socials',       [ShopProfileController::class, 'updateSocialList']);            //[V]
-        Route::post('update_description',   [ShopProfileController::class, 'updateBio']);                   //[V]
-        Route::post('update_location',      [ShopProfileController::class, 'updateLocation']);              //[V]
+        Route::post ('update_pic_name',      [ShopProfileController::class, 'updatePic_Name']);              //[V]
+        Route::post ('update_socials',       [ShopProfileController::class, 'updateSocialList']);            //[V]
+        Route::post ('update_description',   [ShopProfileController::class, 'updateBio']);                   //[V]
+        Route::post ('update_location',      [ShopProfileController::class, 'updateLocation']);              //[V]
         
-        Route::post('send_credit_to',       [ShopPaymentController::class, 'sendCredit']);          //[V]
-        Route::post('recharge_my_account',  [ShopPaymentController::class, 'rechargeMyAccount']);   //[V]
-        Route::get ('recharging_history',   [ShopPaymentController::class, 'rechargingHistory']);   //[V]
-        Route::get ('credit_history',       [ShopPaymentController::class, 'creditHistory']);       //[V]
-        Route::post('verify_account',       [ShopPaymentController::class, 'verifyUser']);       //[V]
+        Route::post ('send_credit_to',       [ShopPaymentController::class, 'sendCredit']);          //[V]
+        Route::post ('recharge_my_account',  [ShopPaymentController::class, 'rechargeMyAccount']);   //[V]
+        Route::get  ('recharging_history',   [ShopPaymentController::class, 'rechargingHistory']);   //[V]
+        Route::get  ('credit_history',       [ShopPaymentController::class, 'creditHistory']);       //[V]
+        Route::post ('verify_account',       [ShopPaymentController::class, 'verifyUser']);       //[V]
         
         //Route::post('verify_clients_payeer', [ShopPaymentController::class, '']); //[X]
         //Route::get('payment_history', [ShopProfileController::class, 'paymentHistory']);
