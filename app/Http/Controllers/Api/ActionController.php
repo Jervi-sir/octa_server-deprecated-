@@ -162,7 +162,6 @@ class ActionController extends Controller
 
         $data = $request->all();
         $auth = auth()->user();
-
         
         $followings = $auth->usersfollowers()->orderBy('id', 'desc')->paginate(7);
         
@@ -194,6 +193,9 @@ class ActionController extends Controller
         $request->validate([
             'page'   => 'nullable',
         ]);
+
+        $data = $request->all();
+        $auth = auth()->user();
 
         
     }

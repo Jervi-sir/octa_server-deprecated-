@@ -12,7 +12,7 @@ use App\Http\Controllers\Api\Shop\ShopItemController;
 use App\Http\Controllers\Api\Shop\ShopPaymentController;
 use App\Http\Controllers\Api\Shop\ShopProfileController;
 use App\Http\Controllers\Api\Shop\ShopListItemsController;
-use App\Http\Controllers\FriendRequestController;
+use App\Http\Controllers\Api\FriendRequestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -85,10 +85,11 @@ Route::prefix('auth/')->group(function() {
         Route::get ('suggest_friend_to_share_with',  [ActionController::class,  'suggestFriendToShareWith']);     //[ ]
     
         //Friends side
-        Route::post('/friend-request/send', [FriendRequestController::class, 'sendRequest']);
-        Route::post('/friend-request/accept/{requestId}', [FriendRequestController::class, 'acceptRequest']);
-        Route::get('/friend-requests/received', [FriendRequestController::class, 'showReceivedRequests']);
-        Route::get('/friend-requests/sent', [FriendRequestController::class, 'showSentRequests']);
+        Route::post('/friend-request/send', [FriendRequestController::class, 'sendRequest']);       //[V]
+        Route::post('/friend-request/accept', [FriendRequestController::class, 'acceptRequest']);
+        Route::get('/friend-requests/received', [FriendRequestController::class, 'showReceivedRequests']);   //[V]
+        Route::get('/friend-requests/sent', [FriendRequestController::class, 'showSentRequests']);  //[V]
+        Route::get('/friend-list', [FriendRequestController::class, 'showFriendList']);     //[V]
         
     });
 }); 

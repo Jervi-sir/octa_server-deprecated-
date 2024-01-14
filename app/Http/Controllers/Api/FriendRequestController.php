@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\Friend;
 use App\Models\FriendRequest;
 use Illuminate\Http\Request;
@@ -11,6 +12,10 @@ class FriendRequestController extends Controller
 {
     public function sendRequest(Request $request)
     {
+        $request->validate([
+            'receiver_id'   => 'required',
+        ]);
+
         $receiverId = $request->receiver_id;
 
         // Prevent sending a request to oneself
@@ -32,12 +37,13 @@ class FriendRequestController extends Controller
         return response()->json($friendRequest, 201);
     }
 
-    /**
-     * Accept a friend request.
-     */
-    public function acceptRequest($requestId)
+    public function acceptRequest(Request $request)
     {
-        $friendRequest = FriendRequest::find($requestId);
+        $request->validate([
+            'request_id'   => 'required',
+        ]);
+        
+        $friendRequest = FriendRequest::find($request->request_id);
 
         // Check if request exists and is meant for the authenticated user
         if (!$friendRequest || $friendRequest->receiver_id !== Auth::id()) {
@@ -56,22 +62,37 @@ class FriendRequestController extends Controller
         return response()->json(['message' => 'Friend request accepted.']);
     }
 
-    /**
-     * Show all received friend requests.
-     */
-    public function showReceivedRequests()
+    public function showReceivedRequests(Request $request)
     {
-        $requests = FriendRequest::where('receiver_id', Auth::id())->get();
+        $request->validate([
+            'page'   => 'nullable',
+        ]);
+
+        $requests = FriendRequest::where('receiver_id', Auth::id())->paginate(7);
         return response()->json($requests);
     }
 
-    /**
-     * Show all sent friend requests.
-     */
-    public function showSentRequests()
+    public function showSentRequests(Request $request)
     {
-        $requests = FriendRequest::where('sender_id', Auth::id())->get();
+        $request->validate([
+            'page'   => 'nullable',
+        ]);
+
+        $requests = FriendRequest::where('sender_id', Auth::id())->paginate(7);
         return response()->json($requests);
     }
 
+    public function showFriendList(Request $request)
+    {
+        $request->validate([
+            'page'   => 'nullable',
+        ]);
+
+        $auth = auth()->user();
+        $friends = $auth->friends();
+
+        return response()->json([
+            'friends' => $friends
+        ]);
+    }
 }
