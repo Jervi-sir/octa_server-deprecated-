@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Shop\ShopItemController;
 use App\Http\Controllers\Api\Shop\ShopPaymentController;
 use App\Http\Controllers\Api\Shop\ShopProfileController;
 use App\Http\Controllers\Api\Shop\ShopListItemsController;
+use App\Http\Controllers\FriendRequestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,6 +79,17 @@ Route::prefix('auth/')->group(function() {
         Route::get  ('get_saved_items', [ActionController::class,  'getSavedItems']); //[V]          //[]
         Route::post ('save_item',       [ActionController::class,  'saveItem']);     //[V]
         Route::post ('un_save_item',    [ActionController::class,  'unSaveItem']);   //[V]
+
+        //Shares side
+        Route::post ('share_item',  [ActionController::class,  'shareItem']);     //[ ]
+        Route::get ('suggest_friend_to_share_with',  [ActionController::class,  'suggestFriendToShareWith']);     //[ ]
+    
+        //Friends side
+        Route::post('/friend-request/send', [FriendRequestController::class, 'sendRequest']);
+        Route::post('/friend-request/accept/{requestId}', [FriendRequestController::class, 'acceptRequest']);
+        Route::get('/friend-requests/received', [FriendRequestController::class, 'showReceivedRequests']);
+        Route::get('/friend-requests/sent', [FriendRequestController::class, 'showSentRequests']);
+        
     });
 }); 
 
