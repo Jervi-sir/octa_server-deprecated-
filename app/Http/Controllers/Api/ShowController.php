@@ -27,17 +27,24 @@ class ShowController extends Controller
             foreach ($items as $index => $item) {
                 $data['items'][$index] = getItem($item);
             }
+            
+            $nextPage = null;
+            if ($items->nextPageUrl()) {
+                $nextPage = $items->currentPage() + 1;
+            }
+            
             return response()->json([
                 //'user_status' => auth()->user() ? 'You are authenticated' : 'You are NOT authenticated',
-                'shop' => $data['shop'],
-                'pagination' => [
-                    'total' => $items->total(),
+                //'shop' => $data['shop'],
+                'total' => $items->total(),
+                'next_page' => $nextPage,
+                /*'pagination' => [
                     'per_page' => $items->perPage(),
                     'current_page' => $items->currentPage(),
                     'last_page' => $items->lastPage(),
                     'from' => $items->firstItem(),
                     'to' => $items->lastItem(),
-                ],
+                ],*/
                 'items' => $data['items'],
             ], 200);
         }

@@ -63,9 +63,10 @@ class ShopAuthController extends Controller
 
         try {
             $validateUser = Validator::make($request->all(), [
-                'phone_number' => 'required',
+                'username' => 'required',
                 'password' => 'required'
             ]);
+           
             if($validateUser->fails()){
                 return response()->json([
                     'status' => false,
@@ -74,20 +75,20 @@ class ShopAuthController extends Controller
                 ], 401);
             }
 
-            $user = User::where('phone_number', $request->phone_number)->first();
-
-            if (!$user || !Hash::check($request->password, $user->password)) {
+            $shop = Shop::where('username', $request->username)->first();
+            
+            if (!$shop || !Hash::check($request->password, $shop->password)) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Auth Error',
                 ], 500);
             }
-
+          
             return response()->json([
                 'status' => true,
                 'message' => 'User Logged In Successfully',
-                'access_token' => $user->createToken($request->header('User-Agent'), ['role:shop'])->plainTextToken,
-                'shop_auth_info' => getShopAuthDetails($user)
+                'access_token' => $shop->createToken($request->header('User-Agent'), ['auth:shops'])->plainTextToken,
+                'shop_auth_info' => getShopAuthDetails($shop)
             ], 200);
 
         } catch (\Throwable $th) {

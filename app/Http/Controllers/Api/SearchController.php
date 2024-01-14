@@ -29,23 +29,49 @@ class SearchController extends Controller
         ], 200);
     }
 
-    public function suggestShop()
+    public function searchShop(Request $request)
     {
+        $request->validate([
+            'keywords'   => 'nullable',
+            'wilaya_code'   => 'nullable',
+        ]);
+
         $auth = auth()->user();
-        $shops = Shop::inRandomOrder()->paginate(10);
+
+        $data = $request->all();
+        $keyword_array = !empty($data['keywords']) ? explode(",", $data['keywords']) : [];
+        $shops = Shop::query();
+        
+        if (!empty($keyword_array)) {
+            $shops = $shops->where(function ($query) use ($keyword_array) {
+                foreach ($keyword_array as $keyword) {
+                    if ($keyword) {
+                        // Search in both bio and username
+                        $query->where('bio', 'like', '%' . $keyword . '%')
+                              ->orWhere('shop_name', 'like', '%' . $keyword . '%');
+                    }
+                }
+            });
+        }
+        if(!empty($data['wilaya_code'])) {
+            $shops = $shops->where('wilaya_code', $data['wilaya_code']);
+        }
+        $shops = $shops->orderBy('id', 'DESC')->paginate(10);
+    
+        $data['shops'] = [];
+        
         foreach ($shops as $index => $shop) {
-            $data['shops'][$index] = [
-                'id' => $shop->id,
-                'shop_name' => $shop->shop_name,
-                'shop_image' => $shop->shop_image,
-                //'shop_image' => imageUrl('shops', $shop->shop_image),
-                'map_location' => $shop->map_location,
-            ];
+            $data['shops'][$index] = getShop($shop);
+        }
+
+        $nextPage = null;
+        if ($shops->nextPageUrl()) {
+            $nextPage = $shops->currentPage() + 1;
         }
 
         return response()->json([
             'user_status' => $auth ? 'You are authenticated' : 'You are NOT authenticated',
-            'next' => $shops->nextPageUrl(),
+            'next_page' => $nextPage,
             'shops' => $data['shops'],
         ], 200);
     }
@@ -54,26 +80,62 @@ class SearchController extends Controller
     {
         $request->validate([
             'keywords'   => 'nullable',
+            'category_name'   => 'nullable',
+            'gender_name'   => 'nullable',
+            'wilaya_code'   => 'nullable',
         ]);
 
         $auth = auth()->user();
-        $data = $request->all();
-        $keyword_array = explode(",", $data['keywords']);
-        $items = Item::where(function ($query) use ($keyword_array) {
-            foreach ($keyword_array as $keyword) {
-                $query->where('keywords', 'like', '%' . $keyword . '%');
-            }
-        })->paginate(10);
 
+        $data = $request->all();
+        $keyword_array = !empty($data['keywords']) ? explode(",", $data['keywords']) : [];
+
+        $items = Item::query();
+    
+        // Only apply keyword filtering if keywords are provided
+        if (!empty($keyword_array)) {
+            $items = $items->where(function ($query) use ($keyword_array) {
+                foreach ($keyword_array as $keyword) {
+                    if ($keyword) {
+                        $query->where('keywords', 'like', '%' . $keyword . '%');
+                    }
+                }
+            });
+        }
+
+        if (!empty($data['category_name'])) {
+            $category_id = ProductType::where('name', 'like', '%' . $data['category_name'] . '%')->first()->id;
+            $items = $items->where('product_type_id', $category_id);
+        }
+
+        if (!empty($data['gender_name'])) {
+            if(strtolower($data['gender_name']) != 'all')
+            $items = $items->where('genders', 'like', '%' . $data['gender_name'] . '%');
+        }
+    
+        if (!empty($data['wilaya_code'])) {
+            // Assuming you have a way to relate items with wilaya_code
+            $items = $items->where('wilaya_code', $data['wilaya_code']);
+        }
+
+        $items = $items->orderBy('id', 'DESC')->paginate(10);
+        
+        $data['items'] = [];
         foreach ($items as $index => $item) {
             $data['items'][$index] = getItem($item);
+        }
+
+        $nextPage = null;
+        if ($items->nextPageUrl()) {
+            $nextPage = $items->currentPage() + 1;
         }
 
         return response()->json([
             'user_status' => $auth ? 'You are authenticated' : 'You are NOT authenticated',
             'next_url' => $items->nextPageUrl(),
+            'next_page' => $nextPage,
             'last' => $items->lastPage(),
-            'shops' => $data['items'],
+            'items' => $data['items'],
         ], 200);
     }
 

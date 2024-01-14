@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('uuid')->unique()->nullable()->after('id');
+        Schema::create('collection_playlists', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('collection_folder_id')->constrained();
+            $table->foreignId('shop_id')->constrained();
+
+            $table->timestamps();
         });
     }
 
@@ -21,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('uuid');
-        });
+        Schema::dropIfExists('collection_playlists');
     }
 };

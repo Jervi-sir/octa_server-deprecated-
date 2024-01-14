@@ -189,4 +189,13 @@ class ActionController extends Controller
         ]);
     }
 
+    public function suggestFriendToShareWith(Request $request)
+    {
+        $request->validate([
+            'page'   => 'nullable',
+        ]);
+
+        
+    }
+
 }

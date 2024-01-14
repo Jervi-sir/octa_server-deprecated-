@@ -47,8 +47,7 @@ class ShopProfileController extends Controller
         
         $data = $request->all();
 
-        $user= auth()->user();
-        $shop= $user->shop;
+        $shop= auth()->user();
         $shop->shop_name = $data['shop_name'];
         if ($data['base64_image'] !== null) {
             $imagePath = 'public/images/' . uniqid() . '.png';
@@ -57,11 +56,11 @@ class ShopProfileController extends Controller
         }
         $shop->save();
 
-        $newest_user = User::find($user->id);
+        //$newest_user = User::find($user->id);
 
         return response()->json([
             'success' => true,
-            'shop_auth_info' => getShopAuthDetails($newest_user)
+            'shop_auth_info' => getShopAuthDetails($shop)
         ]);
 
     }
@@ -74,16 +73,13 @@ class ShopProfileController extends Controller
 
         $data = $request->all();
 
-        $user = auth()->user();
-        $shop = $user->shop;
-        $shop->details = $data['details'];
+        $shop = auth()->user();
+        $shop->bio = $data['details'];
         $shop->save();
-
-        $newest_user = User::find($user->id);
 
         return response()->json([
             'success' => true,
-            'shop_auth_info' => getShopAuthDetails($newest_user)
+            'shop_auth_info' => getShopAuthDetails($shop)
         ]);
 
     }
@@ -115,19 +111,17 @@ class ShopProfileController extends Controller
 
         $data = $request->all();
 
-        $user = auth()->user();
-        $shop = $user->shop;
-        $shop->location = $data['location'];
-        $shop->wilaya_id = $data['wilaya_id'];
+        $shop = auth()->user();
+        $shop->map_location = $data['location'];
+        $shop->wilaya_code = $data['wilaya_id'];
         $shop->wilaya_name = Wilaya::where('code', $data['wilaya_id'])->first()->name;
         
         $shop->save();
 
-        $newest_user = User::find($user->id);
 
         return response()->json([
             'success' => true,
-            'shop_auth_info' => getShopAuthDetails($newest_user)
+            'shop_auth_info' => getShopAuthDetails($shop)
         ]);
 
     }

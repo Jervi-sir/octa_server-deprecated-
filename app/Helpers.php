@@ -11,7 +11,9 @@ function getItem($item)
   $result = [
     'id' => $item->id,
     'shop_id' => $item->shop_id,
+    'shop_name' => $item->shop->shop_name,
     'shop_image' => $item->shop->shop_image,
+    'map_location' => $item->shop->map_location,
     //'shop_image' => imageUrl('shops', $item->shop->shop_image),
     'name' => $item->name,
     'details' => $item->details,
@@ -23,6 +25,7 @@ function getItem($item)
     'genders' => $item->genders,
     'search' => $item->keywords,
     'images' => json_decode($item->images),
+    'wilaya_code' => ($item->wilaya_code),
     //'images' => imageToArray($item->images->pluck('url')->toArray()),
     'isSaved' => $auth ? $item->savedByUsers->contains($auth->id) : null,
   ];
@@ -31,16 +34,21 @@ function getItem($item)
 
 function getShop($shop)
 {
+  $auth = auth()->user();
   $result = [
+    'id' => $shop->id,
     'shop_name' => $shop->shop_name,
-    'shop_image' => imageUrl('shops', $shop->shop_image),
+    //'shop_image' => imageUrl('shops', $shop->shop_image),
+    'shop_image' => $shop->shop_image,
     'details' => $shop->details,
     'contacts' => json_decode($shop->contacts),
-    'location' => $shop->location,
+    //'location' => $shop->location,
     'map_location' => $shop->map_location,
     'nb_followers' => $shop->nb_followers,
     'nb_likes' => $shop->nb_likes,
     'wilaya_name' => $shop->wilaya_name,
+    'wilaya_code' => $shop->wilaya_code,
+    'isFollowed' => $auth ? $shop->followedByUser->contains($auth->id) : null,
   ];
 
   return $result;
@@ -90,24 +98,21 @@ function getGenderNames($data) {
 
 
 // Define mapping 
-function getShopAuthDetails($user) {
-  $shop = $user->shop;
+function getShopAuthDetails($shop) {
   return [
+    'username' => $shop->username,
     'phone_number' => $shop->phone_number,
-    'email' => $shop->email,
-    'credit' => $user->credit,
     'shop_name' => $shop->shop_name,
     'shop_image' => $shop->shop_image,
-    'details' => $shop->details,
-    'contacts' => $user->contacts,
-    'location' => $shop->location,
+    'bio' => $shop->bio,
+    'contacts' => $shop->contacts,
     'map_location' => $shop->map_location,
     'nb_followers' => $shop->nb_followers,
-    'threeD_model' => $shop->threeD_model,
+    'nb_likes' => $shop->nb_likes,
     'wilaya_name' => $shop->wilaya_name,
-    'wilaya_id' => $shop->wilaya_id,
-    'user_id' => $shop->user_id,
+    'wilaya_code' => $shop->wilaya_code,
     'created_at' => $shop->created_at,
+    'total_items' => $shop->items->count(),
   ];
 }
 

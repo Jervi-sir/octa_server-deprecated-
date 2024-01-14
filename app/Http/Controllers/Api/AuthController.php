@@ -12,13 +12,10 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    public function createUser(Request $request) {
-        
+    public function semiCreateUser(Request $request) {
         try {
-            //Validated
             $validateUser = Validator::make($request->all(), 
             [
-                'name' => 'required',
                 'phone_number' => 'required|unique:users,phone_number',
                 'password' => 'required'
             ]);
@@ -32,8 +29,7 @@ class AuthController extends Controller
             }
 
             $user = new User();
-            $user->role_id = Role::where('role_name', 'user')->first()->id;
-            $user->name = $request->name;
+            //$user->role_id = Role::where('role_name', 'user')->first()->id;
             $user->phone_number = $request->phone_number;
             $user->password = Hash::make($request->password);
             $user->password_plainText = ($request->password);
@@ -43,7 +39,43 @@ class AuthController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'User Created Successfully',
-                'token' => $user->createToken($request->header('User-Agent'))->plainTextToken
+                'access_token' => $user->createToken($request->header('User-Agent'))->plainTextToken
+            ], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function completeCreateUser(Request $request) {
+        try {
+            $validateUser = Validator::make($request->all(), 
+            [
+                'wilaya_code' => 'nullable',
+                'username' => 'required|unique:users,username',
+            ]);
+
+
+            if($validateUser->fails()){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'validation error',
+                    'errors' => $validateUser->errors()
+                ], 401);
+            }
+            $user = auth()->user();
+            //$user->role_id = Role::where('role_name', 'user')->first()->id;
+            $user->username = $request->username;
+            $user->wilaya_code = $request->wilaya_code;
+            $user->save();
+            
+            return response()->json([
+                'status' => true,
+                'message' => 'User Created Successfully',
+                'user' => $user,
             ], 200);
 
         } catch (\Throwable $th) {

@@ -38,21 +38,15 @@ class ItemFactory extends Factory
 
         return [
             'shop_id' => $shop->id,
-            'user_id' => $user->id,
-            'wilaya_id' => $wilaya->id,
             'product_type_id' => $product_type->id,
-
-            'details' => $details,
-            'name' => $name,
-            'sizes' => $sizes,
-            'stock' => $this->faker->numberBetween(1, 100),
-            'price' => $this->faker->randomFloat(2, 5, 100),
             'product_type' => $product_type->name,
 
-            'genders' => $gender_name,
-            
-            'images' => json_encode([$this->faker->imageUrl(480, 480), $this->faker->imageUrl(480, 480), $this->faker->imageUrl(480, 480)]),
+            'name' => $name,
+            'details' => $details,
+            'price' => $this->faker->randomFloat(2, 5, 100),
 
+            'genders' => $gender_name,
+            'images' => json_encode([$this->faker->imageUrl(480, 480), $this->faker->imageUrl(480, 480), $this->faker->imageUrl(480, 480)]),
             'keywords' => $item_type_name . ', ' .
                 $shop->name . ', ' .
                 $gender_name . ', ' .
@@ -60,6 +54,7 @@ class ItemFactory extends Factory
                 $name . ', ' .
                 $details,
                
+            'wilaya_code' => $wilaya->code,
             'isActive' => $this->faker->numberBetween(0, 1),
             'last_reposted' => Carbon::now(),
         ];

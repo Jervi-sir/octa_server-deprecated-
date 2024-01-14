@@ -13,26 +13,25 @@ return new class extends Migration
     {
         Schema::create('shops', function (Blueprint $table) {
             $table->id();
-            $table->string('phone_number')->unique();
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->string('username')->unique();     //for login
+            $table->string('phone_number');
+            $table->timestamp('phone_number_verified_at')->nullable();
             $table->string('password');
             $table->string('password_plainText');
             
             $table->string('shop_name');
             $table->string('shop_image')->nullable();
-            $table->mediumText('details')->nullable();
+            $table->mediumText('bio')->nullable();
             $table->text('contacts')->default('[]');
-            $table->mediumText('location')->nullable();
+
+            $table->integer('wilaya_code')->nullable();
+            $table->string('wilaya_name')->nullable();
             $table->mediumText('map_location')->nullable();
+
             $table->integer('nb_followers')->default(0);
             $table->integer('nb_likes')->default(0);
-            
-            $table->mediumText('threeD_model')->nullable();
-            $table->string('wilaya_name')->nullable();
 
-            $table->foreignId('wilaya_id')->constrained();
-            $table->foreignId('user_id')->constrained();
+            $table->string('wilaya_created_at')->nullable();
 
             $table->rememberToken();
             $table->timestamps();

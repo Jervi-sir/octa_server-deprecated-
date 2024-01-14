@@ -14,22 +14,22 @@ return new class extends Migration
         Schema::create('items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('shop_id')->constrained();
-            $table->foreignId('user_id')->nullable()->constrained();
-            $table->foreignId('wilaya_id')->nullable()->constrained();
             $table->foreignId('product_type_id')->nullable()->constrained();
-
-            $table->mediumText('details')->nullable();
-            $table->string('name');
-            $table->mediumText('sizes')->nullable();
-            $table->integer('stock')->default(1);
-            $table->string('price')->nullable();
             $table->string('product_type')->nullable();
 
-            $table->string('genders')->nullable(); //_male, _female, _male/_female
+            $table->string('name');
+            $table->mediumText('details')->nullable();
+            $table->string('price')->nullable();
+
+            $table->string('genders')->nullable(); //male, female, male,female
             $table->longText('images')->nullable();
             $table->longText('keywords')->nullable();
+
             $table->integer('isActive')->default(1);
-            $table->dateTime('last_reposted')->nullable();
+            $table->dateTime('last_reposted')->nullable();      //fill it with created_at also
+            
+            $table->string('wilaya_code')->nullable();
+
             $table->timestamps();
         });
     }

@@ -19,24 +19,22 @@ class ShopController extends Controller
 {
     public function myStoreInfo(Request $request)
     {
-      $user = auth()->user();
-      $shop = $user->shop;
+      $shop = auth()->user();
 
       $data['shop'] = [
+        'username' => $shop->username,
         'phone_number' => $shop->phone_number,
-        'email' => $shop->email,
-        'credit' => $user->credit,
         'shop_name' => $shop->shop_name,
         'shop_image' => $shop->shop_image,
-        'details' => $shop->details,
-        'contacts' => $user->contacts,
-        'location' => $shop->location,
+        'bio' => $shop->bio,
+        'contacts' => $shop->contacts,
+        'wilaya_code' => $shop->wilaya_code,
+        'wilaya_name' => $shop->wilaya_name,
         'map_location' => $shop->map_location,
         'nb_followers' => $shop->nb_followers,
-        'threeD_model' => $shop->threeD_model,
-        'wilaya_name' => $shop->wilaya_name,
-        'wilaya_id' => $shop->wilaya_id,
-        'user_id' => $shop->user_id,
+        'nb_likes' => $shop->nb_likes,
+        'total_items' => $shop->items->count(),
+
         'created_at' => $shop->created_at,
       ];
 

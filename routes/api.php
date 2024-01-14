@@ -21,10 +21,10 @@ use App\Http\Controllers\Api\Shop\ShopListItemsController;
 /*-- Shop --*/
 Route::get('test', fn() => response()->json('absc'));    
 Route::prefix('shop/')->group(function() {
-    Route::post ('register', [ShopAuthController::class, 'createShop']);                                     //[]
+    //Route::post ('register', [ShopAuthController::class, 'createShop']);                                     //[]
     Route::post ('login',    [ShopAuthController::class, 'loginShop']);                                      //[V]
     
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:shops'])->group(function () {
         //Route::get('validate_token', [ShopAuthController::class, 'validateToken']); //[x]
         Route::post ('logout', [ShopAuthController::class, 'logoutShop']);                                  //[V]
 
@@ -36,7 +36,6 @@ Route::prefix('shop/')->group(function() {
         Route::get  ('my_store',                    [ShopController::class,         'myStoreInfo']);        //[V]
         Route::get  ('show_my_followers',           [ShopController::class,         'showMyFollowers']);    //[V]
         Route::get  ('my_products/{category_name}', [ShopListItemsController::class,'listMyProducts']);     //[V]
-        Route::get  ('my_products_offset/{category_name}/{start_id}', [ShopListItemsController::class, 'listMyProductsWithOffset']); //[X]
         Route::get  ('show_product/{product_id}',   [ShopListItemsController::class,'']);                   //[ ]
         Route::post ('repost',                      [ShopItemController::class,     'repostItem']);         //[V]
         
@@ -45,12 +44,11 @@ Route::prefix('shop/')->group(function() {
         Route::post ('update_description',   [ShopProfileController::class, 'updateBio']);                   //[V]
         Route::post ('update_location',      [ShopProfileController::class, 'updateLocation']);              //[V]
         
-        Route::post ('send_credit_to',       [ShopPaymentController::class, 'sendCredit']);          //[V]
-        Route::post ('recharge_my_account',  [ShopPaymentController::class, 'rechargeMyAccount']);   //[V]
-        Route::get  ('recharging_history',   [ShopPaymentController::class, 'rechargingHistory']);   //[V]
-        Route::get  ('credit_history',       [ShopPaymentController::class, 'creditHistory']);       //[V]
-        Route::post ('verify_account',       [ShopPaymentController::class, 'verifyUser']);       //[V]
-        
+        //Route::post ('send_credit_to',       [ShopPaymentController::class, 'sendCredit']);          //[V]
+        //Route::post ('recharge_my_account',  [ShopPaymentController::class, 'rechargeMyAccount']);   //[V]
+        //Route::get  ('recharging_history',   [ShopPaymentController::class, 'rechargingHistory']);   //[V]
+        //Route::get  ('credit_history',       [ShopPaymentController::class, 'creditHistory']);       //[V]
+        //Route::post ('verify_account',       [ShopPaymentController::class, 'verifyUser']);       //[V]
         //Route::post('verify_clients_payeer', [ShopPaymentController::class, '']); //[X]
         //Route::get('payment_history', [ShopProfileController::class, 'paymentHistory']);
         //Route::get('my_products_offset/{category_name}/{start_id}', [ShopListItemsController::class, 'listMyProductsWithOffset']); //[X]
@@ -58,11 +56,12 @@ Route::prefix('shop/')->group(function() {
 }); 
 
 Route::prefix('auth/')->group(function() {
-    Route::post ('register',    [AuthController::class,  'createUser']);    //[V]
+    Route::post ('semi-register',   [AuthController::class,  'semiCreateUser']);    //[V]
     Route::post ('login',       [AuthController::class,  'loginUser']);     //[V]
 
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:users'])->group(function () {
         Route::post ('logout',  [AuthController::class, 'logoutUser']);         //[V]
+        Route::post ('complete-register',   [AuthController::class,  'completeCreateUser']);    //[V]
 
         Route::get  ('show_my_profile',     [ProfileController::class, 'showMyProfile']);   //[V]
         Route::get  ('edit_my_profile',     [ProfileController::class, 'showMyProfile']);   //[V]
@@ -83,10 +82,10 @@ Route::prefix('auth/')->group(function() {
 }); 
 
 
-Route::prefix('shop/')->group(function() {
+Route::prefix('store/')->group(function() {
     Route::get('show/{shopId}',                 [ShowController::class,  'showShop']);      //[V]
     Route::get('show/{shopId}/{category_name}',   [ShowController::class,  'showShop']);    //[V]
-    Route::get('suggest',                       [SearchController::class,'suggestShop']);   //[]
+    Route::get('search',                       [SearchController::class,'searchShop']);   //[]
 }); 
 
 Route::prefix('user/')->group(function() {
@@ -97,7 +96,7 @@ Route::prefix('user/')->group(function() {
 }); 
 
 Route::prefix('item/')->group(function() {
-    Route::get('search',            [SearchController::class,   'search']);         //[V]
+    Route::get('search',           [SearchController::class,   'search']);         //[V]
     Route::get('show/{item_id}',    [ShowController::class,     'showItem']);       //[V]
     Route::get('suggest',           [SearchController::class,   'suggest']);        //[V]
     Route::get('category/{category_name}', [SearchController::class,   'byCategory']);        //[V]

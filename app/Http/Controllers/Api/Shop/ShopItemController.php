@@ -41,7 +41,9 @@ class ShopItemController extends Controller
         $item->images   = $data['images'];
         $item->product_type_id =  $data['product_type_id']; // You'll need to map this to an actual ID
         $item->save();
-
+        $item->last_reposted = $item->created_at;
+        $item->save();
+        
         //$item->price = str_replace(' ', '', $data['productPrice']);
         //$item->genders  =   $data['selectedGenders'];//getGenderId($data['selectedGenders']);
         //$item->sizes = json_encode($data['selectedSizes']);

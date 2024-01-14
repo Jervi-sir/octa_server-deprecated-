@@ -11,14 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('credit_transactions', function (Blueprint $table) {
+        Schema::create('collection_folders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('shop_id')->constrained();
-            $table->foreignId('user_id')->constrained()->nullable();
-            $table->double('amount');
-
-            $table->string('status')->nullable(); //pending, completed, failed
-
+            $table->string('name');
+            $table->string('thumbnail')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('credit_transactions');
+        Schema::dropIfExists('collection_folders');
     }
 };
