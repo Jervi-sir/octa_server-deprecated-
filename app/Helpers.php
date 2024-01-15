@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\ProductType;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -162,3 +163,50 @@ function saveSingleImage($base64Image) {
   return $imagePath;
 }
 
+function getFriendToSendTo($friend) {
+  return [
+    'id' => $friend->id,
+    'username' => $friend->username,
+    'profile_image' => $friend->profile_images ? $friend->profile_images[0] : null,
+  ];
+}
+
+function getProfile($user) {
+  $auth = auth()->user();
+
+  $isMyAccount = $auth && $auth->id === $user->id;
+
+  $isFriend = false;
+  $followingStatus = null; // Default status
+
+  if ($auth && !$isMyAccount) {
+    // Check if they are friends
+    $isFriend = $auth->friends()->contains('id', $user->id);
+    if ($isFriend) {
+        $followingStatus = 'friends';
+    } else {
+        // Check for sent friend requests
+        $sentRequest = $auth->sentRequests()->where('receiver_id', $user->id)->exists();
+        if ($sentRequest) {
+            $followingStatus = 'request_sent';
+        } else {
+            // Check for received friend requests
+            $receivedRequest = $auth->receivedRequests()->where('sender_id', $user->id)->exists();
+            if ($receivedRequest) {
+                $followingStatus = 'request_received';
+            }
+        }
+    }
+}
+
+  return [
+    'id' => $user->id,
+    'name' => $user->name,
+    'username' => $user->username,
+    'profile_image' => $user->profile_images ? $user->profile_images[0] : null,
+    'isFollowed' => $isFriend,
+    'followingStatus' => $followingStatus,
+    'isLiked' => $auth ? false : false,
+    'isMyAccount' => $isMyAccount,
+  ];
+}

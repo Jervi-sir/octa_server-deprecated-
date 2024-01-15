@@ -40,26 +40,30 @@ class FriendRequestController extends Controller
     public function acceptRequest(Request $request)
     {
         $request->validate([
-            'request_id'   => 'required',
+            'user_id' => 'required', // Expect a user_id in the request
         ]);
         
-        $friendRequest = FriendRequest::find($request->request_id);
+        $userId = $request->user_id;
+        $authId = Auth::id();
+    
+        $friendRequest = FriendRequest::where('sender_id', $userId)
+                                        ->where('receiver_id', $authId)
+                                        ->first();
 
-        // Check if request exists and is meant for the authenticated user
-        if (!$friendRequest || $friendRequest->receiver_id !== Auth::id()) {
+        if (!$friendRequest) {
             return response()->json(['message' => 'Friend request not found.'], 404);
         }
-
+    
         // Create a friendship
         Friend::create([
-            'user_id' => Auth::id(),
-            'friend_id' => $friendRequest->sender_id,
+            'user_id' => $authId,
+            'friend_id' => $userId,
         ]);
-
+    
         // Delete the friend request
         $friendRequest->delete();
-
-        return response()->json(['message' => 'Friend request accepted.']);
+    
+        return response()->json(['message' => 'Friend request accepted.'], 200);
     }
 
     public function showReceivedRequests(Request $request)
@@ -85,14 +89,30 @@ class FriendRequestController extends Controller
     public function showFriendList(Request $request)
     {
         $request->validate([
-            'page'   => 'nullable',
+            'page' => 'nullable',
+            'username' => 'nullable'
         ]);
-
+    
         $auth = auth()->user();
+    
+        // Get merged friends collection
         $friends = $auth->friends();
-
+    
+        // Apply username filter if provided
+        if (!empty($request->username)) {
+            $friends = $friends->filter(function ($friend) use ($request) {
+                return str_contains(strtolower($friend->username), strtolower($request->username));
+            });
+        }
+    
+        $data['friends'] = [];
+    
+        foreach ($friends as $friend) {
+            $data['friends'][] = getFriendToSendTo($friend);
+        }
+    
         return response()->json([
-            'friends' => $friends
+            'friends' => $data['friends']
         ]);
     }
 }

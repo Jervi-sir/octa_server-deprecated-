@@ -7,6 +7,7 @@ use App\Models\Shop;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\ProductType;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class SearchController extends Controller
@@ -32,6 +33,7 @@ class SearchController extends Controller
     public function searchShop(Request $request)
     {
         $request->validate([
+            'page'   => 'nullable',
             'keywords'   => 'nullable',
             'wilaya_code'   => 'nullable',
         ]);
@@ -170,4 +172,54 @@ class SearchController extends Controller
             'data' => $data['items'],
         ], 200);
     }
+
+    public function searchProfile(Request $request)
+    {
+        $request->validate([
+            'page' => 'nullable',
+            'keywords' => 'nullable',
+            'wilaya_code' => 'nullable',
+        ]);
+    
+        $auth = auth()->user();
+    
+        $data = $request->all();
+        $keyword_array = !empty($data['keywords']) ? explode(",", $data['keywords']) : [];
+        $users = User::query();
+    
+        // Only get users who have a username
+        $users = $users->whereNotNull('username');
+    
+        if (!empty($keyword_array)) {
+            $users = $users->where(function ($query) use ($keyword_array) {
+                foreach ($keyword_array as $keyword) {
+                    if ($keyword) {
+                        $query->where('username', 'like', '%' . $keyword . '%');
+                    }
+                }
+            });
+        }
+        if(!empty($data['wilaya_code'])) {
+            $users = $users->where('wilaya_code', $data['wilaya_code']);
+        }
+        $users = $users->orderBy('id', 'DESC')->paginate(10);
+    
+        $data['users'] = [];
+        
+        foreach ($users as $index => $user) {
+            $data['users'][$index] = getProfile($user);
+        }
+    
+        $nextPage = null;
+        if ($users->nextPageUrl()) {
+            $nextPage = $users->currentPage() + 1;
+        }
+    
+        return response()->json([
+            'user_status' => $auth ? 'You are authenticated' : 'You are NOT authenticated',
+            'next_page' => $nextPage,
+            'users' => $data['users'],
+        ], 200);
+    }
+    
 }

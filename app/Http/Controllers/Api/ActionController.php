@@ -21,29 +21,21 @@ class ActionController extends Controller
         $data = $request->all();
         $auth = auth()->user();
 
-        
         $saves = $auth->savedItems()->orderBy('id', 'desc')->paginate(7);
         
+        $data['saves'] = [];
         foreach ($saves as $key => $save) {
-            $data['saves'][$key] =[
-                'id' => $save->id,
-                'name' => $save->name,
-                'username' => $save->username,
-                'profile_images' => $save->profile_images,
-            ];
+            $data['saves'][$key] = getItem($save);
         }
 
+        $nextPage = null;
+        if ($saves->nextPageUrl()) {
+            $nextPage = $saves->currentPage() + 1;
+        }
+        
         return response()->json([
-            'pagination' => [
-                'total' => $saves->total(),
-                'per_page' => $saves->perPage(),
-                'current_page' => $saves->currentPage(),
-                'last_page' => $saves->lastPage(),
-                'from' => $saves->firstItem(),
-                'to' => $saves->lastItem(),
-            ],
+            'next_page' => $nextPage,
             'products' => $data['saves'],
-            
         ]);
     }
 
@@ -191,13 +183,30 @@ class ActionController extends Controller
     public function suggestFriendToShareWith(Request $request)
     {
         $request->validate([
-            'page'   => 'nullable',
+            'page' => 'nullable',
+            'username' => 'nullable'
         ]);
-
-        $data = $request->all();
+    
         $auth = auth()->user();
-
-        
+    
+        // Get merged friends collection
+        $friends = $auth->friends();
+    
+        // Apply username filter if provided
+        if (!empty($request->username)) {
+            $friends = $friends->filter(function ($friend) use ($request) {
+                return str_contains(strtolower($friend->username), strtolower($request->username));
+            });
+        }
+    
+        $data['friends'] = [];
+    
+        foreach ($friends as $friend) {
+            $data['friends'][] = getFriendToSendTo($friend);
+        }
+    
+        return response()->json([
+            'friends' => $data['friends']
+        ]);
     }
-
 }

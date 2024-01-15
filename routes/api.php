@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\ShowController;
 use App\Http\Controllers\Api\ActionController;
+use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\Shop\ShopAuthController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\Api\Shop\ShopPaymentController;
 use App\Http\Controllers\Api\Shop\ShopProfileController;
 use App\Http\Controllers\Api\Shop\ShopListItemsController;
 use App\Http\Controllers\Api\FriendRequestController;
+use App\Http\Controllers\Api\MessageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +58,7 @@ Route::prefix('shop/')->group(function() {
     });
 }); 
 
+
 Route::prefix('auth/')->group(function() {
     Route::post ('semi-register',   [AuthController::class,  'semiCreateUser']);    //[V]
     Route::post ('login',       [AuthController::class,  'loginUser']);     //[V]
@@ -91,26 +94,45 @@ Route::prefix('auth/')->group(function() {
         Route::get('/friend-requests/sent', [FriendRequestController::class, 'showSentRequests']);  //[V]
         Route::get('/friend-list', [FriendRequestController::class, 'showFriendList']);     //[V]
         
+        Route::post('/chat/start', [ChatController::class, 'startChat']);
+        Route::get('/chat/list/{userId}', [ChatController::class, 'listChats']);
+        Route::get('/chat/details/{chatId}', [ChatController::class, 'getChatDetails']);
+        Route::post('/chat/share-item', [ChatController::class, 'shareItem']);
     });
 }); 
 
+RouteStores();
+RouteUsers();
+RouteItems();
 
-Route::prefix('store/')->group(function() {
-    Route::get('show/{shopId}',                 [ShowController::class,  'showShop']);      //[V]
-    Route::get('show/{shopId}/{category_name}',   [ShowController::class,  'showShop']);    //[V]
-    Route::get('search',                       [SearchController::class,'searchShop']);   //[]
-}); 
+Route::prefix('auth/')->middleware(['auth:users'])->group(function () {
+    RouteStores();
+    RouteUsers();
+    RouteItems();
+});
 
-Route::prefix('user/')->group(function() {
-    Route::get('show/{userId}',     [ShowController::class,  'showUser']);      //[V]
-    Route::get('show/{userId}/map', function($userId) {
-        return app(ShowController::class)->showUser(request(), $userId, true);  //[V]
+
+/*-------- Functions --------*/
+
+function RouteStores() {
+    Route::prefix('store/')->group(function() {
+        Route::get('show/{shopId}',                 [ShowController::class,  'showShop']);      //[V]
+        Route::get('show/{shopId}/{category_name}',   [ShowController::class,  'showShop']);    //[V]
+        Route::get('search',                       [SearchController::class,'searchShop']);   //[]
     });
-}); 
+}
+function RouteUsers() {
+    Route::prefix('user/')->group(function() {
+        Route::get('show/{userId}',     [ShowController::class,  'showUser']);      //[V]
+        Route::get('search', [SearchController::class,'searchProfile']);   //[]
+    }); 
+}
 
-Route::prefix('item/')->group(function() {
-    Route::get('search',           [SearchController::class,   'search']);         //[V]
-    Route::get('show/{item_id}',    [ShowController::class,     'showItem']);       //[V]
-    Route::get('suggest',           [SearchController::class,   'suggest']);        //[V]
-    Route::get('category/{category_name}', [SearchController::class,   'byCategory']);        //[V]
-}); 
+function RouteItems() {
+    Route::prefix('item/')->group(function() {
+        Route::get('search',           [SearchController::class,   'search']);         //[V]
+        Route::get('show/{item_id}',    [ShowController::class,     'showItem']);       //[V]
+        Route::get('suggest',           [SearchController::class,   'suggest']);        //[V]
+        Route::get('category/{category_name}', [SearchController::class,   'byCategory']);        //[V]
+    }); 
+}

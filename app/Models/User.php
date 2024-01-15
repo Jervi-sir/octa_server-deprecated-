@@ -87,16 +87,22 @@ class User extends Authenticatable
         return $this->hasMany(FriendRequest::class, 'receiver_id');
     }
 
-    public function friendsV2()
-    {
-        return $this->belongsToMany(User::class, 'friends', 'user_id', 'friend_id');
-    }
-
     public function friends()
     {
         $friendsAsUser = $this->belongsToMany(User::class, 'friends', 'user_id', 'friend_id');
         $friendsAsFriend = $this->belongsToMany(User::class, 'friends', 'friend_id', 'user_id');
         return $friendsAsUser->get()->merge($friendsAsFriend->get());
+    }
+
+    public function friendsV2()
+    {
+        return $this->belongsToMany(User::class, 'friends', 'user_id', 'friend_id');
+    }
+
+    public function chats()
+    {
+        return $this->belongsToMany(Chat::class, 'chats', 'user_id', 'friend_id')
+                    ->withTimestamps();
     }
 
 }
