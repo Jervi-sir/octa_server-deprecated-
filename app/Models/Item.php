@@ -41,10 +41,9 @@ class Item extends Model
         return $this->belongsToMany(User::class, 'user_saves', 'item_id', 'user_id');
     }
 
-    public function chats()
+    public function messages()
     {
-        return $this->belongsToMany(Chat::class, 'chat_items')
-                    ->withTimestamps();
+        return $this->hasMany(Message::class);
     }
-
+    
 }

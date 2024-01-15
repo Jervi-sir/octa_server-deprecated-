@@ -99,10 +99,17 @@ class User extends Authenticatable
         return $this->belongsToMany(User::class, 'friends', 'user_id', 'friend_id');
     }
 
-    public function chats()
+
+    // User has many messages that they sent
+    public function sentMessages()
     {
-        return $this->belongsToMany(Chat::class, 'chats', 'user_id', 'friend_id')
-                    ->withTimestamps();
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    // User has many messages that they received
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
     }
 
 }

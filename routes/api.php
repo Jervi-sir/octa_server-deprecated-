@@ -84,9 +84,16 @@ Route::prefix('auth/')->group(function() {
         Route::post ('un_save_item',    [ActionController::class,  'unSaveItem']);   //[V]
 
         //Shares side
-        Route::post ('share_item',  [ActionController::class,  'shareItem']);     //[ ]
         Route::get ('suggest_friend_to_share_with',  [ActionController::class,  'suggestFriendToShareWith']);     //[ ]
-    
+        Route::get('chats/list', [MessageController::class, 'listChats']);
+        Route::get('chats/messages', [MessageController::class, 'getChatWithFriend']);
+        Route::post('chats/messages', [MessageController::class, 'sendMessage']);
+
+        
+        Route::post ('users/{user}/messages',  [MessageController::class,  'storeMessage']);     //[ ]
+        Route::get ('users/{user}/messages',  [MessageController::class,  'showChat']);     //[ ]
+        
+
         //Friends side
         Route::post('/friend-request/send', [FriendRequestController::class, 'sendRequest']);       //[V]
         Route::post('/friend-request/accept', [FriendRequestController::class, 'acceptRequest']);
@@ -94,10 +101,6 @@ Route::prefix('auth/')->group(function() {
         Route::get('/friend-requests/sent', [FriendRequestController::class, 'showSentRequests']);  //[V]
         Route::get('/friend-list', [FriendRequestController::class, 'showFriendList']);     //[V]
         
-        Route::post('/chat/start', [ChatController::class, 'startChat']);
-        Route::get('/chat/list/{userId}', [ChatController::class, 'listChats']);
-        Route::get('/chat/details/{chatId}', [ChatController::class, 'getChatDetails']);
-        Route::post('/chat/share-item', [ChatController::class, 'shareItem']);
     });
 }); 
 
