@@ -10,11 +10,6 @@ class Message extends Model
     use HasFactory;
     protected $fillable = ['*'];
 
-    // Message belongs to a sender
-    public function sender()
-    {
-        return $this->belongsTo(User::class, 'sender_id');
-    }
 
     // Message belongs to a receiver
     public function receiver()
@@ -28,4 +23,15 @@ class Message extends Model
         return $this->belongsTo(Item::class);
     }
 
+    
+    public function conversation()
+    {
+        return $this->belongsTo(Conversation::class);
+    }
+
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'sender_id');
+    }
+    
 }

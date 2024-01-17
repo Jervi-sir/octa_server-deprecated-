@@ -12,35 +12,69 @@ use Illuminate\Support\Facades\Auth;
 
 class MessageController extends Controller
 {
-    public function listChats()
+    public function listChats(Request $request)
     {
+        $request->validate([
+            'page'   => 'nullable',
+            'username'   => 'nullable',
+        ]);
+
         $userId = Auth::id();
-    
-        // Fetch the last message in each conversation the user is involved in
-        $chats = Message::where('sender_id', $userId)
-                        ->orWhere('receiver_id', $userId)
-                        ->orderBy('created_at', 'desc')
-                        ->get()
+        $searchTerm = $request->input('username');
+
+        // Fetch the last message in each conversation the user is involved in with pagination
+        $chats = Message::where(function ($query) use ($userId) {
+                    $query->where('sender_id', $userId)
+                        ->orWhere('receiver_id', $userId);
+                    })
+                    ->whereHas('sender', function ($query) use ($searchTerm) {
+                        $query->where('username', 'like', '%' . $searchTerm . '%');
+                    })
+                    ->orWhereHas('receiver', function ($query) use ($searchTerm, $userId) {
+                        $query->where('username', 'like', '%' . $searchTerm . '%')
+                        ->where('id', '!=', $userId); // Exclude the current user from the search
+                    })
+                    ->orderBy('created_at', 'desc')
+                    ->with('sender', 'receiver')
+                    ->paginate(10);
+        return response()->json([
+            'chats' => $chats
+        ]);
+        // Grouping and mapping
+        $groupedChats = $chats->getCollection()
                         ->groupBy(function($message) use ($userId) {
-                            // Group by the other user involved in the conversation
                             return $message->sender_id === $userId ? $message->receiver_id : $message->sender_id;
                         })
                         ->map(function($messages) {
-                            // Take the first message from each group as the latest message
                             return $messages->sortByDesc('created_at')->first();
-                        });
-    
+                        })
+                        ->values(); // Convert the collection into an array
+
+
         // Formatting the response
-        $formattedChats = $chats->map(function($message) {
+        $formattedChats = $groupedChats->map(function($message) use ($userId) {
+            $otherUserId = $message->sender_id === $userId ? $message->receiver_id : $message->sender_id;
+            $otherUser = User::find($otherUserId);
+        
             return [
-                'friend_id' => $message->sender_id === Auth::id() ? $message->receiver_id : $message->sender_id,
-                'last_message' => Item::find($message->item_id)->name, // Assuming 'content' contains the message text
+                'id' => $otherUserId,
+                'friend_id' => $otherUserId,
+                'chat_name' => $otherUser->username,
+                'profile_image' => $otherUser->profile_image,
+                'last_message' => Item::find($message->item_id)->name, // Modify as needed
                 'last_message_time' => $message->created_at,
-                // Include other relevant data, e.g., friend's name, profile picture, etc.
             ];
         });
     
-        return response()->json(['chats' => $formattedChats]);
+        $nextPage = null;
+        if ($chats->nextPageUrl()) {
+            $nextPage = $chats->currentPage() + 1;
+        }
+
+        return response()->json([
+            'next_page' => $nextPage,
+            'chats' => $formattedChats
+        ]);
     }
 
     // Get messages for a specific chat

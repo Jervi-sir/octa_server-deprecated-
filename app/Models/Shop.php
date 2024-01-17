@@ -69,4 +69,9 @@ class Shop extends Authenticatable
         return $this->belongsToMany(User::class, 'user_shop_followings', 'shop_id', 'user_id');
     }
 
+    public function collections()
+    {
+        return $this->belongsToMany(Collection::class, 'store_collection');
+    }
+
 }

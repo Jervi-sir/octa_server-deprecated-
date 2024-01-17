@@ -13,16 +13,16 @@ return new class extends Migration
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('conversation_id');
             $table->unsignedBigInteger('sender_id');
-            $table->unsignedBigInteger('receiver_id');
-            $table->text('content')->nullable(); // For text messages
-            $table->unsignedBigInteger('item_id')->nullable(); // For item references, if applicable
+            $table->text('message_text');
+            $table->boolean('read_status')->default(false);
             $table->timestamps();
-        
+
+            $table->foreign('conversation_id')->references('id')->on('conversations')->onDelete('cascade');
             $table->foreign('sender_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('receiver_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('item_id')->references('id')->on('items')->onDelete('set null'); // If using items
         });
+
     }
 
     /**

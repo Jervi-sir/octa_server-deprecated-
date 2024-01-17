@@ -11,11 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('collection_folders', function (Blueprint $table) {
+        Schema::create('collections', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->unsignedBigInteger('user_id'); // The owner of the collection
+            $table->string('name'); // Name of the collection
             $table->string('thumbnail')->nullable();
             $table->timestamps();
+        
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('collection_folders');
+        Schema::dropIfExists('collections');
     }
 };

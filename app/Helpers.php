@@ -36,6 +36,18 @@ function getItem($item)
 function getShop($shop)
 {
   $auth = auth()->user();
+  $isCollected = false;
+
+  if ($auth) {
+    // Check if the shop is in any of the user's collections
+    $isCollected = $auth->collections()
+                        ->whereHas('shops', function ($query) use ($shop) {
+                            $query->where('shop_id', $shop->id);
+                        })
+                        ->exists();
+  }
+
+
   $result = [
     'id' => $shop->id,
     'shop_name' => $shop->shop_name,
@@ -50,6 +62,7 @@ function getShop($shop)
     'wilaya_name' => $shop->wilaya_name,
     'wilaya_code' => $shop->wilaya_code,
     'isFollowed' => $auth ? $shop->followedByUser->contains($auth->id) : null,
+    'isCollected' => $isCollected,
   ];
 
   return $result;

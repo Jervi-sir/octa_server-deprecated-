@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\ShowController;
 use App\Http\Controllers\Api\ActionController;
 use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\CollectionController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\Shop\ShopAuthController;
@@ -89,18 +90,22 @@ Route::prefix('auth/')->group(function() {
         Route::get('chats/messages', [MessageController::class, 'getChatWithFriend']);
         Route::post('chats/messages', [MessageController::class, 'sendMessage']);
 
-        
-        Route::post ('users/{user}/messages',  [MessageController::class,  'storeMessage']);     //[ ]
-        Route::get ('users/{user}/messages',  [MessageController::class,  'showChat']);     //[ ]
-        
-
         //Friends side
-        Route::post('/friend-request/send', [FriendRequestController::class, 'sendRequest']);       //[V]
-        Route::post('/friend-request/accept', [FriendRequestController::class, 'acceptRequest']);
-        Route::get('/friend-requests/received', [FriendRequestController::class, 'showReceivedRequests']);   //[V]
-        Route::get('/friend-requests/sent', [FriendRequestController::class, 'showSentRequests']);  //[V]
-        Route::get('/friend-list', [FriendRequestController::class, 'showFriendList']);     //[V]
+        Route::post('friend-request/send', [FriendRequestController::class, 'sendRequest']);       //[V]
+        Route::post('friend-request/accept', [FriendRequestController::class, 'acceptRequest']);
+        Route::get('friend-requests/received', [FriendRequestController::class, 'showReceivedRequests']);   //[V]
+        Route::get('friend-requests/sent', [FriendRequestController::class, 'showSentRequests']);  //[V]
+        Route::get('friend-list', [FriendRequestController::class, 'showFriendList']);     //[V]
         
+        //Collection
+        Route::post('collection', [CollectionController::class, 'createCollection']);
+        Route::get('collection', [CollectionController::class, 'listCollections']);
+        Route::post('collection/add_shop', [CollectionController::class, 'saveStoreToCollection']);
+        Route::get('collection/show_details', [CollectionController::class, 'getCollectionDetails']);
+        Route::post('collection/update', [CollectionController::class, 'updateCollection']);
+        Route::post('collection/delete_store', [CollectionController::class, 'removeStoreFromCollection']);
+        Route::post('collection/delete', [CollectionController::class, 'deleteCollection']);
+
     });
 }); 
 
