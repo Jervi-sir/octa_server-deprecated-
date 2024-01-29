@@ -15,10 +15,13 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('conversation_id');
             $table->unsignedBigInteger('sender_id');
-            $table->text('message_text');
+            $table->text('message_text')->nullable();
+            $table->unsignedBigInteger('item_id')->nullable();
+
             $table->boolean('read_status')->default(false);
             $table->timestamps();
 
+            $table->foreign('item_id')->references('id')->on('items')->onDelete('set null');
             $table->foreign('conversation_id')->references('id')->on('conversations')->onDelete('cascade');
             $table->foreign('sender_id')->references('id')->on('users')->onDelete('cascade');
         });

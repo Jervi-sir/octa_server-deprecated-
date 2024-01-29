@@ -1,0 +1,160 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Models\Message;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\Conversation;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+
+class ConversationController extends Controller
+{
+    public function listConversations(Request $request)
+    {
+        $user = Auth::user();
+        $userId = Auth::id();
+        $perPage = 10; // Define how many items per page
+    
+        // Fetch conversations with the latest message for each
+        $allConversations = $user->conversations()
+                        ->with(['user1', 'user2', 'messages' => function ($query) {
+                            $query->latest()->first();
+                        }])
+                        ->get()
+                        ->map(function ($conversation) use ($userId) {
+                    // Determine the friend's details (assuming the friend is not the current user)
+                    $friend = ($conversation->user1_id == $userId) ? $conversation->user2 : $conversation->user1;
+
+                    $lastMessage = $conversation->messages->first();
+
+                    // Count unread messages in this conversation
+                    $unreadCount = $conversation->messages->where('read_status', false)->count();
+
+                    return [
+                        'id' => $conversation->id,
+                        'friend_id' => $friend->id,
+                        'friend_profile_pic' => $friend->profile_images ? ($friend->profile_images)[0] : null,
+                        'friend_username' => $friend->username,
+                        'last_message' => $lastMessage ? $lastMessage->item->name : null,
+                        'last_message_time' => $lastMessage ? $lastMessage->created_at : null,
+                        'last_message_read' => $lastMessage ? (bool) $lastMessage->read_status : null,
+                        'unread_messages_count' => $unreadCount,
+                    ];
+                })
+                ->sortByDesc('last_message_time');
+
+        $totalPages = ceil($allConversations->count() / $perPage);
+        $currentPage = $request->page ?? 1;
+        $conversations = $allConversations->forPage($currentPage, $perPage)->values();
+    
+        $nextPage = $currentPage < $totalPages ? $currentPage + 1 : null;
+
+        
+        return response()->json([
+            'next_page' => $nextPage,
+            'per_page' => $perPage,
+            'total_pages' => $totalPages,
+            'current_page' => $currentPage,
+            'chats' => $conversations,
+        ]);
+    }
+
+    public function showThisConversation($conversationId, Request $request)
+    {
+        $user = Auth::user();
+        $perPage = 10; // Define how many messages you want per page
+    
+
+        $conversation = Conversation::where('id', $conversationId)
+        ->where(function ($query) use ($user) {
+            $query->where('user1_id', $user->id)
+                  ->orWhere('user2_id', $user->id);
+        })
+        ->firstOrFail();
+
+        // Identify the friend in the conversation
+        $friendId = ($conversation->user1_id == $user->id) ? $conversation->user2_id : $conversation->user1_id;
+        $friend = User::select('id', 'username', 'profile_images')->find($friendId);
+
+        // Paginate the messages
+        $messages = $conversation->messages()
+                                ->orderBy('created_at', 'desc')
+                                ->paginate($perPage, ['*'], 'page', $request->page ?? 1);
+
+        // Transform each message to include 'sent_by_me' attribute
+        $messages->getCollection()->transform(function ($message) use ($user) {
+            $message->sent_by_me = $message->sender_id === $user->id;
+            return $message;
+        });
+
+        $nextPage = $messages->currentPage() < $messages->lastPage() 
+                    ? $messages->currentPage() + 1 
+                    : null;
+
+        return response()->json([
+            'conversation' => $conversation,
+            'friend' => $friend, // Include friend's details
+            'messages' => $messages->items(), // Get the transformed messages
+            'next_page' => $nextPage,
+            'current_page' => $messages->currentPage(),
+            'last_page' => $messages->lastPage(),
+        ]);
+                
+    }
+    
+
+    public function storeMessage(Request $request)
+    {
+        $validatedData = $request->validate([
+            'recipient_id' => 'required|exists:users,id',
+            'message_text' => 'nullable|string',
+            'item_id' => 'sometimes|required_without:message_text|exists:items,id'
+        ]);
+    
+        $user = Auth::user();
+        $recipientId = $validatedData['recipient_id'];
+        $friends = $user->friends();
+
+        // Check if they are friends
+        if (!$friends->contains('id', $recipientId)) {
+            return response()->json(['error' => 'You can only message your friends.'], 403);
+        }
+    
+        // Find an existing conversation or create a new one
+        $conversation = Conversation::firstOrCreate(
+            [
+                'user1_id' => $user->id, 
+                'user2_id' => $recipientId
+            ],
+            [
+                'user1_id' => $user->id, 
+                'user2_id' => $recipientId
+            ]
+        );
+    
+        // Create and save the message
+        $message = new Message();
+        $message->conversation_id = $conversation->id;
+        $message->sender_id = $user->id;
+        $message->message_text = isset($validatedData['message_text']) ? $validatedData['message_text'] : null;
+        $message->item_id = $validatedData['item_id'];
+        $message->save();
+    
+        return response()->json($message, 201);
+    }
+
+    public function showMessage($messageId)
+    {
+        $user = Auth::user();
+        $message = Message::where('id', $messageId)
+                          ->whereHas('conversation', function ($query) use ($user) {
+                              $query->where('user1_id', $user->id)
+                                    ->orWhere('user2_id', $user->id);
+                                })->firstOrFail();
+                                
+        return response()->json($message);
+    }                       
+
+}

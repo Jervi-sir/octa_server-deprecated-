@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_shop_followings', function (Blueprint $table) {
+        Schema::create('user_likes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained();
-            $table->foreignId('shop_id')->constrained()->onDelete('cascade');
-            
-            $table->unique(['user_id', 'shop_id']); // add unique constraint
+            $table->foreignId('liker_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('liked_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_shop_followings');
+        Schema::dropIfExists('user_likes');
     }
 };

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Message extends Model
 {
     use HasFactory;
-    protected $fillable = ['*'];
+    protected $fillable = ['conversation_id', 'sender_id', 'message_text', 'read_status', 'item_id'];
 
 
     // Message belongs to a receiver
@@ -33,5 +33,6 @@ class Message extends Model
     {
         return $this->belongsTo(User::class, 'sender_id');
     }
+
     
 }

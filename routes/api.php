@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ShowController;
 use App\Http\Controllers\Api\ActionController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\CollectionController;
+use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\Shop\ShopAuthController;
@@ -69,7 +70,6 @@ Route::prefix('auth/')->group(function() {
         Route::post ('complete-register',   [AuthController::class,  'completeCreateUser']);    //[V]
 
         Route::get  ('show_my_profile',     [ProfileController::class, 'showMyProfile']);   //[V]
-        Route::get  ('edit_my_profile',     [ProfileController::class, 'showMyProfile']);   //[V]
         Route::post ('update_my_profile',   [ProfileController::class, 'updateMyProfile']);   //[]
         Route::get  ('show_my_map',         [ProfileController::class, 'showMyMap']);       //[V]
         Route::get  ('edit_my_map',         [ProfileController::class, 'showMyProfile']);   //[X]
@@ -80,15 +80,22 @@ Route::prefix('auth/')->group(function() {
         Route::get  ('get_followings',  [ActionController::class, 'getMyFollowings']);      //[V]
         Route::get  ('get_followers',   [ActionController::class, 'getMyFollowers']);       //[V]
 
+        Route::post  ('like_user', [ActionController::class,  'likeUser']); //[V]          //[]
+        Route::post  ('unlike_user', [ActionController::class,  'unlikeUser']); //[V]          //[]
+        
         Route::get  ('get_saved_items', [ActionController::class,  'getSavedItems']); //[V]          //[]
         Route::post ('save_item',       [ActionController::class,  'saveItem']);     //[V]
         Route::post ('un_save_item',    [ActionController::class,  'unSaveItem']);   //[V]
 
+
+
         //Shares side
         Route::get ('suggest_friend_to_share_with',  [ActionController::class,  'suggestFriendToShareWith']);     //[ ]
-        Route::get('chats/list', [MessageController::class, 'listChats']);
-        Route::get('chats/messages', [MessageController::class, 'getChatWithFriend']);
-        Route::post('chats/messages', [MessageController::class, 'sendMessage']);
+        Route::get('conversations', [ConversationController::class, 'listConversations']);
+        Route::get('conversations/{conversation}', [ConversationController::class, 'showThisConversation']);
+        
+        Route::post('messages', [ConversationController::class, 'storeMessage']);
+        Route::get('messages/{message}', [ConversationController::class, 'showMessage']);
 
         //Friends side
         Route::post('friend-request/send', [FriendRequestController::class, 'sendRequest']);       //[V]
@@ -96,7 +103,7 @@ Route::prefix('auth/')->group(function() {
         Route::get('friend-requests/received', [FriendRequestController::class, 'showReceivedRequests']);   //[V]
         Route::get('friend-requests/sent', [FriendRequestController::class, 'showSentRequests']);  //[V]
         Route::get('friend-list', [FriendRequestController::class, 'showFriendList']);     //[V]
-        
+
         //Collection
         Route::post('collection', [CollectionController::class, 'createCollection']);
         Route::get('collection', [CollectionController::class, 'listCollections']);

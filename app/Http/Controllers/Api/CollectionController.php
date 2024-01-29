@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CollectionController extends Controller
 {
@@ -24,7 +25,16 @@ class CollectionController extends Controller
         $collection->thumbnail = $request->thumbnail;
         $collection->save();
 
-        return response()->json(['collection' => $collection]);
+        $data['collection'] = [
+            'id' => $collection->id,
+            'name' => $collection->name,
+            'thumbnail' => $collection->thumbnail,
+            'shops_count' => $collection->shops_count,
+            'contains_shop' => false,
+            'last_shop_added_at' => $collection->last_shop_added_at
+        ];
+
+        return response()->json(['collection' => $data['collection']]);
     }
 
     public function listCollections(Request $request)
@@ -130,8 +140,8 @@ class CollectionController extends Controller
             'collection' => [
                 'id' => $collection->id,
                 'name' => $collection->name,
-                'stores' => $formattedShops
-            ]
+            ],
+            'stores' => $formattedShops
         ]);
     }
 
@@ -140,7 +150,7 @@ class CollectionController extends Controller
         $request->validate([
             'collection_id' => 'required|exists:collections,id',
             'name' => 'sometimes|string|max:255',
-            'thumbnail' => 'sometimes|image|max:2048', // Assuming thumbnail is an image file
+            'thumbnail' => 'nullable|string|max:2048', // Assuming thumbnail is an image file
         ]);
 
         $collection = Collection::find($request->collection_id);

@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Item;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\ProductType;
+use Illuminate\Http\Request;
 use App\Models\UserFollowing;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
 class ActionController extends Controller
@@ -16,12 +17,21 @@ class ActionController extends Controller
     {
         $request->validate([
             'page'   => 'nullable',
+            'category_name'   => 'nullable',
         ]);
 
         $data = $request->all();
         $auth = auth()->user();
 
-        $saves = $auth->savedItems()->orderBy('id', 'desc')->paginate(7);
+        $savesQuery = $auth->savedItems();
+       
+      
+        if (!empty($data['category_name'])) {
+            $category_id = ProductType::where('name', 'like', '%' . $data['category_name'] . '%')->first()->id;
+            $savesQuery = $savesQuery->where('product_type_id', $category_id);
+        }
+        
+        $saves = $savesQuery->orderBy('id', 'desc')->paginate(7);
         
         $data['saves'] = [];
         foreach ($saves as $key => $save) {
@@ -93,23 +103,6 @@ class ActionController extends Controller
         return response()->json('Following Successfully', 200);
     }
 
-    public function unfollowUser(Request $request)
-    {
-        $request->validate([
-            'user_id'   => 'required',
-        ]);
-
-        $data = $request->all();
-        $auth = auth()->user();
-        $user_to_follow = User::find($data['user_id']);
-
-        $following = UserFollowing::where('follower_id', $auth->id)
-                        ->where('following_id', $user_to_follow->id)
-                        ->first();
-        $following->delete();
-        return response()->json('unFollowing Successfully', 200);
-        
-    }
 
     public function getMyFollowings(Request $request)
     {
@@ -209,4 +202,40 @@ class ActionController extends Controller
             'friends' => $data['friends']
         ]);
     }
+
+
+    public function likeUser(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|different:auth()->id()',
+        ]);
+
+        $data = $request->all();
+        $user = auth()->user();
+        $user->likedUsers()->syncWithoutDetaching([$data['user_id']]);
+
+        return response()->json(['message' => 'User liked successfully.']);
+    }
+
+    public function unlikeUser(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|different:auth()->id()',
+        ]);
+        $data = $request->all();
+        $user = auth()->user();
+
+        $alreadyLiked = $user->likedUsers()->where('liked_id', $data['user_id'])->exists();
+
+        if ($alreadyLiked) {
+            // Detach the liked user from the authenticated user's likedUsers
+            $user->likedUsers()->detach($data['user_id']);
+    
+            return response()->json(['message' => 'User unliked successfully.']);
+        } else {
+            return response()->json(['message' => 'You have not liked this user.'], 404);
+        }
+    }
+
 }
+  

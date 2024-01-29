@@ -29,6 +29,7 @@ function getItem($item)
     'wilaya_code' => ($item->wilaya_code),
     //'images' => imageToArray($item->images->pluck('url')->toArray()),
     'isSaved' => $auth ? $item->savedByUsers->contains($auth->id) : null,
+    'shop' => getShop($item->shop),
   ];
   return $result;
 }
@@ -215,6 +216,7 @@ function getProfile($user) {
   return [
     'id' => $user->id,
     'name' => $user->name,
+    'bio' => $user->bio,
     'username' => $user->username,
     'profile_image' => $user->profile_images ? $user->profile_images[0] : null,
     'isFollowed' => $isFriend,

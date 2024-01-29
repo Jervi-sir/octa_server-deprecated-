@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('password_plainText');
 
+            $table->string('name')->nullable();
             $table->string('username')->nullable()->unique();
             $table->mediumText('bio')->default('Octa User');
 

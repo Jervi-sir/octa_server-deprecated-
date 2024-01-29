@@ -56,27 +56,6 @@ class User extends Authenticatable
         return $this->hasOne(Shop::class);
     }
 
-    public function shopsfollowing(): BelongsToMany
-    {
-        return $this->belongsToMany(Shop::class, 'user_shop_followings');
-    }
-
-    public function usersfollowing(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'user_followings', 'follower_id', 'following_id');
-    }
-
-    public function usersfollowers(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'user_followings', 'following_id', 'follower_id');
-    }
-
-    public function isFollowedBy(int $userId): bool
-    {
-        return $this->usersFollowing()->where('follower_id', $userId)->exists();
-    }
-
-
     public function sentRequests()
     {
         return $this->hasMany(FriendRequest::class, 'sender_id');
@@ -94,27 +73,31 @@ class User extends Authenticatable
         return $friendsAsUser->get()->merge($friendsAsFriend->get());
     }
 
-    public function friendsV2()
-    {
-        return $this->belongsToMany(User::class, 'friends', 'user_id', 'friend_id');
-    }
-
-
-    // User has many messages that they sent
-    public function sentMessages()
-    {
-        return $this->hasMany(Message::class, 'sender_id');
-    }
-
-    // User has many messages that they received
-    public function receivedMessages()
-    {
-        return $this->hasMany(Message::class, 'receiver_id');
-    }
-
     public function collections()
     {
         return $this->hasMany(Collection::class);
     }
     
+
+    public function conversations()
+    {
+        return Conversation::where('user1_id', $this->id)
+                           ->orWhere('user2_id', $this->id);
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    public function likedUsers()
+    {
+        return $this->belongsToMany(User::class, 'user_likes', 'liker_id', 'liked_id');
+    }
+
+    public function likedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'user_likes', 'liked_id', 'liker_id');
+    }
+
 }

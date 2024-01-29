@@ -26,11 +26,6 @@ class Item extends Model
         return $this->belongsTo(Shop::class);
     }
 
-    public function backUpImages(): HasMany
-    {
-        return $this->hasMany(ItemImage::class);
-    }
-
     public function wilaya(): BelongsTo
     {
         return $this->belongsTo(Wilaya::class);

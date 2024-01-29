@@ -7,8 +7,11 @@ use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Collection;
+use App\Models\Friend;
 use App\Models\ProductType;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ShowController extends Controller
 {
@@ -54,7 +57,7 @@ class ShowController extends Controller
         ], 200);
     }
 
-    public function showUser(Request $request, $userId, $includeMap = false)
+    public function showUser(Request $request, $userId)
     {
         $request->validate([
             'page'   => 'nullable',
@@ -63,25 +66,59 @@ class ShowController extends Controller
         $auth = auth()->user();
 
         $user = User::find($userId);
-        $data['user'] = [
-            'name' => $user->name,
-            'username' => $user->username,
-            'bio' => $user->bio,
-            'profile_images' => $user->profile_images,
-            'contacts' => $user->contacts,
-            'nb_likes' => $user->nb_likes,
-            'nb_followers' => $user->nb_followers,
-            'isPremium' => $user->isPremium,
-            'isFollowing' => $auth ? $auth->isFollowedBy($userId) : null
-        ];
-
-        if ($includeMap) {
-            $data['user']['game_map'] = $user->game_map;
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
         }
         
+        $isFriend = false;
+        if($auth) {
+            $isFriend = Friend::where(function($query) use ($auth, $userId) {
+                $query->where('user_id', $auth->id)->where('friend_id', $userId);
+            })->orWhere(function($query) use ($auth, $userId) {
+                $query->where('user_id', $userId)->where('friend_id', $auth->id);
+            })->exists();
+        }
+
+        $data['user'] = array_merge(getProfile($user), [
+            'bio' => $user->bio,
+            'contacts' => $user->contacts,
+            'nb_likes' => 0, //UserLike::where('liked_user_id', $userId)->count(),
+            'nb_friends' => $user->friends()->count(),
+            'isPremium' => $user->isPremium,
+        ]);
+
+        $collections = Collection::where('collections.user_id', $userId)
+            ->leftJoin('shop_collections', 'collections.id', '=', 'shop_collections.collection_id')
+            ->withCount('shops')
+            ->select('collections.*', DB::raw('MAX(shop_collections.updated_at) as last_shop_added_at'))
+            ->groupBy('collections.id', 'collections.user_id', 'collections.name', 'collections.thumbnail', 'collections.created_at', 'collections.updated_at')
+            ->orderBy('last_shop_added_at', 'desc')
+            ->paginate(10);
+           
+        $data['collections'] = [];
+
+        foreach ($collections as $index => $collection) {
+            
+            $data['collections'][$index] = [
+                'id' => $collection->id,
+                'name' => $collection->name,
+                'thumbnail' => $collection->thumbnail,
+                'shops_count' => $collection->shops_count,
+                'last_shop_added_at' => $collection->last_shop_added_at
+            ];
+        }
+
+        $nextPage = null;
+        if ($collections->nextPageUrl()) {
+            $nextPage = $collections->currentPage() + 1;
+        }
+
+
         return response()->json([
             'user_status' => $auth ? 'You are authenticated' : 'You are NOT authenticated',
-            'user' => $data['user']
+            'next_page' => $nextPage,
+            'user' => $data['user'],
+            'collections' => $data['collections'],
         ], 200);
     }
 
