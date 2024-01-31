@@ -140,6 +140,7 @@ class CollectionController extends Controller
             'collection' => [
                 'id' => $collection->id,
                 'name' => $collection->name,
+                'thumbnail' => $collection->thumbnail,
             ],
             'stores' => $formattedShops
         ]);

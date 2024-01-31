@@ -6,6 +6,7 @@ use App\Models\Message;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
+use App\Models\Item;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
@@ -61,22 +62,36 @@ class ConversationController extends Controller
         ]);
     }
 
-    public function showThisConversation($conversationId, Request $request)
+    public function showThisConversation(Request $request)
     {
+        $request->validate([
+            'conversation_id' => 'required',
+            'page' => 'nullable'
+        ]);
+        
         $user = Auth::user();
         $perPage = 10; // Define how many messages you want per page
     
-
-        $conversation = Conversation::where('id', $conversationId)
-        ->where(function ($query) use ($user) {
-            $query->where('user1_id', $user->id)
-                  ->orWhere('user2_id', $user->id);
-        })
-        ->firstOrFail();
+        $conversation = Conversation::where('id', $request->conversation_id)
+            ->where(function ($query) use ($user) {
+                $query->where('user1_id', $user->id)
+                    ->orWhere('user2_id', $user->id);
+            })
+            ->firstOrFail();
 
         // Identify the friend in the conversation
         $friendId = ($conversation->user1_id == $user->id) ? $conversation->user2_id : $conversation->user1_id;
         $friend = User::select('id', 'username', 'profile_images')->find($friendId);
+        $data['friend'] = [
+            'id' => $friend->id,
+            'username' => $friend->username,
+            'profile_images' =>  $friend->profile_images ? $friend->profile_images[0] : null,
+        ];
+        $data['my_self'] = [
+            'id' => $user->id,
+            'username' => $user->username,
+            'profile_images' =>  $user->profile_images ? $user->profile_images[0] : null,
+        ];
 
         // Paginate the messages
         $messages = $conversation->messages()
@@ -92,11 +107,27 @@ class ConversationController extends Controller
         $nextPage = $messages->currentPage() < $messages->lastPage() 
                     ? $messages->currentPage() + 1 
                     : null;
+        
+        $data['messages'] = [];
+        foreach ($messages->items() as $index => $message) {
+            $data['messages'][$index] = [
+                "id" => $message->id,
+                "conversation_id" => $message->conversation_id,
+                "sender_id" => $message->sender_id,
+                "message_text" => $message->message_text,
+                "item_id" => $message->item_id,
+                "read_status"=> $message->read_status,
+                "created_at" => $message->created_at,
+                "sent_by_me" => $message->sent_by_me,
+                "item" => getItem(Item::find($message->item_id))
+            ];
+        }
 
         return response()->json([
             'conversation' => $conversation,
-            'friend' => $friend, // Include friend's details
-            'messages' => $messages->items(), // Get the transformed messages
+            'friend' => $data['friend'], // Include friend's details
+            'my_self' => $data['my_self'],
+            'messages' => $data['messages'], // Get the transformed messages
             'next_page' => $nextPage,
             'current_page' => $messages->currentPage(),
             'last_page' => $messages->lastPage(),

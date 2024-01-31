@@ -211,7 +211,9 @@ function getProfile($user) {
             }
         }
     }
-}
+  }
+  $numberOfFriends = $user->friends()->count();
+  $numberOfLikes = $user->likedByUsers()->count();
 
   return [
     'id' => $user->id,
@@ -221,7 +223,10 @@ function getProfile($user) {
     'profile_image' => $user->profile_images ? $user->profile_images[0] : null,
     'isFollowed' => $isFriend,
     'followingStatus' => $followingStatus,
-    'isLiked' => $auth ? false : false,
+    'isLiked' => $auth ? $user->likedByUsers->contains('id', $auth->id) : false,
     'isMyAccount' => $isMyAccount,
+    'number_friends' => $numberOfFriends, // Add the number of friends
+    'number_likes' => $numberOfLikes, // Add the number of likes
+
   ];
 }

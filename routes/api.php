@@ -88,13 +88,12 @@ Route::prefix('auth/')->group(function() {
         Route::post ('un_save_item',    [ActionController::class,  'unSaveItem']);   //[V]
 
 
-
         //Shares side
         Route::get ('suggest_friend_to_share_with',  [ActionController::class,  'suggestFriendToShareWith']);     //[ ]
         Route::get('conversations', [ConversationController::class, 'listConversations']);
-        Route::get('conversations/{conversation}', [ConversationController::class, 'showThisConversation']);
+        Route::get('show-conversation', [ConversationController::class, 'showThisConversation']);
         
-        Route::post('messages', [ConversationController::class, 'storeMessage']);
+        Route::post('send_message_to', [ConversationController::class, 'storeMessage']);
         Route::get('messages/{message}', [ConversationController::class, 'showMessage']);
 
         //Friends side
