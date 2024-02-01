@@ -100,4 +100,16 @@ class User extends Authenticatable
         return $this->belongsToMany(User::class, 'user_likes', 'liked_id', 'liker_id');
     }
 
+    public function reportedItems()
+    {
+        return $this->belongsToMany(Item::class, 'item_user_report')
+            ->withPivot('reason')
+            ->withTimestamps();
+    }
+
+    public function reports()
+    {
+        return $this->hasMany(Report::class);
+    }
+
 }

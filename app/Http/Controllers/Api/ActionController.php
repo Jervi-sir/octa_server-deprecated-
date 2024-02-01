@@ -8,6 +8,7 @@ use App\Models\ProductType;
 use Illuminate\Http\Request;
 use App\Models\UserFollowing;
 use App\Http\Controllers\Controller;
+use App\Models\Report;
 use Illuminate\Support\Facades\Auth;
 
 class ActionController extends Controller
@@ -235,6 +236,33 @@ class ActionController extends Controller
         } else {
             return response()->json(['message' => 'You have not liked this user.'], 404);
         }
+    }
+
+    public function reportItem(Request $request)
+    {
+        $request->validate([
+            'item_id' => 'required',
+            'reasons' => 'nullable',
+        ]);
+        
+        $data = $request->all();
+        $user = auth()->user();
+        $item = Item::findOrFail($data['item_id']);
+
+        if ($item->reports()->where('user_id', $user->id)->exists()) {
+            return response()->json(['message' => 'You have already reported this item.']);
+        }
+
+        $item->increment('nb_reports');
+
+        $item->reports()->create([
+            'user_id' => $user->id,
+            'reasons' => $request->input('reasons'), // You can get the reason from the request
+        ]);
+
+        $item->save();
+
+        return response()->json(['message' => 'Item reported successfully.']);
     }
 
 }

@@ -112,6 +112,9 @@ Route::prefix('auth/')->group(function() {
         Route::post('collection/delete_store', [CollectionController::class, 'removeStoreFromCollection']);
         Route::post('collection/delete', [CollectionController::class, 'deleteCollection']);
 
+        //Reports
+        Route::post('item/report', [ActionController::class, 'reportItem']);
+
     });
 }); 
 

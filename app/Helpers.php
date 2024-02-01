@@ -30,6 +30,7 @@ function getItem($item)
     //'images' => imageToArray($item->images->pluck('url')->toArray()),
     'isSaved' => $auth ? $item->savedByUsers->contains($auth->id) : null,
     'shop' => getShop($item->shop),
+    'posted_since' => $item->last_reposted
   ];
   return $result;
 }

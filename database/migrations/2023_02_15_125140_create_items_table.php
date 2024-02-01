@@ -29,6 +29,7 @@ return new class extends Migration
             $table->dateTime('last_reposted')->nullable();      //fill it with created_at also
             
             $table->string('wilaya_code')->nullable();
+            $table->integer('nb_reports')->default(0);
 
             $table->timestamps();
         });

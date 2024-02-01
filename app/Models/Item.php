@@ -41,4 +41,9 @@ class Item extends Model
         return $this->hasMany(Message::class);
     }
     
+    public function reports()
+    {
+        return $this->hasMany(Report::class);
+    }
+    
 }
