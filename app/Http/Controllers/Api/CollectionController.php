@@ -39,12 +39,6 @@ class CollectionController extends Controller
 
     public function listCollections(Request $request)
     {
-        /*$collections = Auth::user()
-            ->collections()
-            ->withCount('shops') // Adds a 'stores_count' attribute
-            ->orderBy('created_at', 'desc')
-            ->paginate(7);
-        */
         $userId = Auth::id();
         $shopId = $request->input('shop_id');
     
@@ -130,10 +124,12 @@ class CollectionController extends Controller
         if (!$collection) {
             return response()->json(['message' => 'Collection not found.'], 404);
         }
-
+        
         // Format each shop using the getShop function
-        $formattedShops = $collection->shops->map(function ($shop) {
-            return getShop($shop); // Assuming getShop is a function that formats the shop data
+        $formattedShops = $collection->shops->map(function ($shop) use ($collection) {
+            $nbNew = $shop->collections->find($collection->id)->pivot->nb_new ?? 0;
+            $formattedShop = getShop($shop);
+            return array_merge($formattedShop, ['nb_new' => $nbNew]);
         });
 
         return response()->json([

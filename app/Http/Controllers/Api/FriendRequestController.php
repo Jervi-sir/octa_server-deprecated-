@@ -34,16 +34,16 @@ class FriendRequestController extends Controller
             'receiver_id' => $receiverId,
         ]);
 
-        return response()->json($friendRequest, 201);
+        return response()->json(['status' => 'request_sent'], 201);
     }
 
     public function acceptRequest(Request $request)
     {
         $request->validate([
-            'user_id' => 'required', // Expect a user_id in the request
+            'receiver_id' => 'required', // Expect a user_id in the request
         ]);
         
-        $userId = $request->user_id;
+        $userId = $request->receiver_id;
         $authId = Auth::id();
     
         $friendRequest = FriendRequest::where('sender_id', $userId)
@@ -63,8 +63,35 @@ class FriendRequestController extends Controller
         // Delete the friend request
         $friendRequest->delete();
     
-        return response()->json(['message' => 'Friend request accepted.'], 200);
+        return response()->json(['status' => 'friends'], 201);
     }
+
+    public function rejectRequest(Request $request)
+    {
+        $request->validate([
+            'receiver_id' => 'required', // Expect a user_id in the request
+        ]);
+
+        $userId = $request->user_id;
+        $authId = Auth::id();
+
+        $friendRequest = FriendRequest::where('sender_id', $userId)
+                                        ->where('receiver_id', $authId)
+                                        ->first();
+
+        if (!$friendRequest) {
+            return response()->json(['message' => 'Friend request not found.'], 404);
+        }
+
+        // Delete the friend request to reject it
+        $friendRequest->delete();
+
+        return response()->json([
+            'message' => 'Friend request rejected.',
+            'status' => 'request_rejected',
+        ], 200);
+    }
+
 
     public function showReceivedRequests(Request $request)
     {

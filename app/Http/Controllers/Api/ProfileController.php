@@ -19,7 +19,7 @@ class ProfileController extends Controller
         $data['user'] = array_merge(getProfile($user), [
             'bio' => $user->bio,
             'contacts' => $user->contacts,
-            'nb_likes' => 0, //UserLike::where('liked_user_id', $userId)->count(),
+            'nb_likes' => 0, // Adjust this according to your actual logic
             'nb_friends' => $user->friends()->count(),
             'isPremium' => $user->isPremium,
         ]);

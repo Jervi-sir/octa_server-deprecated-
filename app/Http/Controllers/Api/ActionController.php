@@ -104,7 +104,6 @@ class ActionController extends Controller
         return response()->json('Following Successfully', 200);
     }
 
-
     public function getMyFollowings(Request $request)
     {
         $request->validate([
@@ -236,6 +235,27 @@ class ActionController extends Controller
         } else {
             return response()->json(['message' => 'You have not liked this user.'], 404);
         }
+    }
+
+    public function listLikedByUsers(Request $request)
+    {
+        $request->validate([
+            'page' => 'nullable',
+            'username' => 'nullable'
+        ]);
+
+        $user = Auth::user(); // Get the authenticated user
+
+        // Fetch the users who liked the authenticated user with pagination
+        $usersWhoLikedMe = $user->likedByUsers()->paginate(10); // 10 users per page
+        $data['users'] = [];
+        foreach ($usersWhoLikedMe as $user) {
+            $data['users'][] = getProfile($user);
+        }
+
+        return response()->json([
+            'users' => $data['users']
+        ]);
     }
 
     public function reportItem(Request $request)

@@ -71,7 +71,8 @@ class Shop extends Authenticatable
 
     public function collections()
     {
-        return $this->belongsToMany(Collection::class, 'store_collection');
+        return $this->belongsToMany(Collection::class, 'shop_collections')
+                    ->withPivot('nb_new');
     }
 
 }

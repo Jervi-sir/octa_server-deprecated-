@@ -193,24 +193,31 @@ function getProfile($user) {
 
   $isFriend = false;
   $followingStatus = null; // Default status
+  $isBlocked = false; // Initial assumption
 
   if ($auth && !$isMyAccount) {
-    // Check if they are friends
-    $isFriend = $auth->friends()->contains('id', $user->id);
-    if ($isFriend) {
-        $followingStatus = 'friends';
-    } else {
-        // Check for sent friend requests
-        $sentRequest = $auth->sentRequests()->where('receiver_id', $user->id)->exists();
-        if ($sentRequest) {
-            $followingStatus = 'request_sent';
-        } else {
-            // Check for received friend requests
-            $receivedRequest = $auth->receivedRequests()->where('sender_id', $user->id)->exists();
-            if ($receivedRequest) {
-                $followingStatus = 'request_received';
-            }
-        }
+    $isBlocking = $auth->blocking()->where('blocked_id', $user->id)->exists();
+    $isBlockedBy = $user->blockers()->where('blocker_id', $auth->id)->exists();
+    $isBlocked = $isBlocking || $isBlockedBy; // Either condition sets isBlocked to true
+
+    if(!$isBlocked) {
+      // Check if they are friends
+      $isFriend = $auth->friends()->contains('id', $user->id);
+      if ($isFriend) {
+          $followingStatus = 'friends';
+      } else {
+          // Check for sent friend requests
+          $sentRequest = $auth->sentRequests()->where('receiver_id', $user->id)->exists();
+          if ($sentRequest) {
+              $followingStatus = 'request_sent';
+          } else {
+              // Check for received friend requests
+              $receivedRequest = $auth->receivedRequests()->where('sender_id', $user->id)->exists();
+              if ($receivedRequest) {
+                  $followingStatus = 'request_received';
+              }
+          }
+      }
     }
   }
   $numberOfFriends = $user->friends()->count();
@@ -226,8 +233,8 @@ function getProfile($user) {
     'followingStatus' => $followingStatus,
     'isLiked' => $auth ? $user->likedByUsers->contains('id', $auth->id) : false,
     'isMyAccount' => $isMyAccount,
-    'number_friends' => $numberOfFriends, // Add the number of friends
-    'number_likes' => $numberOfLikes, // Add the number of likes
-
+    'number_friends' => $numberOfFriends, 
+    'number_likes' => $numberOfLikes, 
+    'isBlocked' => $isBlocked, 
   ];
 }

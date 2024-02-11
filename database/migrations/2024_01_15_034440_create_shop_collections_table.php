@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('shop_collections', function (Blueprint $table) {
             $table->unsignedBigInteger('shop_id');
             $table->unsignedBigInteger('collection_id');
+            $table->integer('nb_new')->default(0);
             $table->timestamps();
         
             $table->foreign('shop_id')->references('id')->on('shops')->onDelete('cascade');

@@ -188,4 +188,46 @@ class ConversationController extends Controller
         return response()->json($message);
     }                       
 
+    public function unsendMessage(Request $request)
+    {
+        $validated = $request->validate([
+            'message_id' => 'required|exists:messages,id',
+        ]);
+
+        $user = Auth::user();
+        $messageId = $validated['message_id'];
+
+        $message = Message::where('id', $messageId)
+                        ->where('sender_id', $user->id) // Ensure the requester is the sender
+                        ->firstOrFail();
+
+        // For soft delete
+        $message->delete();
+
+        return response()->json(['message' => 'Message unsent successfully.']);
+    }
+
+
+    public function deleteConversation(Request $request, )
+    {
+        $validated = $request->validate([
+            'conversation_id' => 'required|exists:conversations,id',
+        ]);
+
+        $user = Auth::user();
+
+        $conversation = Conversation::where('id', $request->conversation_id)
+                            ->where(function($query) use ($user) {
+                                $query->where('user1_id', $user->id)
+                                    ->orWhere('user2_id', $user->id);
+                            })->first();
+
+        if (!$conversation) {
+            return response()->json(['message' => 'Conversation not found or access denied.'], 404);
+        }
+
+        $conversation->delete();
+        return response()->json(['message' => 'Conversation deleted successfully.']);
+    }
+
 }
