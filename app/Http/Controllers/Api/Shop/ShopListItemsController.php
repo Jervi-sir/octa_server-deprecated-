@@ -17,27 +17,15 @@ class ShopListItemsController extends Controller
 
         $shop = auth()->user();
         $category_id = ProductType::where('name', 'like', $category_name)->first()->id; // You'll need to map this to an actual ID
-        $products = $shop->items()->where('product_type_id', $category_id)->orderBy('id', 'desc')->paginate(7);
+        $products = $shop->rls_items()->where('product_type_id', $category_id)->orderBy('id', 'desc')->paginate(7);
         //$products = Item::where('product_type_id', $category_id)->orderBy('id', 'desc')->paginate(7);
         
         $data['products'] = [];
         
         foreach ($products as $index => $product) {
             //$selected_image = json_decode($product->images)[0];
-           // $image = strpos($selected_image, "https") !== false ? $selected_image : 'http://192.168.1.105:8000' . Storage::url($selected_image);
-            
-            $data['products'][$index] = [
-                'id' => $product->id,
-                'name' => $product->name,
-                'thumbnail' => !empty($product->images) ? json_decode($product->images)[0] : null, // or provide a default image URL
-                'price' => $product->price,
-                'product_type_id' => $product->product_type_id,
-                'is_expired' => checkIfItemIsExpired($product->last_reposted),
-                'last_reposted' => $product->last_reposted,
-                'created_at' => $product->created_at,
-                'shop_name' => $shop->shop_name,
-                'shop_image' => $shop->shop_image,
-            ];
+            //$image = strpos($selected_image, "https") !== false ? $selected_image : 'http://192.168.1.105:8000' . Storage::url($selected_image);
+            $data['products'][$index] = getProductAsShop($product);
         }
 
         // Getting the next page number
@@ -64,7 +52,7 @@ class ShopListItemsController extends Controller
         $shop = auth()->user();
         $category_id = ProductType::where('name', 'like', $category_name)->first()->id;
         
-        $products = $shop->items()->where('product_type_id', $category_id)->where('id', '<=', $start_id)->orderBy('id', 'desc')->paginate(7);
+        $products = $shop->rls_items()->where('product_type_id', $category_id)->where('id', '<=', $start_id)->orderBy('id', 'desc')->paginate(7);
         //$products = Item::where('product_type_id', $category_id)->where('id', '<=', $start_id)->orderBy('id', 'desc')->paginate(7);
     
         $data['products'] = [];

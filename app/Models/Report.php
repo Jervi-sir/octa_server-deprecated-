@@ -10,12 +10,12 @@ class Report extends Model
     use HasFactory;
     protected $fillable = ['user_id', 'reasons'];
 
-    public function user()
+    public function rls_user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function item()
+    public function rls_item()
     {
         return $this->belongsTo(Item::class);
     }

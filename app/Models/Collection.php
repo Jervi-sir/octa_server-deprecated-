@@ -14,7 +14,7 @@ class Collection extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function shops()
+    public function rls_shops()
     {
         return $this->belongsToMany(Shop::class, 'shop_collections');
     }

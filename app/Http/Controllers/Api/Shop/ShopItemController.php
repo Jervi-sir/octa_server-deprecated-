@@ -27,21 +27,22 @@ class ShopItemController extends Controller
 
         $data = $request->all();
         $user = auth()->user();
-        $shop = $user->shop;
+        
+        $shop = $user;
 
         $item = new Item;
         $item->shop_id  = $shop->id;
-        $item->user_id  = $user->id;
-        $item->details  = $data['details']  ?? null; // Or you can set this as needed
+        $item->product_type_id  =  $data['product_type_id']; // You'll need to map this to an actual ID
+        $item->product_type     =  ProductType::find($data['product_type_id'])->name; // You'll need to map this to an actual ID
         $item->name     = $data['name']     ?? 'Untitled';
-        $item->sizes    = $data['sizes']    ?? null; // default
-        $item->stock    = $data['stock']    ?? 1; // default
+        $item->details  = $data['details']  ?? null; // Or you can set this as needed
         $item->price    = $data['price']    ?? null;
         $item->genders  = $data['genders']  ?? null;
         $item->images   = $data['images'];
-        $item->product_type_id =  $data['product_type_id']; // You'll need to map this to an actual ID
-        $item->save();
-        $item->last_reposted = $item->created_at;
+        $item->keywords = $data['name'] . ', ' .  $data['details']; // default
+        $item->wilaya_code  = $data['wilaya_number'];
+
+        $item->last_reposted = now();
         $item->save();
         
         //$item->price = str_replace(' ', '', $data['productPrice']);
@@ -50,7 +51,7 @@ class ShopItemController extends Controller
         // Save base64 images as files and store their paths
         /*
         $imagePaths = [];
-        foreach ($data['base64Images'] as $base64Image) {
+        foreach ($data['images'] as $base64Image) {
             if ($base64Image !== null) {
                 $imageName = uniqid() . '.png';
                 $imagePath = 'public/images/' . $imageName;
@@ -74,9 +75,12 @@ class ShopItemController extends Controller
             'item_id'   => 'required|numeric',
         ]);
         
-        $item = Item::find($request->item_id);
+        $shop = auth()->user();
+        
+        $item =  $shop->rls_items->find($request->item_id);
         $item->last_reposted = Carbon::now();
         $item->isActive = 1;
+        
         $item->save();
 
         return response()->json([
@@ -89,26 +93,10 @@ class ShopItemController extends Controller
     public function editItem(Request $request, $item_id) 
     {
         $user = auth()->user();
-        $shop = $user->shop;
-        $item = $shop->items->find($item_id);
+        $shop = $user;
+        $item = $shop->rls_items->find($item_id);
         
-        $data['item'] = [
-            'id' => $item->id,
-            'product_type_id' => $item->product_type_id,
-            'wilaya_id' => $item->wilaya_id,
-
-            'name' => $item->name,
-            'details' => $item->details,
-            'sizes' => $item->sizes,
-            'stock' => $item->stock,
-            'price' => $item->price,
-            'product_type' => ProductType::find($item->product_type_id)->name,
-            'genders' => $item->genders,
-            'images' => json_decode($item->images),
-            'keywords' => $item->keywords,
-            'isActive' => $item->isActive,
-            'last_reposted' => $item->last_reposted,
-        ];
+        $data['item'] = getItem($item);
 
         return response()->json([
             'success' => true,
@@ -119,33 +107,36 @@ class ShopItemController extends Controller
 
     public function updateItem(Request $request, $item_id) {
 
+        
         $request->validate([
             'product_type'   => 'required',
             'details'   => 'nullable|string',
             'name'      => 'nullable|string',
-            'price'     => 'nullable|numeric',
+            'price'     => 'nullable|string',
             'genders'   => 'nullable|string',
-            'base64Images'    => 'required',
+            'images'    => 'required|string',
         ]);
-
+        
         $data = $request->all();
 
         $user = auth()->user();
-        $shop = $user->shop;
-        $item = $shop->items->find($item_id);
+        $shop = $user;
+        $item = $shop->rls_items->find($item_id);
 
-        $item->shop_id  = $shop->id;
-        $item->user_id  = $user->id;
-        $item->details  = $data['details']  ?? null; // Or you can set this as needed
-        $item->name     = $data['name']     ?? 'Untitled';
-        $item->price    = $data['price']    ?? null;
-        $item->genders  = $data['genders']  ?? null;
-        $item->images   = $data['base64Images'];
         $item->product_type_id =  ProductType::where('name', 'like', $data['product_type'])->first()->id; // You'll need to map this to an actual ID
         $item->product_type =  $data['product_type']; // You'll need to map this to an actual ID
+
+        $item->name     = $data['name']     ?? 'Untitled';
+        $item->details  = $data['details']  ?? null; // Or you can set this as needed
+        $item->price    = $data['price']    ?? null;
+        $item->genders  = $data['genders']  ?? null;
+        $item->keywords = $data['name'] . ', ' .  $data['details']; // default
+
+        $item->images   = $data['images'];
         
+        /*
         $imagePaths = [];
-        foreach ($data['base64Images'] as $base64Image) {
+        foreach ($data['images'] as $base64Image) {
             if ($base64Image !== null) {
                 // Check if the string is a URL
                 if (filter_var($base64Image, FILTER_VALIDATE_URL)) {
@@ -159,8 +150,9 @@ class ShopItemController extends Controller
                 }
             }
         }
-        
         $item->images = json_encode($imagePaths);
+        */
+        $item->images = $request->images;
 
         $item->save();
 
@@ -174,8 +166,8 @@ class ShopItemController extends Controller
         $data = $request->all();
 
         $user = auth()->user();
-        $shop = $user->shop;
-        $item =  $shop->items->find($item_id);
+        $shop = $user;
+        $item =  $shop->rls_items->find($item_id);
         $item->delete();
 
         return response()->json([

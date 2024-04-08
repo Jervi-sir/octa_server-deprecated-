@@ -112,7 +112,7 @@ class MessageController extends Controller
         $userId = Auth::id();
         
         $authUser = Auth::user();
-        $friends = $authUser->friends();
+        $friends = $authUser->rls_friends();
 
         $isFriend = $friends->contains('id', $friendId);
 

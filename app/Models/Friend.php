@@ -19,7 +19,7 @@ class Friend extends Model
     /**
      * Get the user associated with the friendship.
      */
-    public function user()
+    public function rls_user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
@@ -27,7 +27,7 @@ class Friend extends Model
     /**
      * Get the friend user associated with the friendship.
      */
-    public function friend()
+    public function rls_friend()
     {
         return $this->belongsTo(User::class, 'friend_id');
     }

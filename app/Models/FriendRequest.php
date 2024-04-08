@@ -20,7 +20,7 @@ class FriendRequest extends Model
     /**
      * Get the user that sent the friend request.
      */
-    public function sender()
+    public function rls_sender()
     {
         return $this->belongsTo(User::class, 'sender_id');
     }
@@ -28,7 +28,7 @@ class FriendRequest extends Model
     /**
      * Get the user that received the friend request.
      */
-    public function receiver()
+    public function rls_receiver()
     {
         return $this->belongsTo(User::class, 'receiver_id');
     }

@@ -19,19 +19,19 @@ class ConversationController extends Controller
         $perPage = 10; // Define how many items per page
     
         // Fetch conversations with the latest message for each
-        $allConversations = $user->conversations()
-                        ->with(['user1', 'user2', 'messages' => function ($query) {
+        $allConversations = $user->rls_conversations()
+                        ->with(['user1', 'rls_', 'messages' => function ($query) {
                             $query->latest()->first();
                         }])
                         ->get()
                         ->map(function ($conversation) use ($userId) {
                     // Determine the friend's details (assuming the friend is not the current user)
-                    $friend = ($conversation->user1_id == $userId) ? $conversation->user2 : $conversation->user1;
+                    $friend = ($conversation->user1_id == $userId) ? $conversation->rls_user2 : $conversation->user1;
 
-                    $lastMessage = $conversation->messages->first();
+                    $lastMessage = $conversation->rls_messages->first();
 
                     // Count unread messages in this conversation
-                    $unreadCount = $conversation->messages->where('read_status', false)->count();
+                    $unreadCount = $conversation->rls_messages->where('read_status', false)->count();
 
                     return [
                         'id' => $conversation->id,
@@ -75,12 +75,12 @@ class ConversationController extends Controller
         $conversation = Conversation::where('id', $request->conversation_id)
             ->where(function ($query) use ($user) {
                 $query->where('user1_id', $user->id)
-                    ->orWhere('user2_id', $user->id);
+                    ->orWhere('rls__id', $user->id);
             })
             ->firstOrFail();
 
         // Identify the friend in the conversation
-        $friendId = ($conversation->user1_id == $user->id) ? $conversation->user2_id : $conversation->user1_id;
+        $friendId = ($conversation->user1_id == $user->id) ? $conversation->rls__id : $conversation->user1_id;
         $friend = User::select('id', 'username', 'profile_images')->find($friendId);
         $data['friend'] = [
             'id' => $friend->id,
@@ -94,7 +94,7 @@ class ConversationController extends Controller
         ];
 
         // Paginate the messages
-        $messages = $conversation->messages()
+        $messages = $conversation->rls_messages()
                                 ->orderBy('created_at', 'desc')
                                 ->paginate($perPage, ['*'], 'page', $request->page ?? 1);
 
@@ -109,7 +109,7 @@ class ConversationController extends Controller
                     : null;
         
         $data['messages'] = [];
-        foreach ($messages->items() as $index => $message) {
+        foreach ($messages->rls_items() as $index => $message) {
             $data['messages'][$index] = [
                 "id" => $message->id,
                 "conversation_id" => $message->conversation_id,
@@ -146,7 +146,7 @@ class ConversationController extends Controller
     
         $user = Auth::user();
         $recipientId = $validatedData['recipient_id'];
-        $friends = $user->friends();
+        $friends = $user->rls_friends();
 
         // Check if they are friends
         if (!$friends->contains('id', $recipientId)) {
@@ -157,11 +157,11 @@ class ConversationController extends Controller
         $conversation = Conversation::firstOrCreate(
             [
                 'user1_id' => $user->id, 
-                'user2_id' => $recipientId
+                'rls__id' => $recipientId
             ],
             [
                 'user1_id' => $user->id, 
-                'user2_id' => $recipientId
+                'rls__id' => $recipientId
             ]
         );
     
@@ -182,7 +182,7 @@ class ConversationController extends Controller
         $message = Message::where('id', $messageId)
                           ->whereHas('conversation', function ($query) use ($user) {
                               $query->where('user1_id', $user->id)
-                                    ->orWhere('user2_id', $user->id);
+                                    ->orWhere('rls__id', $user->id);
                                 })->firstOrFail();
                                 
         return response()->json($message);
@@ -219,7 +219,7 @@ class ConversationController extends Controller
         $conversation = Conversation::where('id', $request->conversation_id)
                             ->where(function($query) use ($user) {
                                 $query->where('user1_id', $user->id)
-                                    ->orWhere('user2_id', $user->id);
+                                    ->orWhere('rls__id', $user->id);
                             })->first();
 
         if (!$conversation) {

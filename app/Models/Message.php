@@ -12,24 +12,24 @@ class Message extends Model
 
 
     // Message belongs to a receiver
-    public function receiver()
+    public function rls_receiver()
     {
         return $this->belongsTo(User::class, 'receiver_id');
     }
 
     // If using items
-    public function item()
+    public function rls_item()
     {
         return $this->belongsTo(Item::class);
     }
 
     
-    public function conversation()
+    public function rls_conversation()
     {
         return $this->belongsTo(Conversation::class);
     }
 
-    public function sender()
+    public function rls_sender()
     {
         return $this->belongsTo(User::class, 'sender_id');
     }

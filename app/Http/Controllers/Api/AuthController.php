@@ -76,6 +76,7 @@ class AuthController extends Controller
                 'status' => true,
                 'message' => 'User Created Successfully',
                 'user' => $user,
+                'my_account' => getMyProfile($user)
             ], 200);
 
         } catch (\Throwable $th) {
@@ -117,6 +118,7 @@ class AuthController extends Controller
                 'status' => true,
                 'message' => 'User Logged In Successfully',
                 'access_token' => $user->createToken($request->header('User-Agent'))->plainTextToken,
+                'my_account' => getMyProfile($user)
             ], 200);
 
         } catch (\Throwable $th) {

@@ -1,166 +1,164 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\ShopController;
-use App\Http\Controllers\Api\ShowController;
 use App\Http\Controllers\Api\ActionController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BlockController;
-use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\CollectionController;
 use App\Http\Controllers\Api\ConversationController;
-use App\Http\Controllers\Api\SearchController;
+use App\Http\Controllers\Api\FriendRequestController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\Shop\ShopAuthController;
 use App\Http\Controllers\Api\Shop\ShopItemController;
-use App\Http\Controllers\Api\Shop\ShopPaymentController;
-use App\Http\Controllers\Api\Shop\ShopProfileController;
 use App\Http\Controllers\Api\Shop\ShopListItemsController;
-use App\Http\Controllers\Api\FriendRequestController;
-use App\Http\Controllers\Api\MessageController;
+use App\Http\Controllers\Api\Shop\ShopProfileController;
+use App\Http\Controllers\Api\ShopController;
+use App\Http\Controllers\Api\ShowController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-*/
-/*-- Shop --*/
-Route::get('test', fn() => response()->json('absc'));    
-Route::prefix('shop/')->group(function() {
-    //Route::post ('register', [ShopAuthController::class, 'createShop']);                                     //[]
-    Route::post ('login',    [ShopAuthController::class, 'loginShop']);                                      //[V]
-    
+Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+Route::get('test', fn() => response()->json('absc'));
+Route::prefix('octa_store/')->group(function () {
+    Route::post('register', [ShopAuthController::class, 'createShop']); //!not done
+    Route::post('login', [ShopAuthController::class, 'loginShop']);     //*Done
+
     Route::middleware(['auth:shops'])->group(function () {
-        //Route::get('validate_token', [ShopAuthController::class, 'validateToken']); //[x]
-        Route::post ('logout', [ShopAuthController::class, 'logoutShop']);                                  //[V]
+    Route::post('logout', [ShopAuthController::class, 'logoutShop']);           //*Done
+    Route::get('validate_token', [ShopAuthController::class, 'validateToken']); //*Done
 
-        Route::post ('publish_item',            [ShopItemController::class, 'publishItem']);                //[V]
-        Route::get  ('edit_item/{item_id}',     [ShopItemController::class, 'editItem']);                   //[V]
-        Route::post ('update_item/{item_id}',   [ShopItemController::class, 'updateItem']);                 //[V]
-        Route::post ('delete_item/{item_id}',   [ShopItemController::class, 'deleteItem']);                 //[V]
-        
-        Route::get  ('my_store',                    [ShopController::class,         'myStoreInfo']);        //[V]
-        Route::get  ('show_my_followers',           [ShopController::class,         'showMyFollowers']);    //[V]
-        Route::get  ('my_products/{category_name}', [ShopListItemsController::class,'listMyProducts']);     //[V]
-        Route::get  ('show_product/{product_id}',   [ShopListItemsController::class,'']);                   //[ ]
-        Route::post ('repost',                      [ShopItemController::class,     'repostItem']);         //[V]
-        
-        Route::post ('update_pic_name',      [ShopProfileController::class, 'updatePic_Name']);              //[V]
-        Route::post ('update_socials',       [ShopProfileController::class, 'updateSocialList']);            //[V]
-        Route::post ('update_description',   [ShopProfileController::class, 'updateBio']);                   //[V]
-        Route::post ('update_location',      [ShopProfileController::class, 'updateLocation']);              //[V]
-        
-        //Route::post ('send_credit_to',       [ShopPaymentController::class, 'sendCredit']);          //[V]
-        //Route::post ('recharge_my_account',  [ShopPaymentController::class, 'rechargeMyAccount']);   //[V]
-        //Route::get  ('recharging_history',   [ShopPaymentController::class, 'rechargingHistory']);   //[V]
-        //Route::get  ('credit_history',       [ShopPaymentController::class, 'creditHistory']);       //[V]
-        //Route::post ('verify_account',       [ShopPaymentController::class, 'verifyUser']);       //[V]
-        //Route::post('verify_clients_payeer', [ShopPaymentController::class, '']); //[X]
-        //Route::get('payment_history', [ShopProfileController::class, 'paymentHistory']);
-        //Route::get('my_products_offset/{category_name}/{start_id}', [ShopListItemsController::class, 'listMyProductsWithOffset']); //[X]
+    Route::prefix('items')->group(function () {
+        Route::post('publish', [ShopItemController::class, 'publishItem']);                 //*Done
+        Route::get('item/{item_id}', [ShopItemController::class, '']);                      //*Done 
+        Route::get('item_edit/{item_id}', [ShopItemController::class, 'editItem']);         //*Done 
+        Route::post('item_update/{item_id}', [ShopItemController::class, 'updateItem']);    //*Done 
+        Route::post('item_delete/{item_id}', [ShopItemController::class, 'deleteItem']);    //*Done 
+        Route::post('item_repost', [ShopItemController::class, 'repostItem']);              //*Done
+        Route::get('category/{category_name}', [ShopListItemsController::class, 'listMyProducts']);//*Done
     });
-}); 
 
-
-Route::prefix('auth/')->group(function() {
-    Route::post ('semi-register',   [AuthController::class,  'semiCreateUser']);    //[V]
-    Route::post ('login',       [AuthController::class,  'loginUser']);     //[V]
-
-    Route::middleware(['auth:users'])->group(function () {
-        Route::post ('logout',  [AuthController::class, 'logoutUser']);         //[V]
-        Route::post ('complete-register',   [AuthController::class,  'completeCreateUser']);    //[V]
-
-        Route::get  ('show_my_profile',     [ProfileController::class, 'showMyProfile']);   //[V]
-        Route::post ('update_my_profile',   [ProfileController::class, 'updateMyProfile']);   //[]
-        Route::get  ('show_my_map',         [ProfileController::class, 'showMyMap']);       //[V]
-        Route::get  ('edit_my_map',         [ProfileController::class, 'showMyProfile']);   //[X]
-        Route::post ('update_my_map',       [ProfileController::class, 'showMyProfile']);   //[X]
-
-        Route::post ('follow_user',          [ActionController::class, 'followUser']);      //[V]
-        Route::post ('un_follow_user',       [ActionController::class, 'unfollowUser']);    //[V]
-        Route::get  ('get_followings',  [ActionController::class, 'getMyFollowings']);      //[V]
-        Route::get  ('get_followers',   [ActionController::class, 'getMyFollowers']);       //[V]
-
-        Route::post('like_user', [ActionController::class,  'likeUser']); //[V]          //[]
-        Route::post('unlike_user', [ActionController::class,  'unlikeUser']); //[V]          //[]
-        Route::get('list-who-liked-me', [ActionController::class, 'listLikedByUsers']);
-
-        
-        Route::get  ('get_saved_items', [ActionController::class,  'getSavedItems']); //[V]          //[]
-        Route::post ('save_item',       [ActionController::class,  'saveItem']);     //[V]
-        Route::post ('un_save_item',    [ActionController::class,  'unSaveItem']);   //[V]
-
-
-        //Shares side
-        Route::get('suggest_friend_to_share_with',  [ActionController::class,  'suggestFriendToShareWith']);     //[ ]
-        Route::get('conversations', [ConversationController::class, 'listConversations']);
-        Route::get('show-conversation', [ConversationController::class, 'showThisConversation']);
-        
-        Route::post('send_message_to', [ConversationController::class, 'storeMessage']);
-        //Route::get('messages/{message}', [ConversationController::class, 'showMessage']);
-        Route::post('unsend-message', [ConversationController::class, 'unsendMessage']);
-
-        //Friends side
-        Route::post('friend-request/send', [FriendRequestController::class, 'sendRequest']);       //[V]
-        Route::post('friend-request/accept', [FriendRequestController::class, 'acceptRequest']);
-        Route::post('friend-request/reject', [FriendRequestController::class, 'rejectRequest']);
-        Route::get('friend-requests/received', [FriendRequestController::class, 'showReceivedRequests']);   //[V]
-        Route::get('friend-requests/sent', [FriendRequestController::class, 'showSentRequests']);  //[V]
-        Route::get('friend-list', [FriendRequestController::class, 'showFriendList']);     //[V]
-        
-        //Collection
-        Route::post('collection', [CollectionController::class, 'createCollection']);
-        Route::get('collection', [CollectionController::class, 'listCollections']);
-        Route::post('collection/add_shop', [CollectionController::class, 'saveStoreToCollection']);
-        Route::get('collection/show_details', [CollectionController::class, 'getCollectionDetails']);
-        Route::post('collection/update', [CollectionController::class, 'updateCollection']);
-        Route::post('collection/delete_store', [CollectionController::class, 'removeStoreFromCollection']);
-        Route::post('collection/delete', [CollectionController::class, 'deleteCollection']);
-
-        //Reports
-        Route::post('item/report', [ActionController::class, 'reportItem']);
-
-
-        //Blocks
-        Route::post('user/block', [BlockController::class, 'blockUser']);
-        Route::post('user/unblock', [BlockController::class, 'unblockUser']);
-        Route::get('blocked-users', [BlockController::class, 'listBlockedUsers']);
-
+    Route::prefix('my_store')->group(function () {
+        Route::get('show', [ShopController::class, 'myStoreInfo']);                         //*Done
+        Route::get('show_my_followers', [ShopController::class, 'showMyFollowers']);        //*Done
+        Route::post('update_pic_name', [ShopProfileController::class, 'updatePic_Name']);   //*Done
+        Route::post('update_socials', [ShopProfileController::class, 'updateSocialList']);  //*Done
+        Route::post('update_description', [ShopProfileController::class, 'updateBio']);     //*Done
+        Route::post('update_location', [ShopProfileController::class, 'updateLocation']);   //*Done
     });
-}); 
 
-RouteStores();
-RouteUsers();
-RouteItems();
-
-Route::prefix('auth/')->middleware(['auth:users'])->group(function () {
-    RouteStores();
-    RouteUsers();
-    RouteItems();
+    //Route::post ('send_credit_to',       [ShopPaymentController::class, 'sendCredit']);          
+    //Route::post ('recharge_my_account',  [ShopPaymentController::class, 'rechargeMyAccount']);   
+    //Route::get  ('recharging_history',   [ShopPaymentController::class, 'rechargingHistory']);   
+    //Route::get  ('credit_history',       [ShopPaymentController::class, 'creditHistory']);       
+    //Route::post ('verify_account',       [ShopPaymentController::class, 'verifyUser']);       
+    //Route::post('verify_clients_payeer', [ShopPaymentController::class, '']); 
+    //Route::get('payment_history', [ShopProfileController::class, 'paymentHistory']);
+    //Route::get('my_products_offset/{category_name}/{start_id}', [ShopListItemsController::class, 'listMyProductsWithOffset']); 
+    });
 });
 
 
-/*-------- Functions --------*/
 
+Route::prefix('octa_prizes/')->group(function () {
+    Route::post('login', [AuthController::class, 'loginUser']);             //*Done
+    Route::post('semi-register', [AuthController::class, 'semiCreateUser']);//!not done
+
+    RouteStores();
+    RouteUsers();
+    RouteItems();
+
+    Route::middleware(['auth:users'])->group(function () {
+        Route::prefix('auth_search/')->group(function () {      //*Done
+            RouteStores();
+            RouteUsers();
+            RouteItems();
+        });
+
+        Route::post('item/report', [ActionController::class, 'reportItem']);                //*Done
+
+        Route::post('logout', [AuthController::class, 'logoutUser']);                       //*Done
+        Route::post('complete-register', [AuthController::class, 'completeCreateUser']);    //!not done
+
+        Route::prefix('profile')->group(function () {
+            Route::get('show', [ProfileController::class, 'showMyProfile']);                //*Done
+            Route::post('update', [ProfileController::class, 'updateMyProfile']);           //*Done
+        });
+        Route::prefix('follow')->group(function () {
+            Route::post('do', [ActionController::class, 'followUser']);                     //*Done
+            Route::post('undo', [ActionController::class, 'unfollowUser']);                 //*Done
+            Route::get('get_followings', [ActionController::class, 'getMyFollowings']);     //*Done
+            Route::get('get_followers', [ActionController::class, 'getMyFollowers']);       //*Done
+        });
+        Route::prefix('like_user')->group(function () {
+            Route::post('do', [ActionController::class, 'likeUser']);                       //*Done
+            Route::post('undo', [ActionController::class, 'unlikeUser']);                   //*Done
+            Route::get('list-who-i-liked', [ActionController::class, 'listUsersILiked']);   //*Done
+            Route::get('list-who-liked-me', [ActionController::class, 'listLikedByUsers']); //*Done
+        });
+        Route::prefix('save_item')->group(function () {
+            Route::post('do', [ActionController::class, 'saveItem']);               //*Done
+            Route::post('undo', [ActionController::class, 'unSaveItem']);           //*Done
+            Route::get('get_saved', [ActionController::class, 'getSavedItems']);    //*Done
+        });
+        Route::prefix('friend_request')->group(function () {
+            Route::post('send', [FriendRequestController::class, 'sendRequest']);               //*Done
+            Route::post('accept', [FriendRequestController::class, 'acceptRequest']);           //*Done
+            Route::post('reject', [FriendRequestController::class, 'rejectRequest']);           //*Done
+            Route::get('received', [FriendRequestController::class, 'showReceivedRequests']);   //*Done
+            Route::get('sent', [FriendRequestController::class, 'showSentRequests']);           //*Done
+            Route::get('friend-list', [FriendRequestController::class, 'showFriendList']);      //*Done
+        });
+        Route::prefix('collection')->group(function () {
+            Route::post('create', [CollectionController::class, 'createCollection']);                //*Done
+            Route::get('list', [CollectionController::class, 'listCollections']);                    //*Done
+            Route::get('show', [CollectionController::class, 'getCollectionDetails']);               //*Done
+            Route::post('update', [CollectionController::class, 'updateCollection']);                //*Done
+            Route::post('delete', [CollectionController::class, 'deleteCollection']);                //*Done
+            Route::post('add_shop', [CollectionController::class, 'saveStoreToCollection']);         //*Done
+            Route::post('remove_store', [CollectionController::class, 'removeStoreFromCollection']); //*Done
+        });
+        Route::prefix('friends')->group(function () {
+            Route::post('block', [BlockController::class, 'blockUser']);                    //*Done
+            Route::post('unblock', [BlockController::class, 'unblockUser']);                //*Done
+            Route::get('list_blocked', [BlockController::class, 'listBlockedUsers']);       //*Done
+        });
+        Route::prefix('conversations')->group(function () {
+            Route::get('list', [ConversationController::class, 'listConversations']);       //*Done
+            Route::get('show', [ConversationController::class, 'showThisConversation']);    //*Done
+            Route::post('send_message_to', [ConversationController::class, 'storeMessage']);//*Done
+            Route::post('unsend_message', [ConversationController::class, 'unsendMessage']);//*Done
+            Route::get('suggest_friend_to_share_with', [ActionController::class, 'suggestFriendToShareWith']);//[]
+        });
+        //Route::get('messages/{message}', [ConversationController::class, 'showMessage']);
+        //Route::get('show_my_map', [ProfileController::class, 'showMyMap']);             //[]
+        //Route::get('edit_my_map', [ProfileController::class, 'showMyProfile']);         //[]
+        //Route::post('update_my_map', [ProfileController::class, 'showMyProfile']);      //[]
+    });
+});
+
+/*-------- Functions --------*/
+ function RouteItems() {
+    Route::prefix('item/')->group(function () {
+        Route::get('search', [SearchController::class, 'search']);          //[]
+        Route::get('show/{item_id}', [ShowController::class, 'showItem']);  //[done]
+        Route::get('suggest', [SearchController::class, 'suggest']);        //[done]
+        Route::get('category/{category_name}', [SearchController::class, 'byCategory']);//[done]
+    });
+}
 function RouteStores() {
-    Route::prefix('store/')->group(function() {
-        Route::get('show/{shopId}',                 [ShowController::class,  'showShop']);      //[V]
-        Route::get('show/{shopId}/{category_name}',   [ShowController::class,  'showShop']);    //[V]
-        Route::get('search',                       [SearchController::class,'searchShop']);   //[]
+    Route::prefix('store/')->group(function () {
+        Route::get('search', [SearchController::class, 'searchShop']);                      //[]
+        Route::get('show/{shopId}', [ShowController::class, 'showShop']);                   //[done]
+        Route::get('show/{shopId}/{category_name}', [ShowController::class, 'showShop']);   //[done]
     });
 }
 function RouteUsers() {
-    Route::prefix('user/')->group(function() {
-        Route::get('show/{userId}',     [ShowController::class,  'showUser']);      //[V]
-        Route::get('search', [SearchController::class,'searchProfile']);   //[]
-    }); 
+    Route::prefix('user/')->group(function () {
+        Route::get('search', [SearchController::class, 'searchProfile']);   //[]
+        Route::get('show/{userId}', [ShowController::class, 'showUser']);   //[done]
+    });
 }
 
-function RouteItems() {
-    Route::prefix('item/')->group(function() {
-        Route::get('search',           [SearchController::class,   'search']);         //[V]
-        Route::get('show/{item_id}',    [ShowController::class,     'showItem']);       //[V]
-        Route::get('suggest',           [SearchController::class,   'suggest']);        //[V]
-        Route::get('category/{category_name}', [SearchController::class,   'byCategory']);        //[V]
-    }); 
-}

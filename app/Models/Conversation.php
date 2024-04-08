@@ -11,22 +11,22 @@ class Conversation extends Model
 
     protected $fillable = ['user1_id', 'user2_id']; // Add this line
 
-    public function users()
+    public function rls_users()
     {
         return $this->belongsToMany(User::class);
     }
 
-    public function user1()
+    public function rls_user1()
     {
         return $this->belongsTo(User::class, 'user1_id');
     }
 
-    public function user2()
+    public function rls_user2()
     {
         return $this->belongsTo(User::class, 'user2_id');
     }
     
-    public function messages()
+    public function rls_messages()
     {
         return $this->hasMany(Message::class);
     }

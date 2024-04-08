@@ -55,7 +55,7 @@ class CollectionController extends Controller
         foreach ($collections as $index => $collection) {
             $hasShop = false;
             if ($shopId) {
-                $hasShop = $collection->shops()->where('shop_id', $shopId)->exists();
+                $hasShop = $collection->rls_shops()->where('shop_id', $shopId)->exists();
             }
             
             $data['collections'][$index] = [
@@ -64,7 +64,8 @@ class CollectionController extends Controller
                 'thumbnail' => $collection->thumbnail,
                 'shops_count' => $collection->shops_count,
                 'contains_shop' => $hasShop,
-                'last_shop_added_at' => $collection->last_shop_added_at
+                'last_shop_added_at' => $collection->last_shop_added_at,
+                'stores_count' => $collection->rls_shops->count()
             ];
         }
 
@@ -96,12 +97,12 @@ class CollectionController extends Controller
         }
 
         // Check if the shop is already in the collection
-        if ($collection->shops()->where('shop_id', $shop_id)->exists()) {
+        if ($collection->rls_shops()->where('shop_id', $shop_id)->exists()) {
             return response()->json(['message' => 'shop is already in the collection.'], 409);
         }
 
         // Add the shop to the collection
-        $collection->shops()->attach($shop_id);
+        $collection->rls_shops()->attach($shop_id);
 
         return response()->json(['message' => 'shop added to collection successfully.']);
     }
@@ -126,8 +127,8 @@ class CollectionController extends Controller
         }
         
         // Format each shop using the getShop function
-        $formattedShops = $collection->shops->map(function ($shop) use ($collection) {
-            $nbNew = $shop->collections->find($collection->id)->pivot->nb_new ?? 0;
+        $formattedShops = $collection->rls_shops->map(function ($shop) use ($collection) {
+            $nbNew = $shop->rls_collections->find($collection->id)->pivot->nb_new ?? 0;
             $formattedShop = getShop($shop);
             return array_merge($formattedShop, ['nb_new' => $nbNew]);
         });
@@ -137,6 +138,7 @@ class CollectionController extends Controller
                 'id' => $collection->id,
                 'name' => $collection->name,
                 'thumbnail' => $collection->thumbnail,
+                'stores_count' => $collection->rls_shops->count(),
             ],
             'stores' => $formattedShops
         ]);
@@ -200,12 +202,12 @@ class CollectionController extends Controller
             return response()->json(['message' => 'Collection not found or access denied.'], 404);
         }
 
-        if (!$collection->shops()->where('shop_id', $shopId)->exists()) {
+        if (!$collection->rls_shops()->where('shop_id', $shopId)->exists()) {
             return response()->json(['message' => 'Store not found in collection.'], 404);
         }
 
         // Detach the shop from the collection
-        $collection->shops()->detach($shopId);
+        $collection->rls_shops()->detach($shopId);
 
         // Check if the shop exists in any other collections of the user
         $existsInOtherCollections = Collection::where('user_id', $userId)
@@ -241,7 +243,7 @@ class CollectionController extends Controller
         }
 
         // Delete the collection along with its relationships
-        $collection->shops()->detach(); // Detach all associated stores
+        $collection->rls_shops()->detach(); // Detach all associated stores
         $collection->delete(); // Delete the collection
 
         return response()->json(['message' => 'Collection deleted successfully.']);

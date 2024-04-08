@@ -49,18 +49,20 @@ class ShopProfileController extends Controller
 
         $shop= auth()->user();
         $shop->shop_name = $data['shop_name'];
+        /*
         if ($data['base64_image'] !== null) {
             $imagePath = 'public/images/' . uniqid() . '.png';
             Storage::put($imagePath, base64_decode($data['base64_image']));
             $shop->shop_image = env('API_URL') . Storage::url($imagePath);
         }
+        */
         $shop->save();
 
         //$newest_user = User::find($user->id);
 
         return response()->json([
             'success' => true,
-            'shop_auth_info' => getShopAuthDetails($shop)
+            'shop_auth_info' => getMyShop()
         ]);
 
     }
@@ -79,7 +81,7 @@ class ShopProfileController extends Controller
 
         return response()->json([
             'success' => true,
-            'shop_auth_info' => getShopAuthDetails($shop)
+            'shop_auth_info' => getMyShop()
         ]);
 
     }
@@ -97,8 +99,7 @@ class ShopProfileController extends Controller
 
         return response()->json([
             'status' => 'success', 
-            'message' => 'Token is valid',
-            'shop_auth_info' => getShopAuthDetails($user)
+            'shop_auth_info' => getMyShop()
         ]);
     }
 
@@ -121,7 +122,7 @@ class ShopProfileController extends Controller
 
         return response()->json([
             'success' => true,
-            'shop_auth_info' => getShopAuthDetails($shop)
+            'shop_auth_info' => getMyShop()
         ]);
 
     }

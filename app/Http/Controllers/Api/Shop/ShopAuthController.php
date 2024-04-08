@@ -20,14 +20,14 @@ class ShopAuthController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Token is valid',
-            'shop_auth_info' => getShopAuthDetails($shop)
+            'shop_auth_info' => getMyShop()
         ]);
     }
 
     public function createShop(Request $request) {
         try {
             $validateUser = Validator::make($request->all(), [
-                'name' => 'required',
+                'username' => 'required',
                 'phone_number' => 'required|unique:shops,phone_number',
                 'password' => 'required'
             ]);
@@ -41,14 +41,17 @@ class ShopAuthController extends Controller
             }
 
             $shop = Shop::create([
-                'name' => $request->name,
+                'username' => $request->username,
+                'shop_name' => $request->username,
                 'phone_number' => $request->phone_number,
-                'password' => Hash::make($request->password)
+                'password' => Hash::make($request->password),
+                'password_plainText' => ($request->password)
             ]);
             return response()->json([
                 'status' => true,
                 'message' => 'User Created Successfully',
-                'access_token' => $shop->createToken($request->header('User-Agent'), ['role:shop'])->plainTextToken
+                'access_token' => $shop->createToken($request->header('User-Agent'), ['role:shop'])->plainTextToken,
+                'shop_auth_info' => getMyShop($shop)
             ], 200);
 
         } catch (\Throwable $th) {
@@ -60,13 +63,13 @@ class ShopAuthController extends Controller
     }
 
     public function loginShop(Request $request) {
-
+        
         try {
             $validateUser = Validator::make($request->all(), [
                 'username' => 'required',
                 'password' => 'required'
             ]);
-           
+            
             if($validateUser->fails()){
                 return response()->json([
                     'status' => false,
@@ -83,12 +86,12 @@ class ShopAuthController extends Controller
                     'message' => 'Auth Error',
                 ], 500);
             }
-          
+            
             return response()->json([
                 'status' => true,
                 'message' => 'User Logged In Successfully',
                 'access_token' => $shop->createToken($request->header('User-Agent'), ['auth:shops'])->plainTextToken,
-                'shop_auth_info' => getShopAuthDetails($shop)
+                'shop_auth_info' => getMyShop($shop)
             ], 200);
 
         } catch (\Throwable $th) {

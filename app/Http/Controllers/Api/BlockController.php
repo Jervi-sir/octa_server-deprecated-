@@ -50,11 +50,11 @@ class BlockController extends Controller
         $request->validate([
             'page' => 'nullable',
         ]);
-
+        
         $user = Auth::user(); // Get the authenticated user
         // Fetch the users blocked by the authenticated user
-        $blockedUsers = $user->blocking()->paginate(10, ['users.id', 'users.name', 'users.username', 'users.profile_images']); // 10 items per page
-
+        $blockedUsers = $user->rls_blocking()->paginate(10); // 10 items per page
+        
         $data['users'] = [];
         foreach ($blockedUsers as $key => $user) {
             $data['users'][$key] = [

@@ -26,7 +26,7 @@ class ShowController extends Controller
 
         if ($category_name !== null) {
             $category_id = ProductType::where('name', 'like', $category_name)->first()->id;
-            $items = $shop->items()->where('product_type_id', $category_id)->orderBy('id', 'DESC')->paginate(7);
+            $items = $shop->rls_items()->where('product_type_id', $category_id)->orderBy('id', 'DESC')->paginate(7);
             foreach ($items as $index => $item) {
                 $data['items'][$index] = getItem($item);
             }
@@ -83,7 +83,7 @@ class ShowController extends Controller
             'bio' => $user->bio,
             'contacts' => $user->contacts,
             'nb_likes' => 0, //UserLike::where('liked_user_id', $userId)->count(),
-            'nb_friends' => $user->friends()->count(),
+            'nb_friends' => $user->rls_friends()->count(),
             'isPremium' => $user->isPremium,
         ]);
 

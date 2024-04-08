@@ -17,108 +17,112 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         '*'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'profile_images' => 'array',
     ];
 
-    public function savedItems(): BelongsToMany
-    {
-        return $this->belongsToMany(Item::class, 'user_saves', 'user_id', 'item_id');
-    }
-
-    public function shop(): HasOne
-    {
-        return $this->hasOne(Shop::class);
-    }
-
-    public function sentRequests()
-    {
+    
+    public function rls_sentRequests() {
         return $this->hasMany(FriendRequest::class, 'sender_id');
     }
-
-    public function receivedRequests()
-    {
+    
+    public function rls_receivedRequests() {
         return $this->hasMany(FriendRequest::class, 'receiver_id');
     }
 
-    public function friends()
-    {
+    public function rls_friends() {
         $friendsAsUser = $this->belongsToMany(User::class, 'friends', 'user_id', 'friend_id');
         $friendsAsFriend = $this->belongsToMany(User::class, 'friends', 'friend_id', 'user_id');
         return $friendsAsUser->get()->merge($friendsAsFriend->get());
     }
 
-    public function collections()
-    {
+    public function rls_collections() {
         return $this->hasMany(Collection::class);
     }
-    
-
-    public function conversations()
-    {
+ 
+    public function rls_conversations() {
         return Conversation::where('user1_id', $this->id)
                            ->orWhere('user2_id', $this->id);
     }
 
-    public function messages()
-    {
+    public function rls_messages() {
         return $this->hasMany(Message::class, 'sender_id');
     }
 
-    public function likedUsers()
-    {
+    public function rls_likedUsers() {
         return $this->belongsToMany(User::class, 'user_likes', 'liker_id', 'liked_id');
     }
 
-    public function likedByUsers()
-    {
-        return $this->belongsToMany(User::class, 'user_likes', 'liked_id', 'liker_id');
-    }
-
-    public function reportedItems()
+    public function rls_reportedItems() //!not used
     {
         return $this->belongsToMany(Item::class, 'item_user_report')
             ->withPivot('reason')
             ->withTimestamps();
     }
 
-    public function reports()
+    public function rls_reports()       //!not used
     {
         return $this->hasMany(Report::class);
     }
 
-    public function blocking()
+    public function rls_setFollow() {
+        return $this->belongsToMany(User::class, 'user_followings', 'follower_id', 'following_id');
+    }
+    
+    public function rls_getFollowing() {
+        return $this->belongsToMany(User::class, 'user_followings', 'follower_id', 'following_id');
+    }
+
+    public function rls_getFollowers() {
+        return $this->belongsToMany(User::class, 'user_followings', 'following_id', 'follower_id');
+    }
+
+    public function rls_saveItem(): BelongsToMany {
+        return $this->belongsToMany(Item::class, 'user_saves', 'user_id', 'item_id');
+    }
+
+    public function rls_sentFriendRequests() {
+        return $this->hasMany(FriendRequest::class, 'sender_id');
+    }
+
+    public function rls_receivedFriendRequests() {
+        return $this->hasMany(FriendRequest::class, 'receiver_id');
+    }
+
+    public function rls_friendRequested()       //!not used
     {
+        return $this->belongsToMany(User::class, 'friend_requests', 'receiver_id', 'sender_id')
+            ->wherePivot('status', 1) // Assuming 'status' column exists for accepted requests
+            ->withPivot('created_at', 'updated_at'); // Include pivot timestamps if needed
+    }
+    public function rls_isFriendWith(User $user) {
+        $friendIds = $this->rls_friends()->pluck('id');
+        return $friendIds->contains($user->id);
+    }
+
+    public function rls_likedByUsers() {
+        return $this->belongsToMany(User::class, 'user_likes', 'liked_id', 'liker_id');
+    }
+
+    public function rls_usersILiked() {
+        return $this->belongsToMany(User::class, 'user_likes', 'liker_id', 'liked_id');
+    }
+
+    public function rls_blocking() {
         return $this->belongsToMany(User::class, 'blocks', 'blocker_id', 'blocked_id');
     }
 
-    public function blockers()
-    {
+    public function rls_blockers() {
         return $this->belongsToMany(User::class, 'blocks', 'blocked_id', 'blocker_id');
     }
 }

@@ -21,27 +21,27 @@ class Item extends Model
         'user_id'
     ];
 
-    public function shop(): BelongsTo
+    public function rls_store(): BelongsTo
     {
         return $this->belongsTo(Shop::class);
     }
 
-    public function wilaya(): BelongsTo
+    public function rls_wilaya(): BelongsTo
     {
         return $this->belongsTo(Wilaya::class);
     }
 
-    public function savedByUsers(): BelongsToMany
+    public function rls_savedByUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_saves', 'item_id', 'user_id');
     }
 
-    public function messages()
+    public function rls_messages()
     {
         return $this->hasMany(Message::class);
     }
     
-    public function reports()
+    public function rls_reports()
     {
         return $this->hasMany(Report::class);
     }

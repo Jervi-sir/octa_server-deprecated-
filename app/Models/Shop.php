@@ -19,9 +19,12 @@ class Shop extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
-        'name',
+        'phone_number',
+        'username',
+        'shop_name',
         'email',
         'password',
+        'password_plainText',
         'bio',
         'details',
         'contacts',
@@ -39,7 +42,7 @@ class Shop extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function user(): BelongsTo
+    public function rls_user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
@@ -49,6 +52,7 @@ class Shop extends Authenticatable
         return $this->hasMany(Item::class);
     }
 
+    /*
     public function paymentTransactions(): HasMany
     {
         return $this->hasMany(PaymentTransaction::class);
@@ -58,18 +62,19 @@ class Shop extends Authenticatable
     {
         return $this->hasMany(CreditTransaction::class);
     }
+    */
 
-    public function userfollowers(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'user_shop_followings');
-    }
-
-    public function followedByUser(): BelongsToMany
+    public function rls_followers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_shop_followings', 'shop_id', 'user_id');
     }
 
-    public function collections()
+    public function rls_followedByUser(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_shop_followings', 'shop_id', 'user_id');
+    }
+
+    public function rls_collections()
     {
         return $this->belongsToMany(Collection::class, 'shop_collections')
                     ->withPivot('nb_new');

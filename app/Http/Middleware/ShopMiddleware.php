@@ -18,7 +18,6 @@ class ShopMiddleware
         if (auth()->user()->tokenCan('role:shop')) {
             return $next($request);
         }
-
         return response()->json('Not Authorized', 401);
     }
 }

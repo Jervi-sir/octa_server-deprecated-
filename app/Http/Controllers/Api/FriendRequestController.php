@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Friend;
 use App\Models\FriendRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,28 +14,34 @@ class FriendRequestController extends Controller
     public function sendRequest(Request $request)
     {
         $request->validate([
-            'receiver_id'   => 'required',
+            'receiver_id' => 'required|exists:users,id', // Ensure recipient exists
         ]);
 
         $receiverId = $request->receiver_id;
+        $receiver = User::find($receiverId);
+        $sender = auth()->user();
 
-        // Prevent sending a request to oneself
-        if ($receiverId == Auth::id()) {
-            return response()->json(['message' => 'You cannot send a friend request to yourself.'], 400);
+        // Check for existing requests or a reciprocal friendship
+        $existingRequest = FriendRequest::where(function($query) use ($sender, $receiverId) {
+            $query->where('sender_id', $sender->id)->where('receiver_id', $receiverId);
+            })->orWhere(function($query) use ($sender, $receiverId) {
+                $query->where('sender_id', $receiverId)->where('receiver_id', $sender->id);
+            })->exists();
+            
+        if ($existingRequest || $sender->rls_isFriendWith(User::find($receiverId))) {
+            // Handle existing requests/friendship (return appropriate response)
+            return response()->json('Already friends or a Request exists already', 422);
         }
+        
 
-        // Check if the request already exists
-        if (FriendRequest::where('sender_id', Auth::id())->where('receiver_id', $receiverId)->exists()) {
-            return response()->json(['message' => 'Friend request already sent.'], 400);
-        }
-
-        // Create friend request
-        $friendRequest = FriendRequest::create([
-            'sender_id' => Auth::id(),
+        $sender->rls_sentFriendRequests()->create([
             'receiver_id' => $receiverId,
+            'created_at' => now(),
+            'updated_at' => now(), // If you want to track updates
         ]);
 
-        return response()->json(['status' => 'request_sent'], 201);
+        return response()->json('Friend request sent successfully', 201);
+
     }
 
     public function acceptRequest(Request $request)
@@ -72,13 +79,12 @@ class FriendRequestController extends Controller
             'receiver_id' => 'required', // Expect a user_id in the request
         ]);
 
-        $userId = $request->user_id;
+        $userId = $request->receiver_id;
         $authId = Auth::id();
-
+        
         $friendRequest = FriendRequest::where('sender_id', $userId)
                                         ->where('receiver_id', $authId)
                                         ->first();
-
         if (!$friendRequest) {
             return response()->json(['message' => 'Friend request not found.'], 404);
         }
@@ -123,7 +129,7 @@ class FriendRequestController extends Controller
         $auth = auth()->user();
     
         // Get merged friends collection
-        $friends = $auth->friends();
+        $friends = $auth->rls_friends();
     
         // Apply username filter if provided
         if (!empty($request->username)) {

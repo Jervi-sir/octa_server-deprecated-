@@ -16,13 +16,7 @@ class ProfileController extends Controller
     public function showMyProfile(Request $request)
     {
         $user = Auth::user();
-        $data['user'] = array_merge(getProfile($user), [
-            'bio' => $user->bio,
-            'contacts' => $user->contacts,
-            'nb_likes' => 0, // Adjust this according to your actual logic
-            'nb_friends' => $user->friends()->count(),
-            'isPremium' => $user->isPremium,
-        ]);
+        $data['user'] = getMyProfile($user);
 
         $collections = Collection::where('collections.user_id', $user->id)
             ->leftJoin('shop_collections', 'collections.id', '=', 'shop_collections.collection_id')
@@ -74,7 +68,6 @@ class ProfileController extends Controller
 
     public function updateMyProfile(Request $request)
     {
-
         $request->validate([
             'phone_number'   => 'nullable|string',
             'email'     => 'nullable|string',
