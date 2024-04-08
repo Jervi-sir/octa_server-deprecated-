@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Friend;
 use App\Models\Item;
 use App\Models\Message;
 use App\Models\User;
@@ -15,8 +14,8 @@ class MessageController extends Controller
     public function listChats(Request $request)
     {
         $request->validate([
-            'page'   => 'nullable',
-            'username'   => 'nullable',
+            'page' => 'nullable',
+            'username' => 'nullable',
         ]);
 
         $userId = Auth::id();
@@ -24,38 +23,36 @@ class MessageController extends Controller
 
         // Fetch the last message in each conversation the user is involved in with pagination
         $chats = Message::where(function ($query) use ($userId) {
-                    $query->where('sender_id', $userId)
-                        ->orWhere('receiver_id', $userId);
-                    })
-                    ->whereHas('sender', function ($query) use ($searchTerm) {
-                        $query->where('username', 'like', '%' . $searchTerm . '%');
-                    })
-                    ->orWhereHas('receiver', function ($query) use ($searchTerm, $userId) {
-                        $query->where('username', 'like', '%' . $searchTerm . '%')
-                        ->where('id', '!=', $userId); // Exclude the current user from the search
-                    })
-                    ->orderBy('created_at', 'desc')
-                    ->with('sender', 'receiver')
-                    ->paginate(10);
-        return response()->json([
-            'chats' => $chats
-        ]);
+            $query->where('sender_id', $userId)
+                ->orWhere('receiver_id', $userId);
+        })
+            ->whereHas('sender', function ($query) use ($searchTerm) {
+                $query->where('username', 'like', '%' . $searchTerm . '%');
+            })
+            ->orWhereHas('receiver', function ($query) use ($searchTerm, $userId) {
+                $query->where('username', 'like', '%' . $searchTerm . '%')
+                    ->where('id', '!=', $userId); // Exclude the current user from the search
+            })
+            ->orderBy('created_at', 'desc')
+            ->with('sender', 'receiver')
+            ->paginate(10);
+
         // Grouping and mapping
         $groupedChats = $chats->getCollection()
-                        ->groupBy(function($message) use ($userId) {
-                            return $message->sender_id === $userId ? $message->receiver_id : $message->sender_id;
-                        })
-                        ->map(function($messages) {
-                            return $messages->sortByDesc('created_at')->first();
-                        })
-                        ->values(); // Convert the collection into an array
+            ->groupBy(function ($message) use ($userId) {
+                return $message->sender_id === $userId ? $message->receiver_id : $message->sender_id;
+            })
+            ->map(function ($messages) {
+                return $messages->sortByDesc('created_at')->first();
+            })
+            ->values(); // Convert the collection into an array
 
 
         // Formatting the response
-        $formattedChats = $groupedChats->map(function($message) use ($userId) {
+        $formattedChats = $groupedChats->map(function ($message) use ($userId) {
             $otherUserId = $message->sender_id === $userId ? $message->receiver_id : $message->sender_id;
             $otherUser = User::find($otherUserId);
-        
+
             return [
                 'id' => $otherUserId,
                 'friend_id' => $otherUserId,
@@ -65,7 +62,7 @@ class MessageController extends Controller
                 'last_message_time' => $message->created_at,
             ];
         });
-    
+
         $nextPage = null;
         if ($chats->nextPageUrl()) {
             $nextPage = $chats->currentPage() + 1;
@@ -81,8 +78,8 @@ class MessageController extends Controller
     public function getMessages(Request $request)
     {
         $request->validate([
-            'page'   => 'nullable',
-            'friend_id'   => 'nullable',
+            'page' => 'nullable',
+            'friend_id' => 'nullable',
         ]);
 
         $friendId = $request->friend_id;
@@ -103,14 +100,14 @@ class MessageController extends Controller
     public function sendMessage(Request $request)
     {
         $request->validate([
-            'page'   => 'nullable',
+            'page' => 'nullable',
             'friend_id' => 'required',
             'item_id' => 'nullable|exists:items,id'
         ]);
-        
+
         $friendId = $request->friend_id;
         $userId = Auth::id();
-        
+
         $authUser = Auth::user();
         $friends = $authUser->rls_friends();
 
@@ -119,7 +116,7 @@ class MessageController extends Controller
         if (!$isFriend) {
             return response()->json(['message' => 'The specified user is not a friend.'], 403);
         }
-    
+
         $message = new Message();
         $message->sender_id = $userId;
         $message->receiver_id = $friendId;
@@ -132,7 +129,7 @@ class MessageController extends Controller
     public function getChatWithFriend(Request $request)
     {
         $request->validate([
-            'page'   => 'nullable',
+            'page' => 'nullable',
             'friend_id' => 'required',
         ]);
         $perPage = 7;
@@ -142,13 +139,13 @@ class MessageController extends Controller
 
         // Fetch messages between the user and the specified friend
         $messages = Message::where(function ($query) use ($userId, $friendId) {
-                            $query->where('sender_id', $userId)->where('receiver_id', $friendId);
-                        })
-                        ->orWhere(function ($query) use ($userId, $friendId) {
-                            $query->where('sender_id', $friendId)->where('receiver_id', $userId);
-                        })
-                        ->orderBy('created_at', 'desc') // Order messages chronologically
-                        ->paginate($perPage);
+            $query->where('sender_id', $userId)->where('receiver_id', $friendId);
+        })
+            ->orWhere(function ($query) use ($userId, $friendId) {
+                $query->where('sender_id', $friendId)->where('receiver_id', $userId);
+            })
+            ->orderBy('created_at', 'desc') // Order messages chronologically
+            ->paginate($perPage);
 
         // Optionally, format the messages or include additional information
         $formattedMessages = $messages->map(function ($message) use ($userId) {
