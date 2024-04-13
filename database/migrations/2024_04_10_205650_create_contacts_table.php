@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('wilayas', function (Blueprint $table) {
+        Schema::create('contacts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('country_id')->constrained();
-            $table->string('name');
-            $table->smallInteger('code');
+            $table->foreignId('user_id')->nullable()->constrained();
+            $table->string('origin')->nullable();       //store, user
+            $table->string('message')->nullable();
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('wilayas');
+        Schema::dropIfExists('contacts');
     }
 };

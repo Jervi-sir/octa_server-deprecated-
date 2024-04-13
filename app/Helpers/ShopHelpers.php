@@ -1,4 +1,5 @@
 <?php
+use App\Models\ProductType;
 
 function getShop($shop)
 {
@@ -43,16 +44,26 @@ function getShopAuthDetails($shop)
 
 function getMyShop($shop = null)
 {
-    $shop = $shop != null ? $shop : auth()->user();
+    $shop = $shop !== null ? $shop : auth()->user();
+    $contacts = json_decode($shop->contacts, true);
+    $id = 1;
+    $processedContacts = [];
+    if (is_array($contacts)) {
+        $processedContacts = array_map(function ($contact) use (&$id) {
+            return array_merge(['id' => $id++], $contact);
+        }, $contacts);
+    }
+
     return [
         'username' => $shop->username,
         'phone_number' => $shop->phone_number,
         'shop_name' => $shop->shop_name,
         'shop_image' => $shop->shop_image,
         'bio' => $shop->bio,
-        'contacts' => $shop->contacts,
+        'contacts' => $processedContacts,
         'wilaya_code' => $shop->wilaya_code,
         'wilaya_name' => $shop->wilaya_name,
+        'wilaya_created_at' => $shop->wilaya_created_at,
         'map_location' => $shop->map_location,
         'nb_followers' => $shop->nb_followers,
         'nb_likes' => $shop->nb_likes,
@@ -60,6 +71,7 @@ function getMyShop($shop = null)
         'created_at' => $shop->created_at,
     ];
 }
+
 
 function getUserAsShop($user) {
     return [
@@ -72,21 +84,24 @@ function getUserAsShop($user) {
 }
 
 function getProductAsShop($product) {
-    $shop = auth()->user();
     $images = json_decode($product->images);
     $thumbnail = is_array($images) && !empty($images) ? $images[0] : null;
 
     return [
         'id' => $product->id,
-        'name' => $product->name,
-        'thumbnail' => $thumbnail,      //!empty($product->images) ? json_decode($product->images)[0] : null, // or provide a default image URL
-        'price' => $product->price,
         'product_type_id' => $product->product_type_id,
-        'is_expired' => checkIfItemIsExpired($product->last_reposted),
-        'last_reposted' => $product->last_reposted,
-        'created_at' => $product->created_at,
-        'shop_name' => $shop->shop_name,
-        'shop_image' => $shop->shop_image,
+        'product_type' => ProductType::find($product->product_type_id)->name,
+        'name' => $product->name,
+        'details' => $product->details,      //!empty($product->images) ? json_decode($product->images)[0] : null, // or provide a default image URL
+        'price' => $product->price,
+        'genders' => $product->genders,
+        'thumbnail' => $thumbnail,      //!empty($product->images) ? json_decode($product->images)[0] : null, // or provide a default image URL
+        'images' => $thumbnail,      //!empty($product->images) ? json_decode($product->images)[0] : null, // or provide a default image URL
+        'keywords' => $product->keywords,
         'isActive' => $product->isActive,
+        'last_reposted' => $product->last_reposted,
+        'nb_reports' => $product->nb_reports,
+        'is_expired' => checkIfItemIsExpired($product->last_reposted),
+        'created_at' => $product->created_at,
     ];
 }

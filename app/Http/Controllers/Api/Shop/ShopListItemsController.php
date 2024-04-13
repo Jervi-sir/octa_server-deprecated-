@@ -43,6 +43,7 @@ class ShopListItemsController extends Controller
                 'from' => $products->firstItem(),
                 'to' => $products->lastItem(),
             ],
+            'shop' => getMyShop(),
             'products' => $data['products'],
             
         ]);

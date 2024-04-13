@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\Shop\ShopListItemsController;
 use App\Http\Controllers\Api\Shop\ShopProfileController;
 use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\ShowController;
+use App\Http\Controllers\Api\Shop\ContactController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -29,10 +30,11 @@ Route::prefix('octa_store/')->group(function () {
     Route::middleware(['auth:shops'])->group(function () {
     Route::post('logout', [ShopAuthController::class, 'logoutShop']);           //*Done
     Route::get('validate_token', [ShopAuthController::class, 'validateToken']); //*Done
+    Route::post('contact', [ContactController::class, 'storeSendsContactSupport']);                //*Done
 
     Route::prefix('items')->group(function () {
         Route::post('publish', [ShopItemController::class, 'publishItem']);                 //*Done
-        Route::get('item/{item_id}', [ShopItemController::class, '']);                      //*Done 
+        Route::get('item/{item_id}', [ShopItemController::class, '']);                      //! not done 
         Route::get('item_edit/{item_id}', [ShopItemController::class, 'editItem']);         //*Done 
         Route::post('item_update/{item_id}', [ShopItemController::class, 'updateItem']);    //*Done 
         Route::post('item_delete/{item_id}', [ShopItemController::class, 'deleteItem']);    //*Done 
@@ -43,10 +45,16 @@ Route::prefix('octa_store/')->group(function () {
     Route::prefix('my_store')->group(function () {
         Route::get('show', [ShopController::class, 'myStoreInfo']);                         //*Done
         Route::get('show_my_followers', [ShopController::class, 'showMyFollowers']);        //*Done
+        Route::post('update_details', [ShopProfileController::class, 'updateShopDetails']);
+        
         Route::post('update_pic_name', [ShopProfileController::class, 'updatePic_Name']);   //*Done
-        Route::post('update_socials', [ShopProfileController::class, 'updateSocialList']);  //*Done
+        Route::post('update_socials', [ShopProfileController::class, 'updateSocialList']);  //*Done  
+
+        Route::post('update_this_social', [ShopProfileController::class, 'updateThisSocial']);  //*Done  
+        
         Route::post('update_description', [ShopProfileController::class, 'updateBio']);     //*Done
         Route::post('update_location', [ShopProfileController::class, 'updateLocation']);   //*Done
+        Route::post('add_socials', [ShopProfileController::class, 'addSocials']);           //*Done
     });
 
     //Route::post ('send_credit_to',       [ShopPaymentController::class, 'sendCredit']);          
@@ -76,6 +84,7 @@ Route::prefix('octa_prizes/')->group(function () {
             RouteUsers();
             RouteItems();
         });
+
 
         Route::post('item/report', [ActionController::class, 'reportItem']);                //*Done
 

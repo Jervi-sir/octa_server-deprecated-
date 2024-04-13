@@ -20,7 +20,6 @@ return new class extends Migration
 
             $table->string('username')->nullable()->unique();
             $table->mediumText('bio')->default('Octa User');
-
             $table->longText('profile_images')->nullable();
             $table->longText('contacts')->nullable();
             $table->integer('nb_likes')->default(0);
@@ -28,9 +27,11 @@ return new class extends Migration
             $table->boolean('isPremium')->default(0);
             $table->integer('credit')->default(0);
 
-            $table->longText('collections')->nullable();        //might take it off
-            $table->string('wilaya_code')->nullable();        //might take it off
-            $table->string('wilaya_name')->nullable();        //might take it off
+            $table->foreignId('wilaya_id')->constrained();
+
+            //$table->longText('collections')->nullable();        //might take it off
+            //$table->string('wilaya_code')->nullable();        //might take it off
+            //$table->string('wilaya_name')->nullable();        //might take it off
 
             //$table->string('email')->unique();
             //$table->timestamp('email_verified_at')->nullable();

@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Validator;
 
 class ShopAuthController extends Controller
 {
-
     public function validateToken(Request $request)
     {
         $shop = auth()->user();

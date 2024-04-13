@@ -14,15 +14,16 @@ class ShopItemController extends Controller
     public function publishItem(Request $request) 
     {
         $request->validate([
-            'product_type_id'   => 'required|numeric',
-            'wilaya_number'     => 'nullable|string',
-            'details'   => 'nullable|string',
             'name'      => 'nullable|string',
+            'price'     => 'nullable|string',
+            'product_type'   => 'required|string',
+            'genders'   => 'nullable|array',
+            'details'   => 'nullable|string',
+            'base64Images'    => 'required|array',
+
+            'wilaya_number'     => 'nullable|string',
             'sizes'     => 'nullable|string',
             'stock'     => 'nullable|numeric',
-            'price'     => 'nullable|numeric',
-            'genders'   => 'nullable|string',
-            'images'    => 'required|string',
         ]);
 
         $data = $request->all();
@@ -30,28 +31,23 @@ class ShopItemController extends Controller
         
         $shop = $user;
 
+
+        $productType = ProductType::where('name', 'like', $data['product_type'])->first();
+
         $item = new Item;
         $item->shop_id  = $shop->id;
-        $item->product_type_id  =  $data['product_type_id']; // You'll need to map this to an actual ID
-        $item->product_type     =  ProductType::find($data['product_type_id'])->name; // You'll need to map this to an actual ID
+        $item->product_type_id  =  $productType->id; // You'll need to map this to an actual ID
+        $item->product_type     =  $productType->name; // You'll need to map this to an actual ID
         $item->name     = $data['name']     ?? 'Untitled';
         $item->details  = $data['details']  ?? null; // Or you can set this as needed
         $item->price    = $data['price']    ?? null;
-        $item->genders  = $data['genders']  ?? null;
-        $item->images   = $data['images'];
+        $item->genders  = json_encode($data['genders'])  ?? null;
         $item->keywords = $data['name'] . ', ' .  $data['details']; // default
-        $item->wilaya_code  = $data['wilaya_number'];
-
+        $item->wilaya_code  = $data['wilaya_number']  ?? $user->wilaya_code;
         $item->last_reposted = now();
-        $item->save();
         
-        //$item->price = str_replace(' ', '', $data['productPrice']);
-        //$item->genders  =   $data['selectedGenders'];//getGenderId($data['selectedGenders']);
-        //$item->sizes = json_encode($data['selectedSizes']);
-        // Save base64 images as files and store their paths
-        /*
         $imagePaths = [];
-        foreach ($data['images'] as $base64Image) {
+        foreach ($data['base64Images'] as $base64Image) {
             if ($base64Image !== null) {
                 $imageName = uniqid() . '.png';
                 $imagePath = 'public/images/' . $imageName;
@@ -61,13 +57,12 @@ class ShopItemController extends Controller
         }
 
         $item->images = json_encode($imagePaths);
-        */
+        $item->save();
 
         return response()->json([
-            'success' => true,
+            'message' => 'Item added successfully',
             'item' => $item,
         ]);
-        
     }
 
     public function repostItem(Request $request) {

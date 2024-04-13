@@ -7,11 +7,6 @@ function getItem($item)
     $auth = auth()->user();
     $result = [
         'id' => $item->id,
-        'shop_id' => $item->shop_id,
-        'shop_name' => $item->rls_store->shop_name,
-        'shop_image' => $item->rls_store->shop_image,
-        'map_location' => $item->rls_store->map_location,
-        //'shop_image' => imageUrl('shops', $item->rls_store->shop_image),
         'name' => $item->name,
         'details' => $item->details,
         'sizes' => $item->sizes,
@@ -22,12 +17,11 @@ function getItem($item)
         'genders' => $item->genders,
         'search' => $item->keywords,
         'images' => json_decode($item->images),
-        'wilaya_code' => ($item->wilaya_code),
         //'images' => imageToArray($item->images->pluck('url')->toArray()),
         'isSaved' => $auth && !isAuthShop() ? $item->rls_savedByUsers->contains($auth->id) : null,
         'keywords' => $item->keywords,
         'isActive' => $item->isActive,
-        'shop' => getShop($item->shop),
+        'shop' => getShop($item->rls_store),
         'posted_since' => $item->last_reposted
     ];
     return $result;

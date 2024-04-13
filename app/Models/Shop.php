@@ -47,7 +47,7 @@ class Shop extends Authenticatable
         return $this->belongsTo(User::class);
     }
 
-    public function items(): HasMany
+    public function rls_items(): HasMany
     {
         return $this->hasMany(Item::class);
     }

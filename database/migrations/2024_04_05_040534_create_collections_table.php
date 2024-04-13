@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('collections', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id'); // The owner of the collection
-            $table->string('name'); // Name of the collection
+            $table->unsignedBigInteger('user_id');
+            $table->string('name');
             $table->string('thumbnail')->nullable();
             $table->timestamps();
         

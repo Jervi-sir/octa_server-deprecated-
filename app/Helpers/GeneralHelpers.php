@@ -73,3 +73,20 @@ function saveSingleImage($base64Image)
     $imagePath = env('API_URL') . '/storage/images/' . $imageName;
     return $imagePath;
 }
+
+function fixAndDecodeJson($jsonString) {
+    // Pattern to find places where a closing curly brace is immediately followed by an opening curly brace
+    $pattern = '/\}(?=\{)/';
+    // This replaces such occurrences with '},{'
+    $correctedString = preg_replace($pattern, '},{', $jsonString);
+
+    // Now try to decode the JSON
+    $data = json_decode($correctedString, true);
+
+    // Check if the decoding was successful
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return ['error' => json_last_error_msg(), 'fixed_json' => $correctedString];
+    }
+
+    return $data;
+}

@@ -22,16 +22,15 @@ return new class extends Migration
             $table->string('shop_name');
             $table->string('shop_image')->nullable();
             $table->mediumText('bio')->nullable();
-            $table->text('contacts')->default('[]');
+            $table->json('contacts')->nullable();
 
-            $table->integer('wilaya_code')->nullable();
-            $table->string('wilaya_name')->nullable();
+            $table->foreignId('wilaya_id')->constrained();
             $table->mediumText('map_location')->nullable();
 
             $table->integer('nb_followers')->default(0);
             $table->integer('nb_likes')->default(0);
 
-            $table->string('wilaya_created_at')->nullable();
+            $table->foreign('wilaya_created_at')->references('id')->on('wilayas');
 
             $table->rememberToken();
             $table->timestamps();
