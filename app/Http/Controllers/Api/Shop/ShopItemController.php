@@ -2,61 +2,57 @@
 
 namespace App\Http\Controllers\Api\Shop;
 
-use Carbon\Carbon;
-use App\Models\Item;
-use App\Models\ProductType;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Item;
+use App\Models\ItemType;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 
 class ShopItemController extends Controller
 {
-    public function publishItem(Request $request) 
+    public function publishItem(Request $request)
     {
-        $request->validate([
-            'name'      => 'nullable|string',
-            'price'     => 'nullable|string',
-            'product_type'   => 'required|string',
-            'genders'   => 'nullable|array',
-            'details'   => 'nullable|string',
-            'base64Images'    => 'required|array',
-
-            'wilaya_number'     => 'nullable|string',
-            'sizes'     => 'nullable|string',
-            'stock'     => 'nullable|numeric',
+        $validateInput = Validator::make($request->all(), [
+            'name' => 'nullable|string',
+            'price' => 'nullable|string',
+            'item_type' => 'required|string',
+            'details' => 'nullable|string',
+            'genders' => 'nullable',
+            'base64Images' => 'nullable',
         ]);
+        if ($validateInput->fails()) {
+            return response()->json(errorMessage($validateInput), 401);
+        }
 
-        $data = $request->all();
         $user = auth()->user();
-        
+
         $shop = $user;
 
-
-        $productType = ProductType::where('name', 'like', $data['product_type'])->first();
+        $itemType = ItemType::where('name', 'like', $request->item_type)->first();
 
         $item = new Item;
-        $item->shop_id  = $shop->id;
-        $item->product_type_id  =  $productType->id; // You'll need to map this to an actual ID
-        $item->product_type     =  $productType->name; // You'll need to map this to an actual ID
-        $item->name     = $data['name']     ?? 'Untitled';
-        $item->details  = $data['details']  ?? null; // Or you can set this as needed
-        $item->price    = $data['price']    ?? null;
-        $item->genders  = json_encode($data['genders'])  ?? null;
-        $item->keywords = $data['name'] . ', ' .  $data['details']; // default
-        $item->wilaya_code  = $data['wilaya_number']  ?? $user->wilaya_code;
+        $item->shop_id = $shop->id;
+        $item->item_type_id = $itemType->id; // You'll need to map this to an actual ID
+        $item->name = $request->name ?? 'Untitled';
+        $item->details = $request->details ?? null; // Or you can set this as needed
+        $item->price = $request->price ?? null;
+        $item->genders = ($request->genders) ?? null;
+        $item->keywords = $request->name . ', ' . $request->details; // default
         $item->last_reposted = now();
-        
+
         $imagePaths = [];
-        foreach ($data['base64Images'] as $base64Image) {
+        foreach ($request->base64Images as $base64Image) {
             if ($base64Image !== null) {
                 $imageName = uniqid() . '.png';
                 $imagePath = 'public/images/' . $imageName;
                 Storage::put($imagePath, base64_decode($base64Image));
-                $imagePaths[] = env('API_URL') . '/storage/images/' . $imageName;
+                $imagePaths[] = '/storage/images/' . $imageName;        //env('API_URL') . 
             }
         }
-
         $item->images = json_encode($imagePaths);
+
         $item->save();
 
         return response()->json([
@@ -65,17 +61,21 @@ class ShopItemController extends Controller
         ]);
     }
 
-    public function repostItem(Request $request) {
-        $request->validate([
-            'item_id'   => 'required|numeric',
+    public function repostItem(Request $request)
+    {
+        $validateInput = Validator::make($request->all(), [
+            'item_id' => 'required|numeric',
         ]);
-        
+        if ($validateInput->fails()) {
+            return response()->json(errorMessage($validateInput), 401);
+        }
+
         $shop = auth()->user();
-        
-        $item =  $shop->rls_items->find($request->item_id);
+
+        $item = $shop->rls_items->find($request->item_id);
         $item->last_reposted = Carbon::now();
         $item->isActive = 1;
-        
+
         $item->save();
 
         return response()->json([
@@ -85,84 +85,83 @@ class ShopItemController extends Controller
         ]);
     }
 
-    public function editItem(Request $request, $item_id) 
+    public function editItem(Request $request, $item_id)
     {
         $user = auth()->user();
         $shop = $user;
         $item = $shop->rls_items->find($item_id);
-        
-        $data['item'] = getItem($item);
 
         return response()->json([
             'success' => true,
-            'item' => $data['item'],
+            'item' => getProductAsShop($item),
         ]);
-        
+
     }
 
-    public function updateItem(Request $request, $item_id) {
-
-        
-        $request->validate([
-            'product_type'   => 'required',
-            'details'   => 'nullable|string',
-            'name'      => 'nullable|string',
-            'price'     => 'nullable|string',
-            'genders'   => 'nullable|string',
-            'images'    => 'required|string',
+    public function updateItem(Request $request, $item_id)
+    {
+        $validateInput = Validator::make($request->all(), [
+            'name' => 'nullable|string',
+            'price' => 'nullable|string',
+            'item_type' => 'required|string',
+            'details' => 'nullable|string',
+            'genders' => 'nullable',
+            'base64Images' => 'nullable',       //this format will be an array of json [{uri: '', base64: '', isNew: true/false}]
         ]);
-        
-        $data = $request->all();
+        if ($validateInput->fails()) {
+            return response()->json(errorMessage($validateInput), 401);
+        }
 
-        $user = auth()->user();
-        $shop = $user;
+
+        $item_type = ItemType::where('name', 'like', $request->item_type)->first();
+
+        $shop = auth()->user();
         $item = $shop->rls_items->find($item_id);
 
-        $item->product_type_id =  ProductType::where('name', 'like', $data['product_type'])->first()->id; // You'll need to map this to an actual ID
-        $item->product_type =  $data['product_type']; // You'll need to map this to an actual ID
+        $item->name = $request->name ?? 'Untitled';
+        $item->details = $request->details ?? null; // Or you can set this as needed
+        $item->price = $request->price ?? null;
+        $item->genders = $request->genders ?? null;
+        $item->keywords = $request->name . ', ' . $request->details; // default
 
-        $item->name     = $data['name']     ?? 'Untitled';
-        $item->details  = $data['details']  ?? null; // Or you can set this as needed
-        $item->price    = $data['price']    ?? null;
-        $item->genders  = $data['genders']  ?? null;
-        $item->keywords = $data['name'] . ', ' .  $data['details']; // default
+        $item->images = $request->base64Images;
 
-        $item->images   = $data['images'];
-        
-        /*
+        $item->item_type_id = $item_type->id; // You'll need to map this to an actual ID
+        /*to upload images correctly i will have to test if isNew false then push the uri, if true then upload the base64 and push new url */
         $imagePaths = [];
-        foreach ($data['images'] as $base64Image) {
-            if ($base64Image !== null) {
-                // Check if the string is a URL
-                if (filter_var($base64Image, FILTER_VALIDATE_URL)) {
-                    $imagePaths[] = $base64Image;
+        foreach ($request->base64Images as $imageData) {
+            if ($imageData !== null) {
+                // If isNew is false, then push uri to the imagePaths array
+                if (!$imageData['isNew']) {
+                    // Use parse_url to extract the path component
+                    $urlComponents = parse_url($imageData['uri']);
+                    $pathOnly = $urlComponents['path'] ?? ''; // Default to empty string if not set
+                    $imagePaths[] = $pathOnly;
                 } else {
-                    // Handle the base64 encoded image
-                    $imageName = uniqid() . '.png';
-                    $imagePath = 'public/images/' . $imageName;
-                    Storage::put($imagePath, base64_decode($base64Image));
-                    $imagePaths[] = env('API_URL') . '/storage/images/' . $imageName;
+                    // If isNew is true, handle the base64 encoded image
+                    if (!empty($imageData['base64'])) {
+                        $imageName = uniqid() . '.png';
+                        $imagePath = 'public/images/' . $imageName;
+                        Storage::put($imagePath, base64_decode($imageData['base64']));
+                        $imagePaths[] = '/storage/images/' . $imageName;
+                    }
                 }
             }
         }
         $item->images = json_encode($imagePaths);
-        */
-        $item->images = $request->images;
-
         $item->save();
 
         return response()->json([
-            'success'   => true,
-            'item'      => $item,
+            'success' => true,
+            'item' => getProductAsShop($item),
         ]);
     }
 
-    public function deleteItem(Request $request, $item_id) {
-        $data = $request->all();
-
+    public function deleteItem(Request $request, $item_id)
+    {
         $user = auth()->user();
         $shop = $user;
-        $item =  $shop->rls_items->find($item_id);
+        $item = $shop->rls_items->find($item_id);
         $item->delete();
 
         return response()->json([

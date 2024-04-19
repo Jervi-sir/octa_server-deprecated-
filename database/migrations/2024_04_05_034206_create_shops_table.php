@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('shops', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('activation_code_id')->constrained();
             $table->string('username')->unique();     //for login
-            $table->string('phone_number');
+            $table->string('phone_number')->unique(); 
             $table->timestamp('phone_number_verified_at')->nullable();
             $table->string('password');
             $table->string('password_plainText');
@@ -30,6 +31,7 @@ return new class extends Migration
             $table->integer('nb_followers')->default(0);
             $table->integer('nb_likes')->default(0);
 
+            $table->unsignedBigInteger('wilaya_created_at');
             $table->foreign('wilaya_created_at')->references('id')->on('wilayas');
 
             $table->rememberToken();

@@ -20,28 +20,44 @@ class DatabaseSeeder extends Seeder
         // Seed roles
         //Role::factory()->create(['role_name' => 'admin']);
 
-        // Seed wilayas
-        /**/
-         
-        //$role = new RoleSeeder();
-        //$role->run();
+        User::factory(5)->create();
+
+        //Country
+        //$country = new CountrySeeder();
+        //$country->run();
+        //Wilaya
         //$wilaya = new WilayaSeeder();
         //$wilaya->run();
-        //$product_type = new ProductTypeSeeder();
-        //$product_type->run();
-        //User::factory(100)->create();
-        //Shop::factory(20)->create();
-        
-        //Item::factory(500)->create();
+        //Item Type
+        //$itemType = new ItemTypeSeeder();
+        //$itemType->run();
+        //Activation Code
+        //$activationCode = new ActivationCodeSeeder();
+        //$activationCode->run();
 
-        //UserUnlock::factory(200)->create();
-        //Sale::factory(100)->create();
-       //UserSave::factory(200)->create();
-        
-        //UserFollowing::factory(200)->create();
-        UserShopFollowing::factory(200)->create();
-        
-        //CreditTransaction::factory(50)->create();
-        //PaymentTransaction::factory(350)->create();
     }
 }
+         
+
+
+
+//$role = new RoleSeeder();
+//$role->run();
+//$wilaya = new WilayaSeeder();
+//$wilaya->run();
+//$product_type = new ProductTypeSeeder();
+//$product_type->run();
+//User::factory(100)->create();
+//Shop::factory(20)->create();
+
+//Item::factory(500)->create();
+
+//UserUnlock::factory(200)->create();
+//Sale::factory(100)->create();
+//UserSave::factory(200)->create();
+
+//UserFollowing::factory(200)->create();
+//UserShopFollowing::factory(200)->create();
+
+//CreditTransaction::factory(50)->create();
+//PaymentTransaction::factory(350)->create();

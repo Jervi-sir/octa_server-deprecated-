@@ -1,4 +1,5 @@
 <?php
+use App\Models\ItemType;
 use App\Models\ProductType;
 
 function getShop($shop)
@@ -47,11 +48,13 @@ function getMyShop($shop = null)
     $shop = $shop !== null ? $shop : auth()->user();
     $contacts = json_decode($shop->contacts, true);
     $id = 1;
+   
     $processedContacts = [];
     if (is_array($contacts)) {
         $processedContacts = array_map(function ($contact) use (&$id) {
             return array_merge(['id' => $id++], $contact);
         }, $contacts);
+        $processedContacts = array_reverse($processedContacts);
     }
 
     return [
@@ -84,19 +87,19 @@ function getUserAsShop($user) {
 }
 
 function getProductAsShop($product) {
-    $images = json_decode($product->images);
+    $images = imageToArray(json_decode($product->images));
     $thumbnail = is_array($images) && !empty($images) ? $images[0] : null;
 
     return [
         'id' => $product->id,
-        'product_type_id' => $product->product_type_id,
-        'product_type' => ProductType::find($product->product_type_id)->name,
+        'item_type_id' => $product->item_type_id,
+        'item_type_name' => strtolower(ItemType::find($product->item_type_id)->name),
         'name' => $product->name,
         'details' => $product->details,      //!empty($product->images) ? json_decode($product->images)[0] : null, // or provide a default image URL
         'price' => $product->price,
         'genders' => $product->genders,
         'thumbnail' => $thumbnail,      //!empty($product->images) ? json_decode($product->images)[0] : null, // or provide a default image URL
-        'images' => $thumbnail,      //!empty($product->images) ? json_decode($product->images)[0] : null, // or provide a default image URL
+        'images' => $images,      //!empty($product->images) ? json_decode($product->images)[0] : null, // or provide a default image URL
         'keywords' => $product->keywords,
         'isActive' => $product->isActive,
         'last_reposted' => $product->last_reposted,

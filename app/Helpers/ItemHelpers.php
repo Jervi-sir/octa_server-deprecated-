@@ -1,4 +1,5 @@
 <?php
+use App\Models\ItemType;
 use App\Models\ProductType;
 use Carbon\Carbon;
 
@@ -12,17 +13,15 @@ function getItem($item)
         'sizes' => $item->sizes,
         'stock' => $item->stock,
         'price' => $item->price,
-        'category' => ProductType::find($item->product_type_id)->name,
-        'category_id' => $item->product_type_id,
         'genders' => $item->genders,
         'search' => $item->keywords,
-        'images' => json_decode($item->images),
-        //'images' => imageToArray($item->images->pluck('url')->toArray()),
+        'images' => imageToArray(json_encode($item->images)), //'images' => imageToArray($item->images->pluck('url')->toArray()),
         'isSaved' => $auth && !isAuthShop() ? $item->rls_savedByUsers->contains($auth->id) : null,
         'keywords' => $item->keywords,
         'isActive' => $item->isActive,
-        'shop' => getShop($item->rls_store),
-        'posted_since' => $item->last_reposted
+        'posted_since' => $item->last_reposted,
+        'category' => $item->rls_item_type,
+        'shop' => getMyShop($item->rls_shop),
     ];
     return $result;
 }

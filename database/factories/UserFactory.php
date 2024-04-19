@@ -36,6 +36,8 @@ class UserFactory extends Factory
             'nb_friends' => $this->faker->numberBetween(0, 10000),
             'isPremium' => $this->faker->boolean(),
 
+            'wilaya_id' => 46,
+
             'created_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
             'updated_at' => $this->faker->dateTimeBetween('-1 year', 'now')
         ];

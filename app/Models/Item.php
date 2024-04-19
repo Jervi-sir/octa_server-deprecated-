@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Models\Shop;
 use App\Models\User;
 use App\Models\Wilaya;
-use App\Models\ItemImage;
+use App\Models\ItemType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,9 +21,9 @@ class Item extends Model
         'user_id'
     ];
 
-    public function rls_store(): BelongsTo
+    public function rls_shop()
     {
-        return $this->belongsTo(Shop::class);
+        return $this->belongsTo(Shop::class, 'shop_id');
     }
 
     public function rls_wilaya(): BelongsTo
@@ -44,6 +44,11 @@ class Item extends Model
     public function rls_reports()
     {
         return $this->hasMany(Report::class);
+    }
+
+    public function rls_item_type(): BelongsTo
+    {
+        return $this->belongsTo(ItemType::class);
     }
     
 }

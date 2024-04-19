@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Api\Shop;
 
+use App\Http\Controllers\Controller;
+use App\Models\ItemType;
+use Illuminate\Http\Request;
 use App\Models\Item;
 use App\Models\ProductType;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 
 class ShopListItemsController extends Controller
@@ -16,8 +17,8 @@ class ShopListItemsController extends Controller
         ]);
 
         $shop = auth()->user();
-        $category_id = ProductType::where('name', 'like', $category_name)->first()->id; // You'll need to map this to an actual ID
-        $products = $shop->rls_items()->where('product_type_id', $category_id)->orderBy('id', 'desc')->paginate(7);
+        $category_id = ItemType::where('name', 'like', $category_name)->first()->id; // You'll need to map this to an actual ID
+        $products = $shop->rls_items()->where('item_type_id', $category_id)->orderBy('id', 'desc')->paginate(7);
         //$products = Item::where('product_type_id', $category_id)->orderBy('id', 'desc')->paginate(7);
         
         $data['products'] = [];

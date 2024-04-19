@@ -25,6 +25,7 @@
     },
     "autoload": {
         "files": [
+            "app/Helpers/ServerHelpers.php",
             "app/Helpers/GeneralHelpers.php",
             "app/Helpers/ItemHelpers.php",
             "app/Helpers/ProfileHelpers.php",

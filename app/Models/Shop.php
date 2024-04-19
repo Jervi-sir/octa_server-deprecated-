@@ -19,18 +19,20 @@ class Shop extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
-        'phone_number',
+        'activation_code_id',
         'username',
-        'shop_name',
-        'email',
+        'phone_number',
         'password',
         'password_plainText',
-        'bio',
-        'details',
-        'contacts',
-        'map_location',
-        'followers',
+        'shop_name',
         'shop_image',
+        'bio',
+        'contacts',
+        'wilaya_id',
+        'map_location',
+        'nb_followers',
+        'nb_likes',
+        'wilaya_created_at',
     ];
 
     protected $hidden = [
@@ -40,6 +42,7 @@ class Shop extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'phone_number_verified_at' => 'datetime',
     ];
 
     public function rls_user(): BelongsTo

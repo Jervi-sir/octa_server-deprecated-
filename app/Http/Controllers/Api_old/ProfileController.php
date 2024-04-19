@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api_old;
 
 use App\Models\Shop;
 use App\Models\User;

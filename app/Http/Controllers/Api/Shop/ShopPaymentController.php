@@ -2,15 +2,39 @@
 
 namespace App\Http\Controllers\Api\Shop;
 
-use App\Models\User;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\Credit;
-use App\Models\CreditTransaction;
-use App\Models\PaymentTransaction;
+use Illuminate\Http\Request;
 
 class ShopPaymentController extends Controller
 {
+    public function paymentHistory(Request $request)
+    {
+        $shop = auth()->user();
+        $payment_histories = $shop->paymentHistory()->orderBy('id', 'desc')->paginate(7);
+        $data['payment'] = [];
+
+        foreach ($payment_histories as $index => $payment_history) {
+            $data['payment'][$index] = [
+                'id' => $payment_history->id,
+                'user_username' => $payment_history->user->name,
+                'amount' => $payment_history->amount,
+                'sold_bought' => $payment_history->sold_bought,
+                'created_at' => $payment_history->created_at,
+            ];
+        }
+        return response()->json([
+            'payment_history' => $data['payment'],
+            'pagination' => [
+                'total' => $payment_histories->total(),
+                'per_page' => $payment_histories->perPage(),
+                'current_page' => $payment_histories->currentPage(),
+                'last_page' => $payment_histories->lastPage(),
+                'from' => $payment_histories->firstItem(),
+                'to' => $payment_histories->lastItem(),
+            ]
+        ]);
+    }
+
     public function sendCredit(Request $request)
     {
         $request->validate([

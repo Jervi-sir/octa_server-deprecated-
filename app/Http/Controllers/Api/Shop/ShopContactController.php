@@ -8,8 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class ContactController extends Controller
-
+class ShopContactController extends Controller
 {
     public function storeSendsContactSupport(Request $request) {
         $validateUser = Validator::make($request->all(), [
@@ -25,7 +24,7 @@ class ContactController extends Controller
         }
 
         $contact = Contact::create([
-            'user_id' => Auth::id(),
+            'shop_id' => Auth::id(),
             'origin' => 'store',
             'message' => $request->message,
         ]);

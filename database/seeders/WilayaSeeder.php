@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Country;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -251,6 +252,7 @@ class WilayaSeeder extends Seeder
         foreach ($algerianWilayas  as $key => $value) {
             DB::table('wilayas')->insert([
                 'id' => $value['id'],
+                'country_id' => Country::where('name', 'like', 'Algeria')->first()->id,
                 'name' => $value['name'],
                 'code' => $value['id'],
             ]);

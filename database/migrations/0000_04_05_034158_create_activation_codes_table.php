@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('contacts', function (Blueprint $table) {
+        Schema::create('activation_codes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained();
-            $table->foreignId('shop_id')->nullable()->constrained();
-            $table->string('origin')->nullable();       //store, user
-            $table->string('message')->nullable();
+            $table->string('code');
+            $table->boolean('isUsed')->default(0);
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('contacts');
+        Schema::dropIfExists('activation_codes');
     }
 };

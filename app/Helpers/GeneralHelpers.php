@@ -2,22 +2,23 @@
 
 function imageToArray($images)
 {
-    if (count($images) == 0) {
-        return [
-            [
-                "image" => "https://images.unsplash.com/photo-1455620611406-966ca6889d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1130&q=80"
-            ]
-        ];
-    }
+    /*
+    if (count($images) == 0) { return [ [ "image" => "https://images.unsplash.com/photo-1455620611406-966ca6889d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1130&q=80" ]];}
     foreach ($images as &$item) {
-        $item = ["image" => imageUrl('items', $item)];
+        $item = ["image" => imageUrl('', $item)];
     }
     return $images;
+    */
+    $prefixUrl = getServerIP();
+    $fullUrls = array_map(function($path) use ($prefixUrl) {
+        return 'http://' . $prefixUrl . $path;
+    }, $images);
+    return $fullUrls;
 }
 
 function imageUrl($source, $image)
 {
-    return "http://192.168.1.106:8000/" . $source . '/' . $image;
+    return getServerIP() .  $source . '/' . $image;
 }
 function getGenderId($genders)
 {
@@ -89,4 +90,13 @@ function fixAndDecodeJson($jsonString) {
     }
 
     return $data;
+}
+
+
+function errorMessage($validateUser) {
+    return [
+        'status' => false,
+        'message' => 'validation error',
+        'errors' => $validateUser->errors()
+    ];
 }
