@@ -16,7 +16,7 @@ class ProfileController extends Controller
     public function showMyProfile(Request $request)
     {
         $user = Auth::user();
-        $data['user'] = getMyProfile($user);
+        $data['user'] = OP_getMyProfile($user);
 
         $collections = Collection::where('collections.user_id', $user->id)
             ->leftJoin('shop_collections', 'collections.id', '=', 'shop_collections.collection_id')

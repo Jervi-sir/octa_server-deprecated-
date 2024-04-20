@@ -126,10 +126,10 @@ class CollectionController extends Controller
             return response()->json(['message' => 'Collection not found.'], 404);
         }
         
-        // Format each shop using the getShop function
+        // Format each shop using the OP_getShop function
         $formattedShops = $collection->rls_shops->map(function ($shop) use ($collection) {
             $nbNew = $shop->rls_collections->find($collection->id)->pivot->nb_new ?? 0;
-            $formattedShop = getShop($shop);
+            $formattedShop = OP_getShop($shop);
             return array_merge($formattedShop, ['nb_new' => $nbNew]);
         });
 

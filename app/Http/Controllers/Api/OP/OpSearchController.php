@@ -55,7 +55,7 @@ class OpSearchController extends Controller
         
         $data['items'] = [];
         foreach ($items as $index => $item) {
-            $data['items'][$index] = getItem($item);
+            $data['items'][$index] = OP_getItem($item);
         }
 
         $nextPage = null;

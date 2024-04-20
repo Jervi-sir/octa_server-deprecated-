@@ -63,7 +63,7 @@ class SearchController extends Controller
         $data['shops'] = [];
         
         foreach ($shops as $index => $shop) {
-            $data['shops'][$index] = getShop($shop);
+            $data['shops'][$index] = OP_getShop($shop);
         }
 
         $nextPage = null;
@@ -146,7 +146,7 @@ class SearchController extends Controller
         $data['users'] = [];
         
         foreach ($users as $index => $user) {
-            $data['users'][$index] = getProfile($user);
+            $data['users'][$index] = OP_getProfile($user);
         }
     
         $nextPage = null;

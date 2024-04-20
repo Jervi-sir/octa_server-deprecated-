@@ -23,6 +23,7 @@ Route::prefix('octa_store/')->group(function () {
 	Route::post('login', [ShopAuthController::class, 'loginShop']);         			//*done
 
 	Route::middleware(['auth:shops'])->group(function () {
+		Route::get('test_my_type', fn() => response()->json(['m i a shop ?' => isAuthShop()]));
 		Route::post('logout', [ShopAuthController::class, 'logoutShop']);       		//*done
 		Route::get('validate_token', [ShopAuthController::class, 'validateToken']);	//*done
 		Route::post('submit_contact_us', [ShopContactController::class, 'storeSendsContactSupport']);//*done             
@@ -56,15 +57,20 @@ Route::prefix('octa_prizes/')->group(function () {
 	Route::post('register/verify-otp', [OpAuthController::class, '']);
 	Route::post('register/verify-username-availability', [OpAuthController::class, 'verifyUsernameAvailability']);
 	Route::post('login', [OpAuthController::class, 'loginUser']);   
+
 	
 	
 	Route::middleware(['auth:users'])->group(function () {
+		Route::get('test_my_type', fn() => response()->json(['m i a shop ?' => isAuthShop()]));
 		Route::post('logout', [OpAuthController::class, 'logoutUser']);	//*done
 		Route::get('validate_token', [OpAuthController::class, 'validateToken']);	//*done
 
 		Route::prefix('auth')->group(function () {
 			RouteItems();
 		});
+
+		
+		
 	});
 
 	RouteItems();

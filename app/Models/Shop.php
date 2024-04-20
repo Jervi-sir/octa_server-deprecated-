@@ -79,8 +79,11 @@ class Shop extends Authenticatable
 
     public function rls_collections()
     {
+        //return $this->belongsToMany(Collection::class, 'shop_collections')
+        //            ->withPivot('nb_new');
         return $this->belongsToMany(Collection::class, 'shop_collections')
-                    ->withPivot('nb_new');
+                    ->withPivot('nb_new')
+                    ->withTimestamps();
     }
 
 }

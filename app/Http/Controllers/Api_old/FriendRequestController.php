@@ -141,7 +141,7 @@ class FriendRequestController extends Controller
         $data['friends'] = [];
     
         foreach ($friends as $friend) {
-            $data['friends'][] = getFriendToSendTo($friend);
+            $data['friends'][] = OP_getFriendToSendTo($friend);
         }
     
         return response()->json([

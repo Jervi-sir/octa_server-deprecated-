@@ -142,7 +142,7 @@ class ActionController extends Controller
         
         $data['followings'] =  [];
         foreach ($followings as $key => $following) {
-            $data['followings'][$key] = getProfile($following);
+            $data['followings'][$key] = OP_getProfile($following);
         }
 
         return response()->json([
@@ -172,7 +172,7 @@ class ActionController extends Controller
         
         $data['followings'] =  [];
         foreach ($followings as $key => $following) {
-            $data['followings'][$key] = getProfile($following);
+            $data['followings'][$key] = OP_getProfile($following);
         }
 
         return response()->json([
@@ -211,7 +211,7 @@ class ActionController extends Controller
         $data['friends'] = [];
     
         foreach ($friends as $friend) {
-            $data['friends'][] = getFriendToSendTo($friend);
+            $data['friends'][] = OP_getFriendToSendTo($friend);
         }
     
         return response()->json([
@@ -267,7 +267,7 @@ class ActionController extends Controller
         
         $data['users'] = [];
         foreach ($usersWhoLikedMe as $user) {
-            $data['users'][] = getProfile($user);
+            $data['users'][] = OP_getProfile($user);
         }
 
         return response()->json([
@@ -288,7 +288,7 @@ class ActionController extends Controller
         $usersILiked = $user->rls_usersILiked()->paginate(10); // 10 users per page
         $data['users'] = [];
         foreach ($usersILiked as $likedUser) {
-            $data['users'][] = getProfile($likedUser);
+            $data['users'][] = OP_getProfile($likedUser);
         }
 
         return response()->json([

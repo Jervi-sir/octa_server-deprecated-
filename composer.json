@@ -25,11 +25,10 @@
     },
     "autoload": {
         "files": [
+            "app/Helpers/OctaPrizesHelpers.php",
+            "app/Helpers/OctaStoreHelpers.php",
             "app/Helpers/ServerHelpers.php",
-            "app/Helpers/GeneralHelpers.php",
-            "app/Helpers/ItemHelpers.php",
-            "app/Helpers/ProfileHelpers.php",
-            "app/Helpers/ShopHelpers.php"
+            "app/Helpers/GeneralHelpers.php"
         ],
         "psr-4": {
             "App\\": "app/",

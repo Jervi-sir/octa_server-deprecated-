@@ -93,7 +93,7 @@ class ShopItemController extends Controller
 
         return response()->json([
             'success' => true,
-            'item' => getProductAsShop($item),
+            'item' => OS_getProductAsShop($item),
         ]);
 
     }
@@ -153,7 +153,7 @@ class ShopItemController extends Controller
 
         return response()->json([
             'success' => true,
-            'item' => getProductAsShop($item),
+            'item' => OS_getProductAsShop($item),
         ]);
     }
 

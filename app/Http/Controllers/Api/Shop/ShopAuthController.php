@@ -21,7 +21,7 @@ class ShopAuthController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Token is valid',
-            'shop_auth_info' => getMyShop()
+            'shop_auth_info' => OS_getMyShop()
         ]);
     }
     public function createShop(Request $request) {
@@ -91,7 +91,7 @@ class ShopAuthController extends Controller
                 'status' => true,
                 'message' => 'User Created Successfully',
                 'access_token' => $shop->createToken($request->header('User-Agent'), ['auth:shops'])->plainTextToken,
-                'shop_auth_info' => getMyShop($shop)
+                'shop_auth_info' => OS_getMyShop($shop)
             ], 200);
 
         } catch (\Throwable $th) {
@@ -131,7 +131,7 @@ class ShopAuthController extends Controller
                 'status' => true,
                 'message' => 'User Logged In Successfully',
                 'access_token' => $shop->createToken($request->header('User-Agent'), ['auth:shops'])->plainTextToken,
-                'shop_auth_info' => getMyShop($shop)
+                'shop_auth_info' => OS_getMyShop($shop)
             ], 200);
 
         } catch (\Throwable $th) {

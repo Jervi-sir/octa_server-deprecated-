@@ -22,7 +22,7 @@ class ShowController extends Controller
         ]);
 
         $shop = Shop::find($shopId);
-        $data['shop'] = getShop($shop);
+        $data['shop'] = OP_getShop($shop);
 
         if ($category_name !== null) {
             $category_id = ProductType::where('name', 'like', $category_name)->first()->id;
@@ -79,7 +79,7 @@ class ShowController extends Controller
             })->exists();
         }
 
-        $data['user'] = array_merge(getProfile($user), [
+        $data['user'] = array_merge(OP_getProfile($user), [
             'bio' => $user->bio,
             'contacts' => $user->contacts,
             'nb_likes' => 0, //UserLike::where('liked_user_id', $userId)->count(),

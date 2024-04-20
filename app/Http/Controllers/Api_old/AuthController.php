@@ -76,7 +76,7 @@ class AuthController extends Controller
                 'status' => true,
                 'message' => 'User Created Successfully',
                 'user' => $user,
-                'my_account' => getMyProfile($user)
+                'my_account' => OP_getMyProfile($user)
             ], 200);
 
         } catch (\Throwable $th) {

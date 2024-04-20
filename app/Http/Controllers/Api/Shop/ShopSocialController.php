@@ -44,7 +44,7 @@ class ShopSocialController extends Controller
     
         return response()->json([
             'message' => 'Contact added successfully!',
-            'shop_auth_info' => getMyShop()  
+            'shop_auth_info' => OS_getMyShop()  
         ]);
     }
 
@@ -79,7 +79,7 @@ class ShopSocialController extends Controller
 
         return response()->json([
             'message' => 'Contact added successfully!',
-            'shop_auth_info' => getMyShop()  // Ensure this method returns the updated shop info
+            'shop_auth_info' => OS_getMyShop()  // Ensure this method returns the updated shop info
         ]);
     }
 
@@ -108,7 +108,7 @@ class ShopSocialController extends Controller
 
         return response()->json([
             'message' => 'Contact removed successfully!',
-            'shop_auth_info' => getMyShop()  // Optionally return the updated shop info
+            'shop_auth_info' => OS_getMyShop()  // Optionally return the updated shop info
         ]);
     }
 

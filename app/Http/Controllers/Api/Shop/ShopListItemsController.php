@@ -26,7 +26,7 @@ class ShopListItemsController extends Controller
         foreach ($products as $index => $product) {
             //$selected_image = json_decode($product->images)[0];
             //$image = strpos($selected_image, "https") !== false ? $selected_image : 'http://192.168.1.105:8000' . Storage::url($selected_image);
-            $data['products'][$index] = getProductAsShop($product);
+            $data['products'][$index] = OS_getProductAsShop($product);
         }
 
         // Getting the next page number
@@ -44,7 +44,7 @@ class ShopListItemsController extends Controller
                 'from' => $products->firstItem(),
                 'to' => $products->lastItem(),
             ],
-            'shop' => getMyShop(),
+            'shop' => OS_getMyShop(),
             'products' => $data['products'],
             
         ]);

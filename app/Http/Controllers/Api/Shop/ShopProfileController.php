@@ -21,7 +21,7 @@ class ShopProfileController extends Controller
     {
       return response()->json([
         'success' => true,
-        'shop' => getMyShop(),
+        'shop' => OS_getMyShop(),
       ]);
     }
 
@@ -37,7 +37,7 @@ class ShopProfileController extends Controller
       foreach ($followers as $key => $follower) {
         $data['followers'][$key] = [
             'user_id' => $follower->id,
-            'user' => getUserAsShop($follower),
+            'user' => OS_getUserAsShopgetUserAsShop($follower),
             'created_at' => $follower->created_at,
         ];
       }

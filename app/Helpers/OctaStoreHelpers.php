@@ -1,41 +1,54 @@
 <?php
 use App\Models\ItemType;
 use App\Models\ProductType;
+use Carbon\Carbon;
 
-function getShop($shop)
+function isAuthShop() {
+    $user = auth() -> user();
+    $isShop =$user->getTable() === 'shops';
+    return $isShop;
+}
+
+function getItem($item)
 {
     $auth = auth()->user();
-    $isCollected = false;
-
-    if ($auth) {
-        // Check if the shop is in any of the user's collections
-        $isCollected = $auth->rls_collections()
-            ->whereHas('shops', function ($query) use ($shop) {
-                $query->where('shop_id', $shop->id);
-            })
-            ->exists();
-    }
-
-
     $result = [
-        'id' => $shop->id,
-        'shop_name' => $shop->shop_name,
-        //'shop_image' => imageUrl('shops', $shop->shop_image),
-        'shop_image' => $shop->shop_image,
-        'details' => $shop->details,
-        'contacts' => json_decode($shop->contacts),
-        //'location' => $shop->location,
-        'map_location' => $shop->map_location,
-        'nb_followers' => $shop->nb_followers,
-        'nb_likes' => $shop->nb_likes,
-        'wilaya_name' => $shop->wilaya_name,
-        'wilaya_code' => $shop->wilaya_code,
-        'isFollowed' => $auth && !isAuthShop() ? $shop->rls_followedByUser->contains($auth->id) : null,
-        'isCollected' => $isCollected,
+        'id' => $item->id,
+        'name' => $item->name,
+        'details' => $item->details,
+        'sizes' => $item->sizes,
+        'stock' => $item->stock,
+        'price' => $item->price,
+        'genders' => $item->genders,
+        'search' => $item->keywords,
+        'images' => imageToArray(json_decode($item->images)), //'images' => imageToArray($item->images->pluck('url')->toArray()), imageToArray
+        'isSaved' => $auth && !isAuthShop() ? $item->rls_savedByUsers->contains($auth->id) : null,
+        'keywords' => $item->keywords,
+        'isActive' => $item->isActive,
+        'posted_since' => $item->last_reposted,
+        'category' => $item->rls_item_type,
+        'shop' => OS_getMyShop($item->rls_shop),
     ];
-
     return $result;
 }
+
+
+function checkIfItemIsExpired($createdAt)
+{
+    $currentDate = Carbon::now();
+    $itemCreatedAt = new Carbon($createdAt); // Assume $createdAt is something like '2023-09-01 12:34:56'
+
+    // Carbon::diffInDays() will give you the difference in days between two dates
+    $daysOld = $currentDate->diffInDays($itemCreatedAt);
+
+    if ($daysOld >= 7) {
+        return true; // Item is 7 days old or more
+    } else {
+        return false;
+    }
+}
+
+
 
 function getShopAuthDetails($shop)
 {
@@ -43,7 +56,7 @@ function getShopAuthDetails($shop)
     ];
 }
 
-function getMyShop($shop = null)
+function OS_getMyShop($shop = null)
 {
     $shop = $shop !== null ? $shop : auth()->user();
     $contacts = json_decode($shop->contacts, true);
@@ -58,6 +71,7 @@ function getMyShop($shop = null)
     }
 
     return [
+        'id' => $shop->id,
         'username' => $shop->username,
         'phone_number' => $shop->phone_number,
         'shop_name' => $shop->shop_name,
@@ -76,7 +90,7 @@ function getMyShop($shop = null)
 }
 
 
-function getUserAsShop($user) {
+function OS_getUserAsShop($user) {
     return [
         'id' => $user->id,
         'name' => $user->name,
@@ -86,7 +100,7 @@ function getUserAsShop($user) {
     ];
 }
 
-function getProductAsShop($product) {
+function OS_getProductAsShop($product) {
     $images = imageToArray(json_decode($product->images));
     $thumbnail = is_array($images) && !empty($images) ? $images[0] : null;
 

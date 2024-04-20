@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Collection extends Model
 {
     use HasFactory;
+    protected $fillable = ['user_id', 'name', 'thumbnail'];
 
     public function user()
     {
@@ -16,6 +17,9 @@ class Collection extends Model
 
     public function rls_shops()
     {
-        return $this->belongsToMany(Shop::class, 'shop_collections');
+        //return $this->belongsToMany(Shop::class, 'shop_collections');
+        return $this->belongsToMany(Shop::class, 'shop_collections')
+                    ->withPivot('nb_new')
+                    ->withTimestamps();
     }
 }

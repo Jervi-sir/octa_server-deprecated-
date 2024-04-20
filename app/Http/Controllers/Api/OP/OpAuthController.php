@@ -16,7 +16,7 @@ class OpAuthController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Token is valid',
-            'user_auth_info' => getMyProfile()
+            'user_auth_info' => OP_getMyProfile()
         ]);
     }
 
@@ -57,7 +57,7 @@ class OpAuthController extends Controller
                 'status' => true,
                 'message' => 'User Created Successfully',
                 'access_token' => $user->createToken($request->header('User-Agent'), ['auth:users'])->plainTextToken,
-                'shop_auth_info' => getMyProfile($user)
+                'shop_auth_info' => OP_getMyProfile($user)
             ], 200);
 
         } catch (\Throwable $th) {
@@ -98,7 +98,7 @@ class OpAuthController extends Controller
                 'status' => true,
                 'message' => 'User Logged In Successfully',
                 'access_token' => $user->createToken($request->header('User-Agent'))->plainTextToken,
-                'my_account' => getMyProfile($user)
+                'my_account' => OP_getMyProfile($user)
             ], 200);
 
         } catch (\Throwable $th) {
