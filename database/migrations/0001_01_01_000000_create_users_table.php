@@ -15,6 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('phone_number')->unique();
             $table->timestamp('phone_number_verified_at')->nullable();
+
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            
             $table->string('password');
             $table->string('password_plainText');
 
@@ -27,14 +31,9 @@ return new class extends Migration
             $table->boolean('isPremium')->default(0);
             $table->integer('credit')->default(0);
 
-            $table->foreignId('wilaya_id')->constrained();
+            $table->foreignId('wilaya_id')->nullable()->constrained();
+            $table->string('wilaya_created_at')->nullable();
 
-            //$table->longText('collections')->nullable();        //might take it off
-            //$table->string('wilaya_code')->nullable();        //might take it off
-            //$table->string('wilaya_name')->nullable();        //might take it off
-
-            //$table->string('email')->unique();
-            //$table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

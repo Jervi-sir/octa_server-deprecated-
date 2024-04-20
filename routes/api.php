@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\OP\OpAuthController;
+use App\Http\Controllers\Api\OP\OpSearchController;
 use App\Http\Controllers\Api\Shop\ShopAuthController;
 use App\Http\Controllers\Api\Shop\ShopContactController;
 use App\Http\Controllers\Api\Shop\ShopItemController;
@@ -48,8 +50,35 @@ Route::prefix('octa_store/')->group(function () {
 
 });
 
+Route::prefix('octa_prizes/')->group(function () {
+	Route::post('register/create', [OpAuthController::class, 'createUser']);
+	Route::post('register/send-email', [OpAuthController::class, '']);
+	Route::post('register/verify-otp', [OpAuthController::class, '']);
+	Route::post('register/verify-username-availability', [OpAuthController::class, 'verifyUsernameAvailability']);
+	Route::post('login', [OpAuthController::class, 'loginUser']);   
+	
+	
+	Route::middleware(['auth:users'])->group(function () {
+		Route::post('logout', [OpAuthController::class, 'logoutUser']);	//*done
+		Route::get('validate_token', [OpAuthController::class, 'validateToken']);	//*done
 
+		Route::prefix('auth')->group(function () {
+			RouteItems();
+		});
+	});
 
+	RouteItems();
+
+});
+
+function RouteItems() {
+	Route::prefix('items/')->group(function () {
+			Route::get('search', [OpSearchController::class, 'search']);
+			//Route::get('show/{item_id}', [ShowController::class, 'showItem']);
+			//Route::get('suggest', [SearchController::class, 'suggest']);
+			//Route::get('category/{category_name}', [SearchController::class, 'byCategory']);
+	});
+}
 
 //Route::post ('send_credit_to',       [ShopPaymentController::class, 'sendCredit']);          
 //Route::post ('recharge_my_account',  [ShopPaymentController::class, 'rechargeMyAccount']);   
@@ -62,7 +91,6 @@ Route::prefix('octa_store/')->group(function () {
 
 /*
 Route::prefix('octa_prizes/')->group(function () {
-	Route::post('login', [AuthController::class, 'loginUser']);             
 	Route::post('semi-register', [AuthController::class, 'semiCreateUser']);
 
 	RouteStores();
@@ -140,14 +168,7 @@ Route::prefix('octa_prizes/')->group(function () {
 */
 
 /*-------- Functions --------
-function RouteItems() {
-	Route::prefix('item/')->group(function () {
-			Route::get('search', [SearchController::class, 'search']);
-			Route::get('show/{item_id}', [ShowController::class, 'showItem']);
-			Route::get('suggest', [SearchController::class, 'suggest']);
-			Route::get('category/{category_name}', [SearchController::class, 'byCategory']);
-	});
-}
+
 function RouteStores() {
 	Route::prefix('store/')->group(function () {
 			Route::get('search', [SearchController::class, 'searchShop']);

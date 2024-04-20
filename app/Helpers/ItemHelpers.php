@@ -15,7 +15,7 @@ function getItem($item)
         'price' => $item->price,
         'genders' => $item->genders,
         'search' => $item->keywords,
-        'images' => imageToArray(json_encode($item->images)), //'images' => imageToArray($item->images->pluck('url')->toArray()),
+        'images' => imageToArray(json_decode($item->images)), //'images' => imageToArray($item->images->pluck('url')->toArray()), imageToArray
         'isSaved' => $auth && !isAuthShop() ? $item->rls_savedByUsers->contains($auth->id) : null,
         'keywords' => $item->keywords,
         'isActive' => $item->isActive,
