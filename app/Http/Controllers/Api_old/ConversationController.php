@@ -136,45 +136,6 @@ class ConversationController extends Controller
     }
     
 
-    public function storeMessage(Request $request)
-    {
-        $validatedData = $request->validate([
-            'recipient_id' => 'required|exists:users,id',
-            'message_text' => 'nullable|string',
-            'item_id' => 'sometimes|required_without:message_text|exists:items,id'
-        ]);
-    
-        $user = Auth::user();
-        $recipientId = $validatedData['recipient_id'];
-        $friends = $user->rls_friends();
-
-        // Check if they are friends
-        if (!$friends->contains('id', $recipientId)) {
-            return response()->json(['error' => 'You can only message your friends.'], 403);
-        }
-    
-        // Find an existing conversation or create a new one
-        $conversation = Conversation::firstOrCreate(
-            [
-                'user1_id' => $user->id, 
-                'rls__id' => $recipientId
-            ],
-            [
-                'user1_id' => $user->id, 
-                'rls__id' => $recipientId
-            ]
-        );
-    
-        // Create and save the message
-        $message = new Message();
-        $message->conversation_id = $conversation->id;
-        $message->sender_id = $user->id;
-        $message->message_text = isset($validatedData['message_text']) ? $validatedData['message_text'] : null;
-        $message->item_id = $validatedData['item_id'];
-        $message->save();
-    
-        return response()->json($message, 201);
-    }
 
     public function showMessage($messageId)
     {

@@ -47,15 +47,15 @@ class User extends Authenticatable
     }
 
     public function rls_friends() {
-        $friendsAsUser = $this->belongsToMany(User::class, 'friends', 'user_id', 'friend_id');
-        $friendsAsFriend = $this->belongsToMany(User::class, 'friends', 'friend_id', 'user_id');
-        return $friendsAsUser->get()->merge($friendsAsFriend->get());
+        // First part of the union: friends where the user is the user_id
+        $friendsAsUser = $this->belongsToMany(User::class, 'friends', 'user_id', 'friend_id')
+                            ->select('users.*', 'friends.user_id as pivot_user_id', 'friends.friend_id as pivot_friend_id');
+        // Second part of the union: friends where the user is the friend_id
+        $friendsAsFriend = $this->belongsToMany(User::class, 'friends', 'friend_id', 'user_id')
+                                ->select('users.*', 'friends.friend_id as pivot_user_id', 'friends.user_id as pivot_friend_id');
+        return $friendsAsUser->union($friendsAsFriend->getQuery()); // Using getQuery to maintain the query builder instance
     }
-
-    public function rls_collections() {
-        return $this->hasMany(Collection::class);
-    }
- 
+    
     public function rls_conversations() {
         return Conversation::where('user1_id', $this->id)
                            ->orWhere('user2_id', $this->id);
@@ -65,6 +65,10 @@ class User extends Authenticatable
         return $this->hasMany(Message::class, 'sender_id');
     }
 
+    public function rls_collections() {
+        return $this->hasMany(Collection::class);
+    }
+    
     public function rls_likedUsers() {
         return $this->belongsToMany(User::class, 'user_likes', 'liker_id', 'liked_id');
     }

@@ -30,53 +30,6 @@ class SearchController extends Controller
         ], 200);
     }
 
-    public function searchShop(Request $request)
-    {
-        $request->validate([
-            'page'   => 'nullable',
-            'keywords'   => 'nullable',
-            'wilaya_code'   => 'nullable',
-        ]);
-
-        $auth = auth()->user();
-
-        $data = $request->all();
-        $keyword_array = !empty($data['keywords']) ? explode(",", $data['keywords']) : [];
-        $shops = Shop::query();
-        
-        if (!empty($keyword_array)) {
-            $shops = $shops->where(function ($query) use ($keyword_array) {
-                foreach ($keyword_array as $keyword) {
-                    if ($keyword) {
-                        // Search in both bio and username
-                        $query->where('bio', 'like', '%' . $keyword . '%')
-                              ->orWhere('shop_name', 'like', '%' . $keyword . '%');
-                    }
-                }
-            });
-        }
-        if(!empty($data['wilaya_code'])) {
-            $shops = $shops->where('wilaya_code', $data['wilaya_code']);
-        }
-        $shops = $shops->orderBy('id', 'DESC')->paginate(10);
-    
-        $data['shops'] = [];
-        
-        foreach ($shops as $index => $shop) {
-            $data['shops'][$index] = OP_getShop($shop);
-        }
-
-        $nextPage = null;
-        if ($shops->nextPageUrl()) {
-            $nextPage = $shops->currentPage() + 1;
-        }
-
-        return response()->json([
-            'user_status' => $auth ? 'You are authenticated' : 'You are NOT authenticated',
-            'next_page' => $nextPage,
-            'shops' => $data['shops'],
-        ], 200);
-    }
 
 
 
@@ -112,53 +65,6 @@ class SearchController extends Controller
         ], 200);
     }
 
-    public function searchProfile(Request $request)
-    {
-        $request->validate([
-            'page' => 'nullable',
-            'keywords' => 'nullable',
-            'wilaya_code' => 'nullable',
-        ]);
-    
-        $auth = auth()->user();
-    
-        $data = $request->all();
-        $keyword_array = !empty($data['keywords']) ? explode(",", $data['keywords']) : [];
-        $users = User::query();
-    
-        // Only get users who have a username
-        $users = $users->whereNotNull('username');
-    
-        if (!empty($keyword_array)) {
-            $users = $users->where(function ($query) use ($keyword_array) {
-                foreach ($keyword_array as $keyword) {
-                    if ($keyword) {
-                        $query->where('username', 'like', '%' . $keyword . '%');
-                    }
-                }
-            });
-        }
-        if(!empty($data['wilaya_code'])) {
-            $users = $users->where('wilaya_code', $data['wilaya_code']);
-        }
-        $users = $users->orderBy('id', 'DESC')->paginate(10);
-    
-        $data['users'] = [];
-        
-        foreach ($users as $index => $user) {
-            $data['users'][$index] = OP_getProfile($user);
-        }
-    
-        $nextPage = null;
-        if ($users->nextPageUrl()) {
-            $nextPage = $users->currentPage() + 1;
-        }
-    
-        return response()->json([
-            'user_status' => $auth ? 'You are authenticated' : 'You are NOT authenticated',
-            'next_page' => $nextPage,
-            'users' => $data['users'],
-        ], 200);
-    }
+
     
 }

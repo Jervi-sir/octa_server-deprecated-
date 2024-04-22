@@ -41,6 +41,7 @@ class ShopItemController extends Controller
         $item->genders = ($request->genders) ?? null;
         $item->keywords = $request->name . ', ' . $request->details; // default
         $item->last_reposted = now();
+        $item->wilaya_code = $shop->wilaya_id;
 
         $imagePaths = [];
         foreach ($request->base64Images as $base64Image) {

@@ -26,9 +26,10 @@ return new class extends Migration
 
             $table->integer('isActive')->default(1);
             $table->dateTime('last_reposted')->nullable();      //fill it with created_at also
+            $table->string('wilaya_code')->nullable();
             
             $table->integer('nb_reports')->default(0);
-
+            
             $table->timestamps();
         });
     }

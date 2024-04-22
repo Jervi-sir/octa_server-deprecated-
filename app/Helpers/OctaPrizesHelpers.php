@@ -7,14 +7,17 @@ function OP_getShop($shop)
 {
     $auth = auth()->user();
     $isCollected = false;
+    $nbCollectedAt = 0;
 
     if ($auth) {
         // Check if the shop is in any of the user's collections
-        $isCollected = $auth->rls_collections()
+        $collections = $auth->rls_collections()
             ->whereHas('rls_shops', function ($query) use ($shop) {
-                $query->where('id', $shop->id);  // or make it to id instead of shop_id
-            })
-            ->exists();
+                $query->where('id', $shop->id);
+            });
+        
+        $isCollected = $collections->exists();
+        $nbCollectedAt = $collections->count();  // Count how many collections contain this shop
     }
 
 
@@ -23,7 +26,7 @@ function OP_getShop($shop)
         'shop_name' => $shop->shop_name,
         //'shop_image' => imageUrl('shops', $shop->shop_image),
         'shop_image' => $shop->shop_image,
-        'details' => $shop->details,
+        'details' => $shop->bio,
         'contacts' => json_decode($shop->contacts),
         //'location' => $shop->location,
         'map_location' => $shop->map_location,
@@ -33,6 +36,7 @@ function OP_getShop($shop)
         'wilaya_code' => $shop->wilaya_code,
         'isFollowed' => $auth && !isAuthShop() ? $shop->rls_followedByUser->contains($auth->id) : null,
         'isCollected' => $isCollected,
+        'nb_collected_at' => $nbCollectedAt
     ];
 
     return $result;
@@ -62,7 +66,7 @@ function OP_getProfile($user)
 
         if (!$isBlocked) {
             // Check if they are friends
-            $isFriend = $auth->rls_friends()->contains('id', $user->id);
+            $isFriend = $auth->rls_friends()->where('id', $user->id);
             if ($isFriend) {
                 $followingStatus = 'friends';
             } else {
@@ -96,19 +100,17 @@ function OP_getProfile($user)
         'number_friends' => $numberOfFriends,
         'number_likes' => $numberOfLikes,
         'isBlocked' => $isBlocked,
+        'contacts' => $user->contacts,
+        'nb_likes' => 0, //UserLike::where('liked_user_id', $userId)->count(),
+        'nb_friends' => $user->rls_friends()->count(),
+        'isPremium' => $user->isPremium,
     ];
 }
 
 function OP_getMyProfile($user = null) {
 
     $auth = $user === null ? auth()->user() : $user;
-    return array_merge(OP_getProfile($auth), [
-        'bio' => $auth->bio,
-        'contacts' => $auth->contacts,
-        'nb_likes' => 0, // Adjust this according to your actual logic
-        'nb_friends' => $auth->rls_friends()->count(),
-        'isPremium' => $auth->isPremium,
-    ]);
+    return OP_getProfile($auth);
 }
 
 function OP_getItem($item)
@@ -124,11 +126,11 @@ function OP_getItem($item)
         'genders' => $item->genders,
         'search' => $item->keywords,
         'images' => imageToArray(json_decode($item->images)), //'images' => imageToArray($item->images->pluck('url')->toArray()), imageToArray
-        'isSaved' => $auth && !isAuthShop() ? $item->rls_savedByUsers->contains($auth->id) : null,
+        'isSaved' => $auth ? $item->rls_savedByUsers->contains($auth->id) : null,
         'keywords' => $item->keywords,
         'isActive' => $item->isActive,
         'posted_since' => $item->last_reposted,
-        'category' => $item->rls_item_type,
+        'category' => ItemType::find($item->item_type_id),
         'shop' => OP_getShop($item->rls_shop),
     ];
     return $result;

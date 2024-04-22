@@ -10,102 +10,10 @@ use Illuminate\Support\Facades\DB;
 
 class CollectionController extends Controller
 {
-    public function createCollection(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string',
-            'thumbnail' => 'nullable|string'
-        ]);
 
-        $user_id = Auth::id();
 
-        $collection = new Collection();
-        $collection->user_id = $user_id;
-        $collection->name = $request->name;
-        $collection->thumbnail = $request->thumbnail;
-        $collection->save();
 
-        $data['collection'] = [
-            'id' => $collection->id,
-            'name' => $collection->name,
-            'thumbnail' => $collection->thumbnail,
-            'shops_count' => $collection->shops_count,
-            'contains_shop' => false,
-            'last_shop_added_at' => $collection->last_shop_added_at
-        ];
 
-        return response()->json(['collection' => $data['collection']]);
-    }
-
-    public function listCollections(Request $request)
-    {
-        $userId = Auth::id();
-        $shopId = $request->input('shop_id');
-    
-        $collections = Collection::where('collections.user_id', $userId)
-                ->leftJoin('shop_collections', 'collections.id', '=', 'shop_collections.collection_id')
-                ->withCount('shops')
-                ->select('collections.*', DB::raw('MAX(shop_collections.updated_at) as last_shop_added_at'))
-                ->groupBy('collections.id', 'collections.user_id', 'collections.name', 'collections.thumbnail', 'collections.created_at', 'collections.updated_at')
-                ->orderBy('last_shop_added_at', 'desc')
-                ->paginate(7);
-                
-        $data['collections'] = [];
-
-        foreach ($collections as $index => $collection) {
-            $hasShop = false;
-            if ($shopId) {
-                $hasShop = $collection->rls_shops()->where('shop_id', $shopId)->exists();
-            }
-            
-            $data['collections'][$index] = [
-                'id' => $collection->id,
-                'name' => $collection->name,
-                'thumbnail' => $collection->thumbnail,
-                'shops_count' => $collection->shops_count,
-                'contains_shop' => $hasShop,
-                'last_shop_added_at' => $collection->last_shop_added_at,
-                'stores_count' => $collection->rls_shops->count()
-            ];
-        }
-
-        $nextPage = null;
-        if ($collections->nextPageUrl()) {
-            $nextPage = $collections->currentPage() + 1;
-        }
-
-        return response()->json([
-            'next_page' => $nextPage,
-            'collections' => $data['collections'],
-        ], 200);
-    }
-
-    public function saveStoreToCollection(Request $request)
-    {
-        $request->validate([
-            'shop_id' => 'required|exists:shops,id',
-            'collection_id' => 'required|exists:collections,id'
-        ]);
-
-        $shop_id = $request->shop_id;
-        $collectionId = $request->collection_id;
-        $collection = Collection::find($collectionId);
-
-        // Check if collection exists and belongs to the authenticated user
-        if (!$collection || $collection->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Collection not found or access denied.'], 404);
-        }
-
-        // Check if the shop is already in the collection
-        if ($collection->rls_shops()->where('shop_id', $shop_id)->exists()) {
-            return response()->json(['message' => 'shop is already in the collection.'], 409);
-        }
-
-        // Add the shop to the collection
-        $collection->rls_shops()->attach($shop_id);
-
-        return response()->json(['message' => 'shop added to collection successfully.']);
-    }
 
     public function getCollectionDetails(Request $request)
     {
@@ -183,45 +91,7 @@ class CollectionController extends Controller
         return response()->json(['message' => 'Collection updated successfully.', 'collection' => $collection]);
     }
 
-    public function removeStoreFromCollection(Request $request)
-    {
-        $request->validate([
-            'collection_id' => 'required',
-            'shop_id' => 'required',
-        ]);
 
-        $collectionId = $request->collection_id;
-        $shopId = $request->shop_id;
-        $userId = Auth::id();
-
-        $collection = Collection::where('id', $collectionId)
-                                ->where('user_id', $userId)
-                                ->first();
-
-        if (!$collection) {
-            return response()->json(['message' => 'Collection not found or access denied.'], 404);
-        }
-
-        if (!$collection->rls_shops()->where('shop_id', $shopId)->exists()) {
-            return response()->json(['message' => 'Store not found in collection.'], 404);
-        }
-
-        // Detach the shop from the collection
-        $collection->rls_shops()->detach($shopId);
-
-        // Check if the shop exists in any other collections of the user
-        $existsInOtherCollections = Collection::where('user_id', $userId)
-                                            ->where('id', '!=', $collectionId)
-                                            ->whereHas('shops', function($query) use ($shopId) {
-                                                $query->where('shop_id', $shopId);
-                                            })
-                                            ->exists();
-
-        return response()->json([
-            'message' => 'Store removed from collection successfully.',
-            'exists_in_other_collections' => $existsInOtherCollections
-        ]);
-    }
 
 
     public function deleteCollection(Request $request)
