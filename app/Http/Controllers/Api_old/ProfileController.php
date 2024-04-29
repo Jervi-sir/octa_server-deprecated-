@@ -13,42 +13,7 @@ use Illuminate\Support\Facades\Auth;
 class ProfileController extends Controller
 {
 
-    public function showMyProfile(Request $request)
-    {
-        $user = Auth::user();
-        $data['user'] = OP_getMyProfile($user);
 
-        $collections = Collection::where('collections.user_id', $user->id)
-            ->leftJoin('shop_collections', 'collections.id', '=', 'shop_collections.collection_id')
-            ->withCount('shops')
-            ->select('collections.*', DB::raw('MAX(shop_collections.updated_at) as last_shop_added_at'))
-            ->groupBy('collections.id', 'collections.user_id', 'collections.name', 'collections.thumbnail', 'collections.created_at', 'collections.updated_at')
-            ->orderBy('last_shop_added_at', 'desc')
-            ->paginate(20);
-
-        $data['collections'] = [];
-        foreach ($collections as $index => $collection) {
-            
-            $data['collections'][$index] = [
-                'id' => $collection->id,
-                'name' => $collection->name,
-                'thumbnail' => $collection->thumbnail,
-                'shops_count' => $collection->shops_count,
-                'last_shop_added_at' => $collection->last_shop_added_at
-            ];
-        }
-        $nextPage = null;
-        if ($collections->nextPageUrl()) {
-            $nextPage = $collections->currentPage() + 1;
-        }
-
-        return response()->json([
-            'user_status' => Auth::user() ? 'You are authenticated' : 'You are NOT authenticated',
-            'next_page' => $nextPage,
-            'user' => $data['user'],
-            'collections' => $data['collections'],
-        ], 200);
-    }
 
 
     public function getSavedItems()
@@ -66,36 +31,7 @@ class ProfileController extends Controller
         ], 200);
     }
 
-    public function updateMyProfile(Request $request)
-    {
-        $request->validate([
-            'phone_number'   => 'nullable|string',
-            'email'     => 'nullable|string',
-            'name'      => 'nullable|string',
-            'username'     => 'nullable|string',
-            'bio'     => 'nullable|numeric',
-            'location'     => 'nullable|numeric',
-            'profile_images'   => 'nullable|string',
-            'contacts'    => 'nullable|string'
-        ]);
-        
-        $data = $request->all();
-        $user = auth()->user();
-
-        $fieldsToUpdate = ['phone_number', 'email', 'name', 'username', 'bio', 'location', 'profile_images', 'contacts'];
-        foreach ($fieldsToUpdate as $field) {
-            if ($request->has($field)) {
-                $user->{$field} = $request->{$field};
-            }
-        }
-        $user->save();
-
-        return response()->json([
-            'status'    => true,
-            'message'   => 'updated successfully',
-            'user'      => $user,
-        ], 200);
-    }
+ 
 
     public function showMyMap(Request $request)
     {

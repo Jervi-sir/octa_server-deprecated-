@@ -1,6 +1,7 @@
 <?php
 use App\Models\ItemType;
 use App\Models\ProductType;
+use App\Models\Wilaya;
 use Carbon\Carbon;
 
 function OP_getShop($shop)
@@ -20,6 +21,7 @@ function OP_getShop($shop)
         $nbCollectedAt = $collections->count();  // Count how many collections contain this shop
     }
 
+    $wilaya = Wilaya::find($shop->wilaya_id);
 
     $result = [
         'id' => $shop->id,
@@ -32,8 +34,8 @@ function OP_getShop($shop)
         'map_location' => $shop->map_location,
         'nb_followers' => $shop->nb_followers,
         'nb_likes' => $shop->nb_likes,
-        'wilaya_name' => $shop->wilaya_name,
-        'wilaya_code' => $shop->wilaya_code,
+        'wilaya_name' => $wilaya->name,
+        'wilaya_code' => $wilaya->code,
         'isFollowed' => $auth && !isAuthShop() ? $shop->rls_followedByUser->contains($auth->id) : null,
         'isCollected' => $isCollected,
         'nb_collected_at' => $nbCollectedAt
@@ -52,40 +54,45 @@ function OP_getFriendToSendTo($friend)
 function OP_getProfile($user)
 {
     $auth = auth()->user();
-
     $isMyAccount = $auth && $auth->id === $user->id;
-
     $isFriend = false;
-    $followingStatus = null; // Default status
-    $isBlocked = false; // Initial assumption
+    $followingStatus = null;
+    $isBlocked = false;
 
     if ($auth && !$isMyAccount) {
         $isBlocking = $auth->rls_blocking()->where('blocked_id', $user->id)->exists();
         $isBlockedBy = $user->rls_blockers()->where('blocker_id', $auth->id)->exists();
-        $isBlocked = $isBlocking || $isBlockedBy; // Either condition sets isBlocked to true
+        $isBlocked = $isBlocking || $isBlockedBy;
 
         if (!$isBlocked) {
             // Check if they are friends
-            $isFriend = $auth->rls_friends()->where('id', $user->id);
-            if ($isFriend) {
-                $followingStatus = 'friends';
-            } else {
-                // Check for sent friend requests
+            $isFriend = $auth->rls_friends()->where('users.id', $user->id)->exists();
+
+            $followingStatus = $isFriend ? 'friends' : null;
+
+            if (!$isFriend) {
                 $sentRequest = $auth->rls_sentRequests()->where('receiver_id', $user->id)->exists();
-                if ($sentRequest) {
-                    $followingStatus = 'request_sent';
-                } else {
-                    // Check for received friend requests
+                $followingStatus = $sentRequest ? 'request_sent' : null;
+
+                if (!$sentRequest) {
                     $receivedRequest = $auth->rls_receivedRequests()->where('sender_id', $user->id)->exists();
-                    if ($receivedRequest) {
-                        $followingStatus = 'request_received';
-                    }
+                    $followingStatus = $receivedRequest ? 'request_received' : null;
                 }
             }
         }
     }
     $numberOfFriends = $user->rls_friends()->count();
-    $numberOfLikes = $user->rls_likedByUsers()->count();
+    $numberOfLikes = $user->rls_usersWhoLikeMe()->count();
+
+    $contacts = $user->contacts;
+    $id = 1;
+    $processedContacts = [];
+    if (is_array($contacts)) {
+        $processedContacts = array_map(function ($contact) use (&$id) {
+            return array_merge(['id' => $id++], $contact);
+        }, $contacts);
+        $processedContacts = array_reverse($processedContacts);
+    }
 
     return [
         'id' => $user->id,
@@ -95,14 +102,12 @@ function OP_getProfile($user)
         'profile_image' => $user->profile_images ? $user->profile_images[0] : null,
         'isFollowed' => $isFriend,
         'followingStatus' => $followingStatus,
-        'isLiked' => $auth ? $user->rls_likedByUsers->contains('id', $auth->id) : false,
+        'isLiked' => $auth ? $user->rls_usersWhoLikeMe->contains('id', $auth->id) : false,
         'isMyAccount' => $isMyAccount,
-        'number_friends' => $numberOfFriends,
-        'number_likes' => $numberOfLikes,
         'isBlocked' => $isBlocked,
-        'contacts' => $user->contacts,
-        'nb_likes' => 0, //UserLike::where('liked_user_id', $userId)->count(),
-        'nb_friends' => $user->rls_friends()->count(),
+        'contacts' => $processedContacts,
+        'nb_likes' => $numberOfLikes, //UserLike::where('liked_user_id', $userId)->count(),
+        'nb_friends' => $numberOfFriends,
         'isPremium' => $user->isPremium,
     ];
 }

@@ -41,7 +41,7 @@ class OpFriendRequestController extends Controller
 
         return response()->json([
             'message' => 'Friend request sent successfully',
-            'user' => User::find($receiverId)
+            'user' => OP_getProfile(User::find($receiverId))
         ], 201);
     }
 
@@ -53,7 +53,7 @@ class OpFriendRequestController extends Controller
         
         $userId = $request->receiver_id;
         $authId = Auth::id();
-    
+        
         $friendRequest = FriendRequest::where('sender_id', $userId)
                                         ->where('receiver_id', $authId)
                                         ->first();
@@ -73,7 +73,7 @@ class OpFriendRequestController extends Controller
     
         return response()->json([
             'message' => 'friends',
-            'user' => User::find($userId)
+            'user' => OP_getProfile(User::find($userId))
         ], 201);
     }
 
@@ -98,7 +98,7 @@ class OpFriendRequestController extends Controller
       
         return response()->json([
             'message' => 'Friend request rejected',
-            'user' => User::find($userId)
+            'user' => OP_getProfile(User::find($userId))
         ], 201);
     }
     public function showReceivedRequests(Request $request)
@@ -172,7 +172,7 @@ class OpFriendRequestController extends Controller
         $data['friends'] = [];
     
         foreach ($friends as $friend) {
-            $data['friends'][] = OP_getFriendToSendTo($friend);
+            $data['friends'][] = OP_getProfile($friend);    //old was => OP_getFriendToSendTo($friend)
         }
     
         $nextPage = null;

@@ -27,10 +27,10 @@ class ShopUpdateProfileController extends Controller
         
         // Check if the shop_image is present and process it
         if ($request->has('shop_image')) {
-            //$imagePath = 'public/images/' . uniqid() . '.png';
-            //Storage::put($imagePath, base64_decode($request->shop_image));
-            //$shop->shop_image = env('API_URL') . Storage::url($imagePath);
-            $shop->shop_image = $request->shop_image;
+            $imagePath = 'public/images/' . uniqid() . '.png';
+            Storage::put($imagePath, base64_decode($request->shop_image));
+            $shop->shop_image = env('API_URL') . Storage::url($imagePath);
+            //$shop->shop_image = $request->shop_image;
         }
         if($request->has('wilaya_name')) {
             $shop->wilaya_id = Wilaya::where('name', 'like', $request->wilaya_name)->first()->id;

@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('password_plainText');
 
             $table->string('username')->nullable()->unique();
+            $table->string('name')->nullable();
             $table->mediumText('bio')->default('Octa User');
             $table->longText('profile_images')->nullable();
             $table->longText('contacts')->nullable();

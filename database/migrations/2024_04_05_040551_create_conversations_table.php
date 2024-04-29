@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user1_id');
             $table->unsignedBigInteger('user2_id');
+            $table->integer('nb_unread')->default(0);
+            $table->string('last_message')->nullable();
             
             $table->timestamps();
 

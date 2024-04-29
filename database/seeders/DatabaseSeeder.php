@@ -2,10 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Friend;
 use App\Models\Item;
 use App\Models\Shop;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\UserLike;
 use App\Models\UserSave;
 use App\Models\UserShopFollowing;
 use Illuminate\Database\Seeder;
@@ -20,7 +22,9 @@ class DatabaseSeeder extends Seeder
         // Seed roles
         //Role::factory()->create(['role_name' => 'admin']);
 
-        User::factory(5)->create();
+        //User::factory(50)->create();
+        //Friend::factory(50)->create();
+        UserLike::factory(50)->create();
 
         //Country
         //$country = new CountrySeeder();

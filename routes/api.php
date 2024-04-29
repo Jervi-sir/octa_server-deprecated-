@@ -5,8 +5,12 @@ use App\Http\Controllers\Api\OP\OpBlockController;
 use App\Http\Controllers\Api\OP\OpCollectionController;
 use App\Http\Controllers\Api\OP\OpConversationController;
 use App\Http\Controllers\Api\OP\OpFriendRequestController;
+use App\Http\Controllers\Api\OP\OpIssueReportController;
 use App\Http\Controllers\Api\OP\OpItemController;
+use App\Http\Controllers\Api\OP\OpLikeProfileController;
+use App\Http\Controllers\Api\OP\OpMyProfileController;
 use App\Http\Controllers\Api\OP\OpSearchController;
+use App\Http\Controllers\Api\OP\OpSettingController;
 use App\Http\Controllers\Api\Shop\ShopAuthController;
 use App\Http\Controllers\Api\Shop\ShopContactController;
 use App\Http\Controllers\Api\Shop\ShopItemController;
@@ -63,23 +67,38 @@ Route::prefix('octa_prizes/')->group(function () {
 	Route::post('register/verify-username-availability', [OpAuthController::class, 'verifyUsernameAvailability']);
 	Route::post('login', [OpAuthController::class, 'loginUser']);
 
-
-
 	Route::middleware(['auth:users'])->group(function () {
 		Route::get('test_my_type', fn() => response()->json(['m i a shop ?' => isAuthShop()]));
 		Route::post('logout', [OpAuthController::class, 'logoutUser']);	//*done
 		Route::get('validate_token', [OpAuthController::class, 'validateToken']);	//*done
+
+		Route::prefix('my_profile')->group(function () {
+			Route::get('show', [OpMyProfileController::class, 'showMyProfile']);                
+			Route::post('update', [OpMyProfileController::class, 'updateMyProfile']);   
+			Route::post('add_social', [OpMyProfileController::class, 'addSocial']);    
+			Route::get('get_saved', [OpSearchController::class, 'getSavedItems']);    
+		});
 
 		Route::prefix('collection')->group(function () {
 			Route::get('list', [OpCollectionController::class, 'listCollections']);			//* done
 			Route::post('create', [OpCollectionController::class, 'createCollection']);	//* done
 			Route::post('add_shop', [OpCollectionController::class, 'saveStoreToCollection']);	//* done
 			Route::post('remove_shop', [OpCollectionController::class, 'removeStoreFromCollection']);	//* done
+
+			Route::get('show', [OpCollectionController::class, 'getCollectionDetails']);
+			Route::post('update', [OpCollectionController::class, 'updateCollection']);
+			Route::post('delete', [OpCollectionController::class, 'deleteCollection']);
+
 		});
 
 		Route::prefix('conversations')->group(function () {
 			Route::get('suggest_friend_to_share_with', [OpConversationController::class, 'suggestFriendToShareWith']);	//* done
-			Route::post('send_message_to', [OpConversationController::class, 'sendMessageTo']);
+			Route::post('send_message_to', [OpConversationController::class, 'sendMessageTo']);//* done
+			Route::get('list', [OpConversationController::class, 'listConversations']);//* done
+			Route::get('show', [OpConversationController::class, 'showThisConversation']);//* done
+			Route::post('delete', [OpConversationController::class, 'deleteThisConversation']);//* done
+			Route::post('unsend_message', [OpConversationController::class, 'unSendMessage']);//* done
+			Route::get('show_item/{item_id}', [OpConversationController::class, 'ShowThisItem']);//* done
 
 		});
 
@@ -90,19 +109,37 @@ Route::prefix('octa_prizes/')->group(function () {
 		});
 
 		Route::prefix('friends')->group(function () {
-			Route::post('block', [OpBlockController::class, 'blockUser']);
-			Route::post('unblock', [OpBlockController::class, 'unblockUser']);
-			Route::get('list_blocked', [OpBlockController::class, 'listBlockedUsers']);
+			Route::post('block', [OpBlockController::class, 'blockUser']);							//* done 
+			Route::post('unblock', [OpBlockController::class, 'unblockUser']);					//* done 
+			Route::get('list_blocked', [OpBlockController::class, 'listBlockedUsers']);	//* done 
 		});
 
 		Route::prefix('friend_request')->group(function () {
-			Route::post('send', [OpFriendRequestController::class, 'sendRequest']);
-			Route::post('accept', [OpFriendRequestController::class, 'acceptRequest']);
-			Route::post('reject', [OpFriendRequestController::class, 'rejectRequest']);
-			Route::get('received', [OpFriendRequestController::class, 'showReceivedRequests']);
-			Route::get('sent', [OpFriendRequestController::class, 'showSentRequests']);
-			Route::get('friend-list', [OpFriendRequestController::class, 'showFriendList']);
+			Route::post('send', [OpFriendRequestController::class, 'sendRequest']);							//* done 
+			Route::post('accept', [OpFriendRequestController::class, 'acceptRequest']);					//* done 
+			Route::post('reject', [OpFriendRequestController::class, 'rejectRequest']);					//* done 
+			Route::get('received', [OpFriendRequestController::class, 'showReceivedRequests']);	//* done 
+			Route::get('sent', [OpFriendRequestController::class, 'showSentRequests']);					//* done 
+			Route::get('friend-list', [OpFriendRequestController::class, 'showFriendList']);		//* done 
 		});
+
+		Route::prefix('profile')->group(function () {
+			Route::post('like', [OpLikeProfileController::class, 'likeUser']);                     	//* done   
+			Route::post('unlike', [OpLikeProfileController::class, 'unlikeUser']);               		//* done     
+			Route::get('list-who-i-liked', [OpLikeProfileController::class, 'listUsersILiked']);   	//* done 
+			Route::get('list-who-liked-me', [OpLikeProfileController::class, 'listLikedByUsers']); 	//* done 
+		});
+
+		Route::prefix('settings')->group(function () {
+			Route::get('list-friends', [OpSettingController::class,'listFriends']);									//* done 
+			Route::get('list-user-I-like', [OpSettingController::class,'listUserILike']);						//* done 
+			Route::get('list-user-who-liked-me', [OpSettingController::class,'listUserWhoLikedMe']);//* done 
+			Route::get('list-user-I-blocked', [OpSettingController::class,'listWhoIBlocked']);			//* done 
+			Route::get('list-who-blocked-me', [OpSettingController::class,'listWhoBlockedMe']);			//* done 
+			Route::post('contact-support-team', [OpIssueReportController::class,'ContactSupportTeam']);//* done 
+		});
+
+
 
 		Route::prefix('auth')->group(function () {
 			RouteItems();
@@ -120,7 +157,7 @@ Route::prefix('octa_prizes/')->group(function () {
 function RouteItems()
 {
 	Route::prefix('items/')->group(function () {
-		Route::get('search', [OpSearchController::class, 'search']);
+		Route::get('search', [OpSearchController::class, 'search']);	//* done 
 
 		//Route::get('show/{item_id}', [ShowController::class, 'showItem']);
 		//Route::get('suggest', [SearchController::class, 'suggest']);
@@ -131,17 +168,17 @@ function RouteItems()
 function RouteStores()
 {
 	Route::prefix('shop/')->group(function () {
-		Route::get('search', [OpSearchController::class, 'searchShop']);
-		Route::get('show/{shopId}', [OpSearchController::class, 'showShop']);
-		Route::get('show/{shopId}/{category_name}', [OpSearchController::class, 'showShop']);
+		Route::get('search', [OpSearchController::class, 'searchShop']);											//* done 
+		Route::get('show/{shopId}', [OpSearchController::class, 'showShop']);									//* done 
+		Route::get('show/{shopId}/{category_name}', [OpSearchController::class, 'showShop']);	//* done 
 	});
 }
 
 function RouteUsers()
 {
 	Route::prefix('profile/')->group(function () {
-		Route::get('search', [OpSearchController::class, 'searchProfile']);
-		Route::get('show/{userId}', [OpSearchController::class, 'showProfile']);
+		Route::get('search', [OpSearchController::class, 'searchProfile']);				//* done 
+		Route::get('show/{userId}', [OpSearchController::class, 'showProfile']);	//* done 
 	});
 }
 
@@ -158,10 +195,6 @@ function RouteUsers()
 Route::prefix('octa_prizes/')->group(function () {
 	Route::post('semi-register', [AuthController::class, 'semiCreateUser']);
 
-	RouteStores();
-	RouteUsers();
-	RouteItems();
-
 	Route::middleware(['auth:users'])->group(function () {
 			Route::prefix('auth_search/')->group(function () {      
 					RouteStores();
@@ -173,38 +206,21 @@ Route::prefix('octa_prizes/')->group(function () {
 			Route::post('logout', [AuthController::class, 'logoutUser']);                       
 			Route::post('complete-register', [AuthController::class, 'completeCreateUser']);    
 
-			Route::prefix('profile')->group(function () {
-					Route::get('show', [ProfileController::class, 'showMyProfile']);                
-					Route::post('update', [ProfileController::class, 'updateMyProfile']);           
-			});
+
 			Route::prefix('follow')->group(function () {
 					Route::post('do', [ActionController::class, 'followUser']);                     
 					Route::post('undo', [ActionController::class, 'unfollowUser']);                 
 					Route::get('get_followings', [ActionController::class, 'getMyFollowings']);     
 					Route::get('get_followers', [ActionController::class, 'getMyFollowers']);       
 			});
-			Route::prefix('like_user')->group(function () {
-					Route::post('do', [ActionController::class, 'likeUser']);                       
-					Route::post('undo', [ActionController::class, 'unlikeUser']);                   
-					Route::get('list-who-i-liked', [ActionController::class, 'listUsersILiked']);   
-					Route::get('list-who-liked-me', [ActionController::class, 'listLikedByUsers']); 
-			});
+			
 			Route::prefix('save_item')->group(function () {
 								
-					Route::get('get_saved', [ActionController::class, 'getSavedItems']);    
 			});
 			
-			Route::prefix('collection')->group(function () {
-					Route::get('show', [CollectionController::class, 'getCollectionDetails']);
-					Route::post('update', [CollectionController::class, 'updateCollection']);
-					Route::post('delete', [CollectionController::class, 'deleteCollection']);
-			});
 			
-			Route::prefix('conversations')->group(function () {
-					Route::get('list', [ConversationController::class, 'listConversations']);
-					Route::get('show', [ConversationController::class, 'showThisConversation']);
-					Route::post('unsend_message', [ConversationController::class, 'unsendMessage']);
-			});
+			
+			
 			//Route::get('messages/{message}', [ConversationController::class, 'showMessage']);
 			//Route::get('show_my_map', [ProfileController::class, 'showMyMap']);
 			//Route::get('edit_my_map', [ProfileController::class, 'showMyProfile']);

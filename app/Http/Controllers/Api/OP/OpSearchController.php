@@ -21,6 +21,7 @@ class OpSearchController extends Controller
             'category_name'   => 'nullable',
             'gender_name'   => 'nullable',
             'wilaya_code'   => 'nullable',
+            'page'   => 'nullable',
         ]);
 
         $auth = auth()->user();
@@ -179,7 +180,6 @@ class OpSearchController extends Controller
         ], 200);
     }
 
-
     public function showShop(Request $request, $shopId, $category_name = null)
     {
         $request->validate([
@@ -279,6 +279,71 @@ class OpSearchController extends Controller
             'next_page' => $nextPage,
             'user' => $data['user'],
             'collections' => $data['collections'],
+        ], 200);
+    }
+
+
+
+    public function getSavedItems(Request $request)
+    {
+        $request->validate([
+            'keywords'   => 'nullable',
+            'category_name'   => 'nullable',
+            'gender_name'   => 'nullable',
+            'wilaya_code'   => 'nullable',
+            'page'   => 'nullable',
+        ]);
+
+        $data = $request->all();
+        $auth = auth()->user();
+
+        $items = $auth->rls_saveItem();
+      
+        $keyword_array = !empty($data['keywords']) ? explode(",", $data['keywords']) : [];
+        if (!empty($keyword_array)) {
+            $items = $items->where(function ($query) use ($keyword_array) {
+                foreach ($keyword_array as $keyword) {
+                    if ($keyword) {
+                        $query->where('keywords', 'like', '%' . $keyword . '%');
+                    }
+                }
+            });
+        }
+        if (!empty($data['category_name'])) {
+            $category_id = ItemType::where('name', 'like', '%' . $data['category_name'] . '%')->first()->id;
+            $items = $items->where('item_type_id', $category_id);
+        }
+        if (!empty($data['gender_name'])) {
+            if(strtolower($data['gender_name']) === 'both') {
+                // If "both", include items tagged explicitly with "male,female"
+                $items = $items->where('genders', 'male,female');
+            } else {
+                // Otherwise, search for items that contain the gender as a whole word within the string
+                $items = $items->where('genders', 'like', $data['gender_name'] . '%');
+            }
+        }
+        if (!empty($data['wilaya_code'])) {
+            // Assuming you have a way to relate items with wilaya_code
+            $items = $items->where('wilaya_code', $data['wilaya_code']);
+        }
+
+        $items = $items->orderBy('id', 'DESC')->paginate(10);
+        $data['items'] = [];
+        foreach ($items as $index => $item) {
+            $data['items'][$index] = OP_getItem($item);
+        }
+        $nextPage = null;
+        if ($items->nextPageUrl()) {
+            $nextPage = $items->currentPage() + 1;
+        }
+       
+        return response()->json([
+            'my_user_info' => $auth,
+            'user_status' => $auth ? 'You are authenticated' : 'You are NOT authenticated',
+            'next_url' => $items->nextPageUrl(),
+            'next_page' => $nextPage,
+            'last' => $items->lastPage(),
+            'items' => $data['items'],
         ], 200);
     }
     
