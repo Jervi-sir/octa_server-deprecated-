@@ -22,7 +22,10 @@ class OpSearchController extends Controller
             'gender_name'   => 'nullable',
             'wilaya_code'   => 'nullable',
             'page'   => 'nullable',
+            'per_page' => 'nullable',
         ]);
+
+        $per_page = $request->has('per_page') ? $request->per_page : 10;
 
         $auth = auth()->user();
         $data = $request->all();
@@ -60,7 +63,8 @@ class OpSearchController extends Controller
             $items = $items->where('wilaya_code', $data['wilaya_code']);
         }
 
-        $items = $items->orderBy('id', 'DESC')->paginate(10);
+        $items = $items->orderBy('id', 'DESC')->paginate($per_page);
+        $totalItems = $items->total();
         
         $data['items'] = [];
         foreach ($items as $index => $item) {
@@ -77,6 +81,7 @@ class OpSearchController extends Controller
             'user_status' => $auth ? 'You are authenticated' : 'You are NOT authenticated',
             'next_url' => $items->nextPageUrl(),
             'next_page' => $nextPage,
+            'total_items' => $totalItems,
             'last' => $items->lastPage(),
             'items' => $data['items'],
         ], 200);
@@ -247,6 +252,7 @@ class OpSearchController extends Controller
 
         $data['user'] = OP_getProfile($user);
 
+        /*
         $collections = Collection::where('collections.user_id', $userId)
             ->leftJoin('shop_collections', 'collections.id', '=', 'shop_collections.collection_id')
             ->withCount('rls_shops')
@@ -272,13 +278,13 @@ class OpSearchController extends Controller
         if ($collections->nextPageUrl()) {
             $nextPage = $collections->currentPage() + 1;
         }
-
+        */
 
         return response()->json([
             'user_status' => $auth ? 'You are authenticated' : 'You are NOT authenticated',
-            'next_page' => $nextPage,
+            'next_page' => null, //$nextPage,
             'user' => $data['user'],
-            'collections' => $data['collections'],
+            'collections' => [] //$data['collections'],
         ], 200);
     }
 
@@ -292,7 +298,9 @@ class OpSearchController extends Controller
             'gender_name'   => 'nullable',
             'wilaya_code'   => 'nullable',
             'page'   => 'nullable',
+            'per_page' => 'nullable',
         ]);
+        $per_page = $request->has('per_page') ? $request->per_page : 10;
 
         $data = $request->all();
         $auth = auth()->user();
@@ -327,7 +335,9 @@ class OpSearchController extends Controller
             $items = $items->where('wilaya_code', $data['wilaya_code']);
         }
 
-        $items = $items->orderBy('id', 'DESC')->paginate(10);
+        $items = $items->orderBy('id', 'DESC')->paginate($per_page);
+        $totalItems = $items->total();
+        
         $data['items'] = [];
         foreach ($items as $index => $item) {
             $data['items'][$index] = OP_getItem($item);
@@ -343,6 +353,7 @@ class OpSearchController extends Controller
             'next_url' => $items->nextPageUrl(),
             'next_page' => $nextPage,
             'last' => $items->lastPage(),
+            'total_items' => $totalItems,
             'items' => $data['items'],
         ], 200);
     }

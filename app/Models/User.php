@@ -178,7 +178,7 @@ class User extends Authenticatable
             ->withPivot('created_at', 'updated_at'); // Include pivot timestamps if needed
     }
     public function rls_isFriendWith(User $user) {
-        $friendIds = $this->rls_friends()->pluck('id');
+        $friendIds = $this->rls_friends()->pluck('friends.friend_id');  //id instead of friends.friend_id
         return $friendIds->contains($user->id);
     }
     public function rls_friends_old() { //! Deprecated

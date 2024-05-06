@@ -129,13 +129,53 @@ class OpConversationController extends Controller
     public function showThisConversation(Request $request)
     {
         $request->validate([
-            'conversation_id' => 'required',
+            'profile_id' => 'nullable',
+            'conversation_id' => 'nullable',
             'page' => 'nullable'
         ]);
 
         $auth = Auth::user();
         $perPage = 10;
-        $conversation = Conversation::find($request->conversation_id);
+
+       
+        if($request->has('profile_id'))
+        {
+            // Find the conversation between the authenticated user and the given profile
+            $profileId = $request->profile_id;
+            $authId = $auth->id;
+            $conversation = Conversation::where(function($query) use ($authId, $profileId) {
+                $query->where('user1_id', $authId)
+                    ->where('user2_id', $profileId);
+            })->orWhere(function($query) use ($authId, $profileId) {
+                $query->where('user1_id', $profileId)
+                    ->where('user2_id', $authId);
+            })->first();
+        }
+
+        if($request->has('conversation_id'))
+        {
+            $conversation = Conversation::find($request->conversation_id);
+        }
+
+        // If no conversation exists, check if they are friends
+        if (!$conversation) {
+            $profileId = $profileId ?? User::find($request->conversation_id)->id;
+            $areFriends = $auth->rls_isFriendWith(User::find($profileId));
+
+            if ($areFriends) {
+                // Create a new conversation if they are friends
+                $conversation = Conversation::create([
+                    'user1_id' => $auth->id,
+                    'user2_id' => $profileId,
+                    'nb_unread' => 0,
+                    'last_message' => null,
+                ]);
+            } else {
+                // If they are not friends, return an error
+                return response()->json(['error' => 'No conversation found and they are not friends.'], 404);
+            }
+        }
+
         $conversation->nb_unread = 0;
         $conversation->save();
 

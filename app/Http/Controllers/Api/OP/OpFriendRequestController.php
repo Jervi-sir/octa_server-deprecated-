@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\OP;
 
 use App\Http\Controllers\Controller;
+use App\Models\Conversation;
 use App\Models\Friend;
 use App\Models\FriendRequest;
 use App\Models\User;
@@ -31,7 +32,22 @@ class OpFriendRequestController extends Controller
             // Handle existing requests/friendship (return appropriate response)
             return response()->json('Already friends or a Request exists already', 422);
         }
-        
+
+        // Check for an existing conversation and create one if not exists
+        $conversationExists = Conversation::where(function($query) use ($sender, $receiverId) {
+            $query->where('user1_id', $sender->id)->where('user2_id', $receiverId);
+        })->orWhere(function($query) use ($sender, $receiverId) {
+            $query->where('user1_id', $receiverId)->where('user2_id', $sender->id);
+        })->exists();
+
+        if (!$conversationExists) {
+            Conversation::create([
+                'user1_id' => $sender->id,
+                'user2_id' => $receiverId,
+                'nb_unread' => 0,
+                'last_message' => null,
+            ]);
+        }
 
         $sender->rls_sentFriendRequests()->create([
             'receiver_id' => $receiverId,
