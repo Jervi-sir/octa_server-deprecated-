@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('activation_codes', function (Blueprint $table) {
             $table->id();
-            $table->string('code');
+            $table->string('code')->unique();
             $table->boolean('isUsed')->default(0);
+            $table->foreignId('distributor_star_id')->nullable()->constrained();
+            $table->string('status');       //new, on hold, used
             $table->timestamps();
         });
     }
